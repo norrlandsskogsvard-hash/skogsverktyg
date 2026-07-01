@@ -33,3 +33,16 @@ Lägg filerna i ett GitHub-repo och aktivera GitHub Pages för vald branch. Alla
 - Bygga färdig DGV-modul med tabeller och validerad beräkningslogik
 - Bygga färdig medelhöjd-modul med provträd, summering och export
 - Utöka offertgeneratorn med kunduppgifter, PDF/utskrift och malltexter
+
+
+## Fältmoduler i aktuell version
+
+### DGV
+
+DGV-modulen låter användaren mata in diametrar i cm med ett stort mobilanpassat inmatningsfält. Värden kan läggas till med Enter eller knapp, tas bort enskilt, ångras och rensas efter bekräftelse. Utkast sparas automatiskt i webbläsarens localStorage.
+
+DGV beräknas med formeln sum(d^3) / sum(d^2). Resultatet visas tillsammans med antal provträd, aritmetiskt medel, median, min, max och standardavvikelse.
+
+### Medelhöjd
+
+Medelhöjdsmodulen låter användaren mata in höjder i meter med samma fältanpassade flöde. Medelhöjd beräknas som aritmetiskt medel och visas tillsammans med antal provträd, median, min, max och standardavvikelse. Utkast sparas automatiskt i localStorage.

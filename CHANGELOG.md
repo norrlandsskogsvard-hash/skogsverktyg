@@ -2,6 +2,13 @@
 
 ## v2.0.0-alpha.1 - 2026-07-01
 
+### Added - Färdiga fältmoduler
+
+- Färdig DGV-modul med diameterinmatning, auto-sparat utkast, ångra, rensa, borttagning och statistik.
+- Färdig medelhöjdsmodul med höjdinmatning, auto-sparat utkast, ångra, rensa, borttagning och statistik.
+- Fältanpassad mobil-UX med stora inmatningsfält, stora knappar och tydliga resultatpaneler.
+
+
 ### Added
 
 - Första fungerande appskalet för Skogskalkyl 2.0.
