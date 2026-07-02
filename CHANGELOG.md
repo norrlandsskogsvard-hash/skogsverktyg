@@ -2,6 +2,11 @@
 
 ## v2.0.0-alpha.1 - 2026-07-01
 
+### Fixed - Scrollhopp i fältknappsats
+
+- Fixat scrollhopp vid knappsatsinmatning på mobil i DGV och Medelhöjd.
+- Uppdaterat service worker-cache-namn till skogskalkyl-2.0.0-alpha.1-keypad.2.
+
 ### Added - Fältknappsats för DGV och Medelhöjd
 
 - Inbyggd fältknappsats för DGV med stor display, decimalstöd, backspace och rensa inmatning.
