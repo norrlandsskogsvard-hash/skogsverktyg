@@ -2,6 +2,14 @@
 
 ## v2.0.0-alpha.1 - 2026-07-01
 
+### Added - Fältknappsats för DGV och Medelhöjd
+
+- Inbyggd fältknappsats för DGV med stor display, decimalstöd, backspace och rensa inmatning.
+- Inbyggd fältknappsats för Medelhöjd med samma fältanpassade inmatningsflöde.
+- Snabbval för vanliga diametrar och höjder som lägger till värden direkt.
+- Mindre dashboard-layoutfix så statusetiketter inte bryts mitt i ord.
+- Uppdaterat service worker-cache-namn till skogskalkyl-2.0.0-alpha.1-keypad.1.
+
 ### Changed - Dashboardstatusar
 
 - Uppdaterade modulstatusar och dashboardtexter för DGV, Medelhöjd, Röjning, Planpris, Offert och Kunder.
