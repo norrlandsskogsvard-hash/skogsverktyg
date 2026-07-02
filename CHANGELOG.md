@@ -2,6 +2,13 @@
 
 ## v2.0.0-alpha.1 - 2026-07-01
 
+### Fixed - Global layout och textbrytning
+
+- Global layoutfix med stabilare box sizing, min-width-skydd och textbrytning i kort, statistik och resultatpaneler.
+- Statistikgridar och formulärfält bryts mer robust på mindre skärmar.
+- Förbättrad mobilanpassning för kundregister, dashboard, offert och resultatvyer utan horisontell scroll.
+- Uppdaterat service worker-cache-namn till skogskalkyl-2.0.0-alpha.1-layout.1.
+
 ### Checked - Stabilitet efter filstruktur
 
 - Kontrollerad GitHub Pages-struktur med root-filer, css/, js/, js/views/ och js/calculators/.
