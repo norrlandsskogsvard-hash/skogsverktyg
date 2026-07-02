@@ -80,6 +80,10 @@
   align-items: end;
 }
 
+.field-entry-form--keypad {
+  grid-template-columns: 1fr;
+}
+
 .field-entry-input {
   min-width: 0;
 }
