@@ -110,6 +110,10 @@
     justify-self: start;
     text-align: left;
   }
+
+  .status-item strong {
+    text-align: left;
+  }
 }
 
 
@@ -179,13 +183,22 @@
 
 @media (max-width: 560px) {
   .field-entry-form,
-  .field-actions {
+  .field-actions,
+  .field-keypad__actions {
     grid-template-columns: 1fr;
   }
 
   .input--large,
   .button--large {
     min-height: 4.5rem;
+  }
+
+  .field-keypad__display-row {
+    grid-template-columns: minmax(0, 1fr) minmax(3.5rem, auto);
+  }
+
+  .field-keypad__button {
+    min-height: 3.75rem;
   }
 
   .field-value-item {
