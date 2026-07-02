@@ -20,10 +20,10 @@ export const DEFAULT_SETTINGS = {
 };
 
 export const MODULE_STATUS = {
-  dgv: "Förberedd för nästa steg",
-  height: "Förberedd för nästa steg",
-  rojning: "Alpha-kalkyl",
-  forestPlanPricing: "Alpha-kalkyl",
-  quote: "Alpha-generator",
+  dgv: "Fältklar",
+  height: "Fältklar",
+  rojning: "Proffskalkyl",
+  forestPlanPricing: "Proffskalkyl",
+  quote: "Offertgenerator",
   customers: "Lokalt arkiv"
 };
