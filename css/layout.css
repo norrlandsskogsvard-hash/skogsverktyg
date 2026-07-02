@@ -1,13 +1,17 @@
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html {
   min-height: 100%;
   background: var(--color-bg);
+  overflow-x: hidden;
 }
 
 body {
+  overflow-x: hidden;
   min-height: 100vh;
   margin: 0;
   background: var(--color-bg);
@@ -27,6 +31,14 @@ a {
   color: inherit;
 }
 
+#app,
+#view,
+.app-shell,
+.app-main,
+.view {
+  min-width: 0;
+}
+
 .boot-screen {
   display: grid;
   min-height: 100vh;
@@ -37,6 +49,7 @@ a {
 
 .app-layout {
   display: grid;
+  min-width: 0;
   min-height: 100vh;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
 }
@@ -49,11 +62,13 @@ a {
   flex-direction: column;
   border-right: 1px solid var(--color-border);
   background: var(--color-surface);
+  min-width: 0;
   padding: var(--space-5);
 }
 
 .brand {
   display: grid;
+  min-width: 0;
   gap: var(--space-1);
   margin-bottom: var(--space-6);
 }
@@ -81,6 +96,7 @@ a {
   align-items: center;
   gap: var(--space-3);
   min-height: 2.75rem;
+  min-width: 0;
   border-radius: var(--radius-md);
   color: var(--color-muted);
   padding: 0 var(--space-3);
@@ -96,6 +112,7 @@ a {
 }
 
 .nav-icon {
+  flex: 0 0 auto;
   width: 1.25rem;
   text-align: center;
   font-weight: 800;
@@ -112,6 +129,7 @@ a {
   top: 0;
   z-index: 5;
   display: flex;
+  min-width: 0;
   min-height: var(--header-height);
   align-items: center;
   justify-content: space-between;
@@ -121,7 +139,12 @@ a {
   backdrop-filter: blur(16px);
 }
 
+.topbar > * {
+  min-width: 0;
+}
+
 .topbar__title {
+  min-width: 0;
   margin: 0;
   font-size: 1.3rem;
 }
@@ -133,23 +156,27 @@ a {
 
 .page {
   width: min(100%, 76rem);
+  min-width: 0;
   margin: 0 auto;
   padding: var(--space-6);
 }
 
 .page-header {
   display: grid;
+  min-width: 0;
   gap: var(--space-2);
   margin-bottom: var(--space-6);
 }
 
 .page-title {
+  min-width: 0;
   margin: 0;
   font-size: clamp(1.75rem, 3vw, 2.4rem);
   line-height: 1.1;
 }
 
 .page-lead {
+  min-width: 0;
   max-width: 68ch;
   margin: 0;
   color: var(--color-muted);
@@ -158,6 +185,7 @@ a {
 .content-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
+  min-width: 0;
   gap: var(--space-4);
 }
 
@@ -169,3 +197,6 @@ a {
 .bottom-nav {
   display: none;
 }
+  min-width: 0;
+  min-width: 0;
+  min-width: 0;

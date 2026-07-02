@@ -1,6 +1,7 @@
 .dashboard-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.9fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(min(22rem, 100%), 0.9fr);
+  min-width: 0;
   gap: var(--space-4);
   align-items: stretch;
   margin-bottom: var(--space-5);
@@ -8,6 +9,7 @@
 
 .hero-panel {
   display: grid;
+  min-width: 0;
   min-height: 14rem;
   align-content: end;
   gap: var(--space-3);
@@ -23,6 +25,7 @@
 }
 
 .hero-panel h1 {
+  min-width: 0;
   max-width: 14ch;
   margin: 0;
   font-size: clamp(2rem, 5vw, 3.6rem);
@@ -30,6 +33,7 @@
 }
 
 .hero-panel p {
+  min-width: 0;
   max-width: 54ch;
   margin: 0;
   color: rgb(255 255 255 / 0.86);
@@ -37,12 +41,14 @@
 
 .module-card {
   display: grid;
+  min-width: 0;
   min-height: 10rem;
   align-content: space-between;
 }
 
 .module-card__footer {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);

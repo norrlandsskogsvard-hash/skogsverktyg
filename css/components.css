@@ -1,4 +1,7 @@
 .card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -7,22 +10,26 @@
 
 .card__body {
   display: grid;
+  min-width: 0;
   gap: var(--space-4);
   padding: var(--space-5);
 }
 
 .card__title {
+  min-width: 0;
   margin: 0;
   font-size: 1.05rem;
 }
 
 .card__text {
+  min-width: 0;
   margin: 0;
   color: var(--color-muted);
 }
 
 .button-row {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: center;
@@ -30,6 +37,8 @@
 
 .button {
   display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
   min-height: 2.75rem;
   align-items: center;
   justify-content: center;
@@ -63,7 +72,8 @@
 
 .pill {
   display: inline-flex;
-  width: max-content;
+  width: fit-content;
+  max-width: 100%;
   align-items: center;
   border-radius: 999px;
   background: var(--color-primary-soft);
@@ -83,6 +93,7 @@
 
 .status-item {
   display: flex;
+  min-width: 0;
   justify-content: space-between;
   gap: var(--space-3);
   border-bottom: 1px solid var(--color-border);
@@ -108,6 +119,9 @@
 
 .result-panel {
   display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
   gap: var(--space-3);
   border-radius: var(--radius-md);
   background: var(--color-surface-muted);
@@ -115,13 +129,22 @@
 }
 
 .result-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, max-content);
+  align-items: start;
   gap: var(--space-4);
 }
 
+.result-row span,
 .result-row strong {
+  min-width: 0;
+}
+
+.result-row strong {
+  justify-self: end;
+  max-width: 100%;
   font-size: 1.15rem;
+  text-align: right;
 }
 
 .toast {
@@ -144,6 +167,7 @@
 
 .field-module {
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 1.05fr) minmax(20rem, 0.95fr);
   gap: var(--space-4);
   align-items: start;
@@ -151,6 +175,7 @@
 
 .field-entry-card,
 .field-list-card {
+  min-width: 0;
   grid-column: 1;
 }
 
@@ -174,6 +199,7 @@
 
 .result-main {
   display: grid;
+  min-width: 0;
   gap: var(--space-1);
   border-bottom: 1px solid var(--color-border);
   padding-bottom: var(--space-4);
@@ -185,6 +211,7 @@
 }
 
 .result-main strong {
+  min-width: 0;
   color: var(--color-primary-strong);
   font-size: clamp(2.2rem, 8vw, 4.4rem);
   line-height: 1;
@@ -192,17 +219,20 @@
 
 .field-actions {
   display: grid;
+  min-width: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
 
 .field-value-list {
   display: grid;
+  min-width: 0;
   gap: var(--space-2);
 }
 
 .field-value-item {
   display: flex;
+  min-width: 0;
   min-height: 3.5rem;
   align-items: center;
   justify-content: space-between;
@@ -234,6 +264,7 @@
 
 .clearing-layout {
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 1.15fr) minmax(22rem, 0.85fr);
   gap: var(--space-4);
   align-items: start;
@@ -242,6 +273,7 @@
 .clearing-main,
 .clearing-side {
   display: grid;
+  min-width: 0;
   gap: var(--space-4);
 }
 
@@ -252,6 +284,7 @@
 
 .clearing-actions {
   display: grid;
+  min-width: 0;
   grid-template-columns: 1fr;
   gap: var(--space-3);
 }
@@ -263,6 +296,7 @@
 
 .difficulty-meter {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
@@ -285,6 +319,7 @@
 
 .factor-row {
   display: flex;
+  min-width: 0;
   justify-content: space-between;
   gap: var(--space-3);
   border-bottom: 1px solid var(--color-border);
@@ -316,6 +351,7 @@
 
 .quote-layout {
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 1.15fr) minmax(22rem, 0.85fr);
   gap: var(--space-4);
   align-items: start;
@@ -324,6 +360,7 @@
 .quote-editor,
 .quote-side {
   display: grid;
+  min-width: 0;
   gap: var(--space-4);
 }
 
@@ -339,10 +376,12 @@
 
 .quote-rows {
   display: grid;
+  min-width: 0;
   gap: var(--space-3);
 }
 
 .quote-row-card {
+  min-width: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface-muted);
@@ -351,6 +390,7 @@
 
 .quote-row-grid {
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 2fr) repeat(4, minmax(4.5rem, 1fr)) minmax(5rem, auto);
   gap: var(--space-3);
   align-items: end;
@@ -358,6 +398,7 @@
 
 .quote-row-totals {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
   gap: var(--space-3);
   justify-content: flex-end;
@@ -367,11 +408,16 @@
 }
 
 .quote-preview-shell {
+  min-width: 0;
   grid-column: 1 / -1;
+  overflow-x: auto;
 }
 
 .quote-preview {
   display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
   gap: var(--space-5);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -382,6 +428,7 @@
 
 .quote-preview__header {
   display: flex;
+  min-width: 0;
   justify-content: space-between;
   gap: var(--space-6);
   border-bottom: 2px solid #17231d;
@@ -396,7 +443,9 @@
 
 .quote-preview-table {
   width: 100%;
+  min-width: 0;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .quote-preview-table th,
@@ -404,11 +453,13 @@
   border-bottom: 1px solid #d8ded4;
   padding: 0.65rem;
   text-align: left;
+  overflow-wrap: anywhere;
   vertical-align: top;
 }
 
 .quote-preview__totals {
   display: grid;
+  min-width: 0;
   gap: var(--space-2);
   justify-self: end;
   min-width: min(22rem, 100%);
@@ -416,7 +467,8 @@
 
 .archive-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+  grid-template-columns: minmax(0, 1fr) minmax(17.5rem, 23.75rem);
+  min-width: 0;
   gap: var(--space-4);
   align-items: start;
 }
@@ -424,6 +476,7 @@
 .archive-main,
 .archive-side {
   display: grid;
+  min-width: 0;
   gap: var(--space-4);
 }
 
@@ -434,7 +487,8 @@
 
 .archive-stat {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  min-width: 0;
   gap: var(--space-3);
 }
 
@@ -444,31 +498,39 @@
 }
 
 .archive-stat-card span {
+  min-width: 0;
   color: var(--color-muted);
   font-weight: 750;
 }
 
 .archive-stat-card strong {
+  min-width: 0;
   font-size: 1.2rem;
+  line-height: 1.2;
 }
 
 .archive-toolbar {
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
 }
 
 .archive-toolbar--three {
-  grid-template-columns: minmax(0, 1fr) minmax(10rem, 14rem) minmax(10rem, 14rem);
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 }
 
 .archive-list {
   display: grid;
+  min-width: 0;
   gap: var(--space-3);
 }
 
 .archive-card {
   display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
   grid-template-columns: minmax(0, 1fr) minmax(9rem, auto);
   gap: var(--space-4);
   align-items: start;
@@ -480,6 +542,7 @@
 
 .archive-card h3,
 .archive-card p {
+  min-width: 0;
   margin: 0;
 }
 
@@ -499,6 +562,7 @@
 
 .archive-card__actions {
   display: grid;
+  min-width: 0;
   gap: var(--space-2);
 }
 
@@ -547,3 +611,5 @@
     padding: 0;
   }
 }
+  min-width: 0;
+  min-width: 0;
