@@ -2,6 +2,16 @@
 
 ## v2.0.0-alpha.1 - 2026-07-01
 
+### Added - Professionell offertgenerator
+
+- Ny offertgenerator med företag, kund, offertuppgifter, offertposter, summering, villkor och förhandsvisning.
+- Ny fristående quoteCalculator med normalisering, radmoms, rabatt, påslag, avrundning och offerttext.
+- Import av senaste röjningskalkyl och senaste planpriskalkyl till offertposter.
+- Autosparade offertutkast som laddas tillbaka efter omladdning.
+- Kopiera offerttext och utskrift/PDF via webbläsarens utskriftsfunktion.
+- Uppdaterat service worker-cache-namn till skogskalkyl-2.0.0-alpha.1-offert.6 och cachar quoteCalculator.js.
+
+
 ### Added - Professionell prissättning av skogsbruksplan
 
 - Ny planprismodul med uppdrag, omfattning, fältarbete, kontorsarbete, resa, resultat och offertunderlag.

@@ -313,3 +313,139 @@
 .quote-textarea {
   min-height: 11rem;
 }
+
+.quote-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(22rem, 0.85fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.quote-editor,
+.quote-side {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.quote-side {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-4));
+}
+
+.quote-layout .input,
+.quote-layout .select {
+  min-height: 3.15rem;
+}
+
+.quote-rows {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.quote-row-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  padding: var(--space-3);
+}
+
+.quote-row-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(4, minmax(4.5rem, 1fr)) minmax(5rem, auto);
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.quote-row-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  margin-top: var(--space-3);
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+.quote-preview-shell {
+  grid-column: 1 / -1;
+}
+
+.quote-preview {
+  display: grid;
+  gap: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  color: #17231d;
+  padding: var(--space-6);
+}
+
+.quote-preview__header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-6);
+  border-bottom: 2px solid #17231d;
+  padding-bottom: var(--space-4);
+}
+
+.quote-preview h2,
+.quote-preview h3,
+.quote-preview p {
+  margin: 0;
+}
+
+.quote-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quote-preview-table th,
+.quote-preview-table td {
+  border-bottom: 1px solid #d8ded4;
+  padding: 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.quote-preview__totals {
+  display: grid;
+  gap: var(--space-2);
+  justify-self: end;
+  min-width: min(22rem, 100%);
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  .sidebar,
+  .topbar,
+  .bottom-nav,
+  .quote-editor,
+  .quote-side,
+  .page-header {
+    display: none !important;
+  }
+
+  .app-layout,
+  .main-area,
+  .quote-layout,
+  .page {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .quote-preview-shell {
+    display: block;
+  }
+
+  .quote-preview {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+}

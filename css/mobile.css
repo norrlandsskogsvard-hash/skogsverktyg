@@ -98,9 +98,36 @@
     grid-template-columns: 1fr;
   }
 
+  .quote-layout,
+  .quote-row-grid {
+    grid-template-columns: 1fr;
+  }
+
   .clearing-side {
     position: static;
     order: -1;
+  }
+
+  .quote-side {
+    position: static;
+    order: -1;
+  }
+
+  .quote-preview__header {
+    flex-direction: column;
+  }
+
+  .quote-preview-table,
+  .quote-preview-table thead,
+  .quote-preview-table tbody,
+  .quote-preview-table tr,
+  .quote-preview-table th,
+  .quote-preview-table td {
+    display: block;
+  }
+
+  .quote-preview-table thead {
+    display: none;
   }
 
   .field-entry-card,

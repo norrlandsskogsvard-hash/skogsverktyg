@@ -98,3 +98,28 @@ Testa modulen:
 4. Klicka på Beräkna.
 5. Kontrollera komplexitet, delkostnader, pris/ha och totalpris.
 6. Klicka på Kopiera offerttext och klistra in texten där den ska användas.
+
+
+### Offertgenerator
+
+Offertgeneratorn kan skapa professionella kundunderlag direkt i appen. Den har fält för företag, kund, offertuppgifter, offertposter, villkor, summering och förhandsvisning.
+
+Funktioner:
+
+- skapa och ändra offertposter manuellt
+- räkna summa exkl. moms, moms och total inkl. moms
+- rabatt, extra påslag och avrundning
+- hämta senaste röjningskalkyl som offertpost
+- hämta senaste planpriskalkyl som offertpost
+- autospara utkast i localStorage
+- kopiera offerttext
+- skriva ut eller spara som PDF via webbläsarens utskriftsfunktion
+
+Testa modulen:
+
+1. Öppna appen lokalt eller via GitHub Pages.
+2. Gå till #/quote.
+3. Fyll i företag, kund och offertuppgifter.
+4. Lägg till rader manuellt eller hämta senaste röjning/planpris.
+5. Kontrollera summering och förhandsvisning.
+6. Klicka på Kopiera offerttext eller Skriv ut / Spara som PDF.
