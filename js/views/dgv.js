@@ -41,16 +41,25 @@ export function renderDgvView() {
     input.value = currentEntry;
   }
 
+  function focusEntryDisplay() {
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      return;
+    }
+    input.focus({ preventScroll: true });
+  }
+
   function isValidEntry(value) {
     const rawValue = String(value ?? "").trim();
     return /^[0-9]+([,.][0-9]+)?$/.test(rawValue);
   }
 
-  function addDiameter(rawValue = currentEntry, successMessage = "Diameter tillagd och utkast sparat.") {
+  function addDiameter(rawValue = currentEntry, successMessage = "Diameter tillagd och utkast sparat.", shouldFocus = true) {
     const value = parsePositiveDiameter(rawValue);
     if (!isValidEntry(rawValue) || value === null) {
       setFeedback("Ange en diameter större än 0 cm. Komma går bra som decimaltecken.", "error");
-      input.focus();
+      if (shouldFocus) {
+        focusEntryDisplay();
+      }
       return;
     }
 
@@ -60,7 +69,9 @@ export function renderDgvView() {
     setFeedback(successMessage);
     saveDraft();
     render();
-    input.focus();
+    if (shouldFocus) {
+      focusEntryDisplay();
+    }
   }
 
   function appendKey(key) {
@@ -78,10 +89,12 @@ export function renderDgvView() {
     setEntry(currentEntry.slice(0, -1));
   }
 
-  function clearEntry() {
+  function clearEntry(shouldFocus = true) {
     setEntry("");
     setFeedback("Aktuell inmatning är rensad.");
-    input.focus();
+    if (shouldFocus) {
+      focusEntryDisplay();
+    }
   }
 
   function removeDiameter(index) {
@@ -90,7 +103,6 @@ export function renderDgvView() {
     setFeedback("Värdet togs bort. Du kan ångra direkt.");
     saveDraft();
     render();
-    input.focus();
   }
 
   function undoLast() {
@@ -109,13 +121,11 @@ export function renderDgvView() {
     }
     saveDraft();
     render();
-    input.focus();
   }
 
   function clearAll() {
     if (!diameters.length) {
       setFeedback("Listan är redan tom.", "error");
-      input.focus();
       return;
     }
 
@@ -125,7 +135,6 @@ export function renderDgvView() {
       setFeedback("Alla diametrar är rensade.");
       saveDraft();
       render();
-      input.focus();
     }
   }
 
@@ -143,7 +152,7 @@ export function renderDgvView() {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    addDiameter();
+    addDiameter(currentEntry, "Diameter tillagd och utkast sparat.", document.activeElement === input);
   });
 
   input.addEventListener("keydown", (event) => {
@@ -168,19 +177,20 @@ export function renderDgvView() {
       return;
     }
 
+    event.preventDefault();
     if (button.dataset.keypadValue === "backspace") {
       backspaceEntry();
     } else {
       appendKey(button.dataset.keypadValue);
     }
-    input.focus();
   });
 
   quickValues.addEventListener("click", (event) => {
     const button = event.target.closest("[data-quick-value]");
     if (button) {
+      event.preventDefault();
       const value = Number(button.dataset.quickValue);
-      addDiameter(String(value).replace(".", ","), "Snabbval " + formatNumber(value, 1) + " cm tillagt och utkast sparat.");
+      addDiameter(String(value).replace(".", ","), "Snabbval " + formatNumber(value, 1) + " cm tillagt och utkast sparat.", false);
     }
   });
 
@@ -191,7 +201,10 @@ export function renderDgvView() {
     }
   });
 
-  clearEntryButton.addEventListener("click", clearEntry);
+  clearEntryButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    clearEntry(false);
+  });
   undoButton.addEventListener("click", undoLast);
   clearButton.addEventListener("click", clearAll);
 
