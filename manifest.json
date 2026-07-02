@@ -1,0 +1,13 @@
+{
+  "name": "Skogskalkyl 2.0",
+  "short_name": "Skogskalkyl",
+  "description": "Modern offline-PWA för svenska skogsvårdsentreprenörer och små skogsföretagare.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f2e9",
+  "theme_color": "#1f6f4a",
+  "orientation": "portrait-primary",
+  "lang": "sv-SE",
+  "categories": ["business", "productivity", "utilities"]
+}
