@@ -1,125 +1,49 @@
-# Skogskalkyl 2.0
+import { DEFAULT_SETTINGS } from "../config.js";
+import { getStoredValue, setStoredValue } from "../storage.js";
+import { setTheme } from "../theme.js";
+import { createPageHeader, escapeHtml, getFormNumber, showToast } from "../ui.js";
 
-Version: v2.0.0-alpha.1
+export function renderSettingsView() {
+  const settings = getStoredValue("settings", DEFAULT_SETTINGS);
+  const page = document.createElement("div");
+  page.append(createPageHeader("Inställningar", "Spara lokala standardvärden för priser, moms och visning."));
+  page.insertAdjacentHTML("beforeend",
+    "<section class='content-grid'>" +
+      "<article class='card span-8'><div class='card__body'>" +
+        "<h3 class='card__title'>Lokala värden</h3>" +
+        "<form class='form' data-settings-form>" +
+          "<label class='field'><span>Företagsnamn</span><input class='input' name='companyName' type='text' value='" + escapeHtml(settings.companyName ?? "") + "'></label>" +
+          "<div class='form-grid'>" +
+            numberField("hourlyRate", "Timpris, kr", settings.hourlyRate, 10) +
+            numberField("travelRate", "Respris, kr/km", settings.travelRate, 1) +
+            numberField("vatRate", "Moms, %", settings.vatRate, 1) +
+            "<label class='field'><span>Tema</span><select class='select' name='theme'><option value='light' " + (settings.theme === "light" ? "selected" : "") + ">Ljust</option><option value='dark' " + (settings.theme === "dark" ? "selected" : "") + ">Mörkt</option></select></label>" +
+          "</div>" +
+          "<button class='button' type='submit'>Spara inställningar</button>" +
+        "</form>" +
+      "</div></article>" +
+      "<aside class='card span-4'><div class='card__body'><h3 class='card__title'>Offline</h3><p class='card__text'>Appen sparar inställningar i webbläsaren på den här enheten. Ingen backend används.</p></div></aside>" +
+    "</section>"
+  );
 
-Skogskalkyl 2.0 är en modern PWA för svenska skogsvårdsentreprenörer och små skogsföretagare. Den här första alpha-versionen innehåller appskal, navigering, responsiv layout, offline-stöd och förberedda moduler för kommande skogliga beräkningar.
+  page.querySelector("[data-settings-form]").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const nextSettings = {
+      companyName: form.elements.companyName.value.trim(),
+      hourlyRate: getFormNumber(form, "hourlyRate", DEFAULT_SETTINGS.hourlyRate),
+      travelRate: getFormNumber(form, "travelRate", DEFAULT_SETTINGS.travelRate),
+      vatRate: getFormNumber(form, "vatRate", DEFAULT_SETTINGS.vatRate),
+      theme: form.elements.theme.value
+    };
+    setStoredValue("settings", nextSettings);
+    setTheme(nextSettings.theme);
+    showToast("Inställningarna är sparade.");
+  });
 
-## Funktioner i alpha.1
+  return page;
+}
 
-- Fungerande appskal utan backend eller byggprocess
-- Hash-baserad navigering som fungerar på GitHub Pages
-- Responsiv layout för mobil, surfplatta och desktop
-- PWA-manifest och service worker med defensiv cachelogik
-- Lokalt sparade inställningar med localStorage
-- Förberedda moduler för DGV, medelhöjd, röjning, skogsbruksplan och offert
-- Grundläggande kalkylmotor för röjning, planprissättning och offertsummering
-
-## Kör lokalt
-
-Appen kan köras med Live Server eller valfri statisk server.
-
-Exempel med Python:
-
-python -m http.server 5173
-
-Öppna sedan http://localhost:5173/
-
-## GitHub Pages
-
-Lägg filerna i ett GitHub-repo och aktivera GitHub Pages för vald branch. Alla sökvägar är relativa och appen använder #/vy för intern navigering, så inga extra serverregler behövs.
-
-## Nästa steg
-
-- Koppla offertgeneratorn till sparade kalkyler.
-- Utöka utskrift och offertmallar.
-- Förbereda export av beräkningsunderlag.
-
-## Fältmoduler i aktuell version
-
-### DGV
-
-DGV-modulen låter användaren mata in diametrar i cm med ett stort mobilanpassat inmatningsfält. Värden kan läggas till med Enter eller knapp, tas bort enskilt, ångras och rensas efter bekräftelse. Utkast sparas automatiskt i webbläsarens localStorage.
-
-DGV beräknas med formeln sum(d^3) / sum(d^2). Resultatet visas tillsammans med antal provträd, aritmetiskt medel, median, min, max och standardavvikelse.
-
-### Medelhöjd
-
-Medelhöjdsmodulen låter användaren mata in höjder i meter med samma fältanpassade flöde. Medelhöjd beräknas som aritmetiskt medel och visas tillsammans med antal provträd, median, min, max och standardavvikelse. Utkast sparas automatiskt i localStorage.
-
-
-### Röjningskalkyl
-
-Röjningskalkylen är utbyggd till en professionell fältmodul. Den bedömer svårighet, produktivitet, tidsåtgång, arbetskostnad, utrustningskostnad, påslag, moms och pris per hektar.
-
-Faktorer som påverkar priset:
-
-- areal
-- stamantal före och efter röjning
-- medelhöjd
-- DGV
-- huvudträdslag och lövandel
-- röjningstyp
-- terräng, vegetation, blockighet, lutning, mark och framkomlighet
-- timpris, utrustningskostnad, resa, administration, vinstpåslag och moms
-
-Röjningsutkast sparas automatiskt i localStorage och laddas tillbaka efter omladdning. Modulen kan också skapa en kort offerttext som går att kopiera.
-
-Testa modulen:
-
-1. Öppna appen lokalt eller via GitHub Pages.
-2. Gå till #/rojning.
-3. Fyll i bestånd, svårighet och prisdata.
-4. Klicka på Beräkna.
-5. Kontrollera produktivitet, timmar per hektar, total tid, pris per hektar och totalpris.
-6. Klicka på Kopiera offerttext och klistra in texten där den ska användas.
-
-
-### Prissättning skogsbruksplan
-
-Skogsbruksplanmodulen är utbyggd för professionell prissättning av uppdraget att inventera, samla in underlag och ta fram/skapa en skogsbruksplan i ett annat system. Modulen skapar inte själva planen.
-
-Faktorer som påverkar priset:
-
-- areal, antal skiften och antal bestånd
-- plantyp: enkel, normal, fördjupad eller revidering
-- grundavgift, hektarpris, beståndstillägg, skiftestillägg, karta och administration
-- fältdagar, dagpris, fältsvårighet, tillgänglighet och terräng
-- kontorstimmar, timpris, kvalitetskontroll och kundgenomgång
-- körsträcka, kilometerpris, antal resor och etablering
-- administration/påslag, vinstpåslag och moms
-
-Modulen visar komplexitetsindex, pris exkl. moms, pris per hektar, moms och totalpris inkl. moms. Utkast sparas automatiskt i localStorage och en kort offerttext kan kopieras.
-
-Testa modulen:
-
-1. Öppna appen lokalt eller via GitHub Pages.
-2. Gå till #/forest-plan-pricing.
-3. Fyll i uppdrag, omfattning, fältarbete, kontorsarbete och resa.
-4. Klicka på Beräkna.
-5. Kontrollera komplexitet, delkostnader, pris/ha och totalpris.
-6. Klicka på Kopiera offerttext och klistra in texten där den ska användas.
-
-
-### Offertgenerator
-
-Offertgeneratorn kan skapa professionella kundunderlag direkt i appen. Den har fält för företag, kund, offertuppgifter, offertposter, villkor, summering och förhandsvisning.
-
-Funktioner:
-
-- skapa och ändra offertposter manuellt
-- räkna summa exkl. moms, moms och total inkl. moms
-- rabatt, extra påslag och avrundning
-- hämta senaste röjningskalkyl som offertpost
-- hämta senaste planpriskalkyl som offertpost
-- autospara utkast i localStorage
-- kopiera offerttext
-- skriva ut eller spara som PDF via webbläsarens utskriftsfunktion
-
-Testa modulen:
-
-1. Öppna appen lokalt eller via GitHub Pages.
-2. Gå till #/quote.
-3. Fyll i företag, kund och offertuppgifter.
-4. Lägg till rader manuellt eller hämta senaste röjning/planpris.
-5. Kontrollera summering och förhandsvisning.
-6. Klicka på Kopiera offerttext eller Skriv ut / Spara som PDF.
+function numberField(name, label, value, step) {
+  return "<label class='field'><span>" + label + "</span><input class='input' name='" + name + "' type='number' min='0' step='" + step + "' value='" + value + "'></label>";
+}
