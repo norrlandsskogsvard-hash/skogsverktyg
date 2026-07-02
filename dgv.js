@@ -1,44 +1,93 @@
-import { MODULE_STATUS } from "../config.js";
-import { createPageHeader } from "../ui.js";
+import { APP_VERSION, NAV_ITEMS } from "./config.js";
 
-const modules = [
-  { title: "DGV", href: "#/dgv", status: MODULE_STATUS.dgv, text: "Struktur för diametergrundytevägd volym är redo." },
-  { title: "Medelhöjd", href: "#/height", status: MODULE_STATUS.height, text: "Provträdsflöde och beräkningsmodul är förberett." },
-  { title: "Röjning", href: "#/rojning", status: MODULE_STATUS.rojning, text: "Snabb kalkyl för hektar, täthet och svårighetsgrad." },
-  { title: "Planpris", href: "#/forest-plan-pricing", status: MODULE_STATUS.forestPlanPricing, text: "Prissätt skogsbruksplan med areal och fältdagar." },
-  { title: "Offert", href: "#/quote", status: MODULE_STATUS.quote, text: "Skapa enkel offertsummering med moms." },
-  { title: "Kunder & jobb", href: "#/customers", status: MODULE_STATUS.customers, text: "Spara kunder, fastigheter och uppdrag lokalt." }
-];
-
-export function renderDashboardView() {
-  const page = document.createElement("div");
-  page.append(createPageHeader("Skogskalkyl 2.0", "Ett offline-redo appskal för fältarbete, kalkyler och offertunderlag."));
-  page.insertAdjacentHTML("beforeend",
-    "<section class='dashboard-hero'>" +
-      "<div class='hero-panel'>" +
-        "<span class='pill'>v2.0.0-alpha.1</span>" +
-        "<h1>Fältkalkyler utan krångel</h1>" +
-        "<p>Öppna rätt modul, fyll i underlaget och fortsätt även när täckningen försvinner.</p>" +
-      "</div>" +
-      "<div class='card'><div class='card__body'>" +
-        "<h3 class='card__title'>Status</h3>" +
-        "<ul class='status-list'>" +
-          "<li class='status-item'><span>Appskal</span><strong>Klart</strong></li>" +
-          "<li class='status-item'><span>Offline</span><strong>Aktivt</strong></li>" +
-          "<li class='status-item'><span>DGV och höjd</span><strong>Nästa steg</strong></li>" +
-        "</ul>" +
-      "</div></div>" +
-    "</section>" +
-    "<section class='content-grid' aria-label='Moduler'>" + modules.map(moduleCard).join("") + "</section>"
-  );
-  return page;
+export function createAppShell() {
+  const app = document.querySelector("#app");
+  app.innerHTML = shellTemplate();
 }
 
-function moduleCard(module) {
-  return "<article class='card module-card span-4'><div class='card__body'>" +
-    "<span class='pill'>" + module.status + "</span>" +
-    "<h3 class='card__title'>" + module.title + "</h3>" +
-    "<p class='card__text'>" + module.text + "</p>" +
-    "<div class='module-card__footer'><span>Öppna modul</span><a class='button button--secondary' href='" + module.href + "'>Gå vidare</a></div>" +
-  "</div></article>";
+function shellTemplate() {
+  return "<div class='app-layout'>" +
+    "<aside class='sidebar' aria-label='Huvudmeny'>" +
+      "<div class='brand'><span class='brand__title'>Skogskalkyl 2.0</span><span class='brand__version'>v" + APP_VERSION + "</span></div>" +
+      "<nav><ul class='nav-list'>" + NAV_ITEMS.map(navItemTemplate).join("") + "</ul></nav>" +
+    "</aside>" +
+    "<main class='main-area'>" +
+      "<header class='topbar'>" +
+        "<div><h1 class='topbar__title' id='view-title'>Start</h1><span class='topbar__meta'>Offline-redo fältapp</span></div>" +
+        "<a class='button button--secondary' href='#/settings'>Inställningar</a>" +
+      "</header>" +
+      "<section id='view' class='page' tabindex='-1'></section>" +
+    "</main>" +
+    "<nav class='bottom-nav' aria-label='Mobilmeny'>" + NAV_ITEMS.filter((item) => item.primary).map(navLinkTemplate).join("") + "</nav>" +
+  "</div>";
+}
+
+function navItemTemplate(item) {
+  return "<li>" + navLinkTemplate(item) + "</li>";
+}
+
+function navLinkTemplate(item) {
+  return "<a class='nav-link' href='" + item.hash + "' data-route-link='" + item.id + "'>" +
+    "<span class='nav-icon' aria-hidden='true'>" + item.icon + "</span>" +
+    "<span class='nav-label'>" + item.label + "</span>" +
+  "</a>";
+}
+
+export function setActiveNavigation(routeId) {
+  document.querySelectorAll("[data-route-link]").forEach((link) => {
+    link.classList.toggle("is-active", link.dataset.routeLink === routeId);
+  });
+}
+
+export function setViewTitle(title) {
+  const titleNode = document.querySelector("#view-title");
+  if (titleNode) {
+    titleNode.textContent = title;
+  }
+  document.title = title + " - Skogskalkyl 2.0";
+}
+
+export function createPageHeader(title, lead) {
+  const header = document.createElement("header");
+  header.className = "page-header";
+  header.innerHTML = "<h2 class='page-title'>" + escapeHtml(title) + "</h2><p class='page-lead'>" + escapeHtml(lead) + "</p>";
+  return header;
+}
+
+export function formatCurrency(value) {
+  return new Intl.NumberFormat("sv-SE", {
+    style: "currency",
+    currency: "SEK",
+    maximumFractionDigits: 0
+  }).format(Number.isFinite(value) ? value : 0);
+}
+
+export function formatNumber(value, digits = 1) {
+  return new Intl.NumberFormat("sv-SE", {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits
+  }).format(Number.isFinite(value) ? value : 0);
+}
+
+export function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.setAttribute("role", "status");
+  toast.textContent = message;
+  document.body.append(toast);
+  window.setTimeout(() => toast.remove(), 3200);
+}
+
+export function getFormNumber(form, name, fallback = 0) {
+  const value = Number.parseFloat(form.elements[name]?.value ?? "");
+  return Number.isFinite(value) ? value : fallback;
+}
+
+export function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }

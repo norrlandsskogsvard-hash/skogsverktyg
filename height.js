@@ -1,354 +1,620 @@
 import {
-  FOREST_PLAN_DEFAULTS,
-  buildForestPlanOfferText,
-  calculateForestPlanEstimate,
-  normalizeForestPlanInput
-} from "../calculators/pricingEngine.js";
-import { createPageHeader, escapeHtml, formatCurrency, formatNumber, showToast } from "../ui.js";
+  CUSTOMER_STORAGE_KEY,
+  JOB_STORAGE_KEY,
+  JOB_STATUSES,
+  JOB_TYPES,
+  createArchiveFromQuote,
+  createCustomer,
+  createJob,
+  deleteCustomer,
+  deleteJob,
+  filterCustomers,
+  filterJobs,
+  findCustomerByNameAndProperty,
+  getCustomerJobStats,
+  normalizeCustomer,
+  normalizeJob,
+  sortCustomers,
+  sortJobs,
+  summarizeArchive,
+  updateCustomer,
+  updateJob
+} from "../calculators/customerArchive.js";
+import { calculateQuoteEstimate } from "../calculators/quoteCalculator.js";
 import { getStoredValue, setStoredValue } from "../storage.js";
+import { createPageHeader, escapeHtml, formatCurrency, showToast } from "../ui.js";
 
-const STORAGE_KEY = "forestPlanPricingDraft";
+const QUOTE_DRAFT_KEY = "quoteDraft";
 
-const TEXT_FIELDS = [
-  ["propertyName", "Fastighetsbeteckning", "Ex. Skogen 1:4"],
-  ["customerName", "Kundnamn", "Kundens namn"],
-  ["municipality", "Kommun", "Kommun"]
-];
-
-const NUMBER_FIELDS = {
-  assignment: [
-    ["areaHa", "Areal, ha", "0.1"],
-    ["parcelCount", "Antal skiften", "1"],
-    ["standCount", "Antal bestånd/avdelningar", "1"]
-  ],
-  scope: [
-    ["baseFee", "Grundavgift, kr", "100"],
-    ["hectareRate", "Hektarpris, kr/ha", "5"],
-    ["standRate", "Beståndstillägg, kr/bestånd", "10"],
-    ["parcelRate", "Skiftestillägg, kr/skifte", "50"],
-    ["mapCost", "Digitalt underlag/karta, kr", "50"],
-    ["adminFixedCost", "Administrationskostnad, kr", "50"]
-  ],
-  field: [
-    ["fieldDays", "Fältdagar", "0.5"],
-    ["fieldDayRate", "Dagpris fältarbete, kr/dag", "100"]
-  ],
-  office: [
-    ["officeHours", "Kontorstimmar", "0.5"],
-    ["officeHourlyRate", "Timpris kontor, kr/h", "10"],
-    ["qualityCost", "Kvalitetskontroll/granskning, kr", "50"],
-    ["meetingCost", "Kundmöte/genomgång, kr", "50"]
-  ],
-  travel: [
-    ["travelKmRoundtrip", "Körsträcka tur/retur, km", "1"],
-    ["kmRate", "Pris per km, kr/km", "0.5"],
-    ["tripCount", "Antal resor", "1"],
-    ["establishmentCost", "Etablering, kr", "50"],
-    ["adminMarkupPercent", "Administration/påslag, %", "1"],
-    ["profitMarkupPercent", "Vinstpåslag, %", "1"],
-    ["vatPercent", "Moms, %", "1"]
-  ]
-};
-
-const SELECTS = {
-  planType: [
-    ["simple", "Enkel plan"],
-    ["normal", "Normal skogsbruksplan"],
-    ["advanced", "Fördjupad plan"],
-    ["revision", "Uppdatering/revidering av befintlig plan"]
-  ],
-  fieldDifficulty: [
-    ["easy", "Lätt"],
-    ["normal", "Normal"],
-    ["hard", "Svår"],
-    ["veryHard", "Mycket svår"]
-  ],
-  accessibility: [
-    ["good", "God"],
-    ["normal", "Normal"],
-    ["hard", "Svår"]
-  ],
-  terrain: [
-    ["easy", "Lätt"],
-    ["normal", "Normal"],
-    ["hard", "Svår"]
-  ]
-};
-
-export function renderForestPlanPricingView() {
-  const draft = normalizeForestPlanInput(getStoredValue(STORAGE_KEY, FOREST_PLAN_DEFAULTS));
+export function renderCustomersView() {
   const page = document.createElement("div");
+  page.append(createPageHeader(
+    "Kundregister",
+    "Spara kunder, fastigheter och uppdrag lokalt på enheten."
+  ));
 
-  page.append(
-    createPageHeader(
-      "Prissättning skogsbruksplan",
-      "Ta fram ett professionellt pris- och offertunderlag för inventering, underlag och planarbete."
-    )
-  );
-  page.insertAdjacentHTML("beforeend", viewTemplate(draft));
+  let customers = sortCustomers(getStoredValue(CUSTOMER_STORAGE_KEY, []));
+  let jobs = sortJobs(getStoredValue(JOB_STORAGE_KEY, []));
+  let editingCustomerId = null;
+  let editingJobId = null;
 
-  const form = page.querySelector("[data-plan-form]");
-  const resultNode = page.querySelector("[data-plan-result]");
-  const offerNode = page.querySelector("[data-plan-offer]");
-  const feedbackNode = page.querySelector("[data-plan-feedback]");
-  let latestEstimate = calculateForestPlanEstimate(readForm(form));
+  page.insertAdjacentHTML("beforeend", viewTemplate());
 
-  function saveDraft(silent = true) {
-    setStoredValue(STORAGE_KEY, readForm(form));
-    if (!silent) {
-      showToast("Planprisutkast sparat på enheten.");
-    }
+  const customerForm = page.querySelector("[data-customer-form]");
+  const jobForm = page.querySelector("[data-job-form]");
+  const customerFeedback = page.querySelector("[data-customer-feedback]");
+  const jobFeedback = page.querySelector("[data-job-feedback]");
+  const importFeedback = page.querySelector("[data-import-feedback]");
+  const customerSearch = page.querySelector("[data-customer-search]");
+  const jobSearch = page.querySelector("[data-job-search]");
+  const jobStatusFilter = page.querySelector("[data-job-status-filter]");
+  const jobTypeFilter = page.querySelector("[data-job-type-filter]");
+
+  function persist() {
+    setStoredValue(CUSTOMER_STORAGE_KEY, customers);
+    setStoredValue(JOB_STORAGE_KEY, jobs);
   }
 
-  function renderResult() {
-    latestEstimate = calculateForestPlanEstimate(readForm(form));
-    resultNode.innerHTML = resultTemplate(latestEstimate);
-    offerNode.value = buildForestPlanOfferText(latestEstimate);
-    feedbackNode.innerHTML = feedbackTemplate(latestEstimate);
-    saveDraft(true);
+  function renderAll() {
+    renderOverview(page, customers, jobs);
+    renderCustomerSelect(jobForm, customers);
+    renderCustomerList(page, customers, jobs, customerSearch.value);
+    renderJobArchive(page, jobs, {
+      searchTerm: jobSearch.value,
+      status: jobStatusFilter.value,
+      type: jobTypeFilter.value
+    });
   }
 
-  form.addEventListener("submit", (event) => {
+  customerForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    renderResult();
-  });
-
-  form.addEventListener("input", () => {
-    saveDraft(true);
-  });
-
-  form.addEventListener("change", () => {
-    renderResult();
-  });
-
-  page.querySelector("[data-save-plan]").addEventListener("click", () => saveDraft(false));
-
-  page.querySelector("[data-reset-plan]").addEventListener("click", () => {
-    if (window.confirm("Rensa planprisutkastet och återställ standardvärden?")) {
-      fillForm(form, FOREST_PLAN_DEFAULTS);
-      renderResult();
-      showToast("Planprisutkastet är återställt.");
-    }
-  });
-
-  page.querySelector("[data-copy-plan-offer]").addEventListener("click", async () => {
-    renderResult();
-    const text = buildForestPlanOfferText(latestEstimate);
-    if (!text) {
-      showToast("Fyll i en giltig areal innan offerttext kopieras.");
+    const input = readCustomerForm(customerForm);
+    if (!input.name) {
+      setFeedback(customerFeedback, "Fyll i kundnamn.", true);
       return;
     }
 
-    try {
-      await navigator.clipboard.writeText(text);
-      showToast("Offerttext kopierad.");
-    } catch (error) {
-      offerNode.focus();
-      offerNode.select();
-      if (document.execCommand("copy")) {
-        showToast("Offerttext kopierad.");
-      } else {
-        showToast("Offerttexten är markerad och kan kopieras manuellt.");
+    if (editingCustomerId) {
+      customers = updateCustomer(customers, editingCustomerId, input);
+      jobs = jobs.map((job) => job.customerId === editingCustomerId
+        ? normalizeJob({
+            ...job,
+            customerName: input.name,
+            propertyName: input.propertyName || job.propertyName,
+            municipality: input.municipality || job.municipality
+          })
+        : job
+      );
+      showToast("Kunden uppdaterades.");
+    } else {
+      customers = sortCustomers([...customers, createCustomer(input)]);
+      showToast("Kunden sparades.");
+    }
+
+    editingCustomerId = null;
+    persist();
+    resetCustomerForm(customerForm);
+    setFeedback(customerFeedback, "Kund sparad.");
+    renderAll();
+  });
+
+  page.querySelector("[data-reset-customer]").addEventListener("click", () => {
+    editingCustomerId = null;
+    resetCustomerForm(customerForm);
+    setFeedback(customerFeedback, "");
+  });
+
+  jobForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = readJobForm(jobForm, customers);
+    if (!input.title) {
+      setFeedback(jobFeedback, "Fyll i rubrik för jobbet.", true);
+      return;
+    }
+
+    if (editingJobId) {
+      jobs = updateJob(jobs, editingJobId, input);
+      showToast("Jobbet uppdaterades.");
+    } else {
+      jobs = sortJobs([...jobs, createJob(input)]);
+      showToast("Jobbet sparades.");
+    }
+
+    editingJobId = null;
+    persist();
+    resetJobForm(jobForm);
+    setFeedback(jobFeedback, "Jobb sparat.");
+    renderAll();
+  });
+
+  page.querySelector("[data-reset-job]").addEventListener("click", () => {
+    editingJobId = null;
+    resetJobForm(jobForm);
+    setFeedback(jobFeedback, "");
+  });
+
+  jobForm.elements.customerId.addEventListener("change", () => {
+    const customer = customers.find((item) => item.id === jobForm.elements.customerId.value);
+    if (!customer) {
+      return;
+    }
+    if (!jobForm.elements.propertyName.value) {
+      jobForm.elements.propertyName.value = customer.propertyName;
+    }
+    if (!jobForm.elements.municipality.value) {
+      jobForm.elements.municipality.value = customer.municipality;
+    }
+  });
+
+  page.querySelector("[data-customer-list]").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) {
+      return;
+    }
+    const customerId = button.dataset.customerId;
+    const customer = customers.find((item) => item.id === customerId);
+    if (!customer) {
+      return;
+    }
+
+    if (button.dataset.action === "edit-customer") {
+      editingCustomerId = customerId;
+      fillCustomerForm(customerForm, customer);
+      setFeedback(customerFeedback, "Redigerar kund.");
+      customerForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    if (button.dataset.action === "new-job") {
+      editingJobId = null;
+      resetJobForm(jobForm);
+      jobForm.elements.customerId.value = customerId;
+      jobForm.elements.customerName.value = customer.name;
+      jobForm.elements.propertyName.value = customer.propertyName;
+      jobForm.elements.municipality.value = customer.municipality;
+      setFeedback(jobFeedback, "Nytt jobb kopplat till vald kund.");
+      jobForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    if (button.dataset.action === "delete-customer") {
+      if (window.confirm("Ta bort kunden? Jobb i arkivet behålls men kopplingen till kunden tas bort.")) {
+        customers = deleteCustomer(customers, customerId);
+        jobs = jobs.map((job) => job.customerId === customerId ? normalizeJob({ ...job, customerId: "" }) : job);
+        persist();
+        showToast("Kunden togs bort.");
+        renderAll();
       }
     }
   });
 
-  renderResult();
+  page.querySelector("[data-job-list]").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) {
+      return;
+    }
+    const jobId = button.dataset.jobId;
+    const job = jobs.find((item) => item.id === jobId);
+    if (!job) {
+      return;
+    }
+
+    if (button.dataset.action === "edit-job") {
+      editingJobId = jobId;
+      fillJobForm(jobForm, job);
+      setFeedback(jobFeedback, "Redigerar jobb.");
+      jobForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    if (button.dataset.action === "complete-job") {
+      jobs = updateJob(jobs, jobId, {
+        status: "Klar",
+        completedDate: job.completedDate || todayInput()
+      });
+      persist();
+      showToast("Jobbet markerades som klart.");
+      renderAll();
+    }
+
+    if (button.dataset.action === "delete-job") {
+      if (window.confirm("Ta bort jobbet från arkivet?")) {
+        jobs = deleteJob(jobs, jobId);
+        persist();
+        showToast("Jobbet togs bort.");
+        renderAll();
+      }
+    }
+  });
+
+  [customerSearch, jobSearch, jobStatusFilter, jobTypeFilter].forEach((control) => {
+    control.addEventListener("input", renderAll);
+    control.addEventListener("change", renderAll);
+  });
+
+  page.querySelector("[data-import-quote]").addEventListener("click", () => {
+    const draft = getStoredValue(QUOTE_DRAFT_KEY, null);
+    const estimate = calculateQuoteEstimate(draft || {});
+    const customerName = estimate.customer?.customerName?.trim();
+
+    if (!draft || !customerName) {
+      setFeedback(importFeedback, "Fyll i kundnamn i offerten först.", true);
+      return;
+    }
+    if (!estimate.activeRows.length) {
+      setFeedback(importFeedback, "Offerten saknar prissatta rader.", true);
+      return;
+    }
+
+    const archive = createArchiveFromQuote(estimate);
+    const existingCustomer = findCustomerByNameAndProperty(customers, archive.customer.name, archive.customer.propertyName);
+    const customer = existingCustomer || archive.customer;
+    const job = normalizeJob({
+      ...archive.job,
+      customerId: customer.id,
+      customerName: customer.name,
+      propertyName: archive.job.propertyName || customer.propertyName,
+      municipality: archive.job.municipality || customer.municipality
+    });
+
+    if (!existingCustomer) {
+      customers = sortCustomers([...customers, customer]);
+    }
+    jobs = sortJobs([...jobs, createJob(job)]);
+    persist();
+    setFeedback(importFeedback, "Kund och jobb skapades från offert.");
+    showToast("Kund och jobb skapades från offert.");
+    renderAll();
+  });
+
+  renderAll();
   return page;
 }
 
-function viewTemplate(draft) {
+function viewTemplate() {
   return `
-    <form class="clearing-layout" data-plan-form novalidate>
-      <div class="clearing-main">
-        ${cardTemplate("Uppdrag", assignmentTemplate(draft))}
-        ${cardTemplate("Omfattning", numberGroupTemplate(NUMBER_FIELDS.scope, draft))}
-        ${cardTemplate("Fältarbete", fieldTemplate(draft))}
-        ${cardTemplate("Kontorsarbete", numberGroupTemplate(NUMBER_FIELDS.office, draft))}
-        ${cardTemplate("Resa", numberGroupTemplate(NUMBER_FIELDS.travel, draft))}
-      </div>
-      <aside class="clearing-side">
-        <div class="clearing-actions">
-          <button class="button button--large" type="submit">Beräkna</button>
-          <button class="button button--secondary" type="button" data-save-plan>Spara utkast</button>
-          <button class="button button--secondary" type="button" data-reset-plan>Rensa</button>
-          <button class="button button--secondary" type="button" data-copy-plan-offer>Kopiera offerttext</button>
-        </div>
-        <section class="result-panel result-panel--strong" data-plan-result></section>
-        ${cardTemplate(
-          "Offertunderlag",
-          `<textarea class="textarea quote-textarea" data-plan-offer readonly aria-label="Offerttext för skogsbruksplan"></textarea>`
-        )}
-        <div class="field-feedback" data-plan-feedback></div>
+    <section class="archive-layout">
+      <section class="archive-main">
+        <section class="archive-overview" data-archive-overview></section>
+
+        ${cardTemplate("Lägg till/redigera kund", customerFormTemplate())}
+        ${cardTemplate("Kundlista", customerListTemplate())}
+        ${cardTemplate("Jobbarkiv", jobArchiveTemplate())}
+        ${cardTemplate("Lägg till/redigera jobb", jobFormTemplate())}
+      </section>
+
+      <aside class="archive-side">
+        ${cardTemplate("Import från offert", importTemplate())}
       </aside>
-    </form>
-  `;
-}
-
-function assignmentTemplate(draft) {
-  return `
-    <div class="form-grid">
-      ${TEXT_FIELDS.map(([name, label, placeholder]) => textField(name, label, draft[name], placeholder)).join("")}
-      ${numberGroupTemplate(NUMBER_FIELDS.assignment, draft)}
-      ${selectField("planType", "Plantyp", draft.planType, SELECTS.planType)}
-    </div>
-  `;
-}
-
-function fieldTemplate(draft) {
-  return `
-    <div class="form-grid">
-      ${numberGroupTemplate(NUMBER_FIELDS.field, draft)}
-      ${selectField("fieldDifficulty", "Svårighetsgrad fält", draft.fieldDifficulty, SELECTS.fieldDifficulty)}
-      ${selectField("accessibility", "Tillgänglighet", draft.accessibility, SELECTS.accessibility)}
-      ${selectField("terrain", "Terräng", draft.terrain, SELECTS.terrain)}
-    </div>
-    <label class="field">
-      <span>Kommentar/anteckning</span>
-      <textarea class="textarea" name="fieldNote" placeholder="Kort notering om fältförutsättningar">${escapeHtml(draft.fieldNote)}</textarea>
-    </label>
-  `;
-}
-
-function numberGroupTemplate(fields, draft) {
-  return fields.map(([name, label, step]) => numberField(name, label, draft[name], step)).join("");
-}
-
-function cardTemplate(title, content) {
-  return `
-    <section class="card">
-      <div class="card__body">
-        <h3 class="card__title">${title}</h3>
-        ${content}
-      </div>
     </section>
   `;
 }
 
-function textField(name, label, value, placeholder) {
+function customerFormTemplate() {
+  return `
+    <form class="form" data-customer-form novalidate>
+      <div class="form-grid">
+        ${textField("name", "Namn")}
+        ${textField("propertyName", "Fastighet")}
+        ${textField("municipality", "Kommun")}
+        ${textField("email", "E-post")}
+        ${textField("phone", "Telefon")}
+        ${textField("address", "Adress")}
+      </div>
+      ${textareaField("notes", "Anteckning")}
+      <div class="button-row">
+        <button class="button button--large" type="submit">Spara kund</button>
+        <button class="button button--secondary" type="button" data-reset-customer>Rensa formulär</button>
+      </div>
+      <p class="field-feedback" data-customer-feedback></p>
+    </form>
+  `;
+}
+
+function customerListTemplate() {
+  return `
+    <div class="archive-toolbar">
+      <label class="field">
+        <span>Sök kund</span>
+        <input class="input" type="search" data-customer-search placeholder="Namn, fastighet eller kommun">
+      </label>
+    </div>
+    <div class="archive-list" data-customer-list></div>
+  `;
+}
+
+function jobArchiveTemplate() {
+  return `
+    <div class="archive-toolbar archive-toolbar--three">
+      <label class="field">
+        <span>Sök jobb</span>
+        <input class="input" type="search" data-job-search placeholder="Titel, kund, fastighet">
+      </label>
+      <label class="field">
+        <span>Status</span>
+        <select class="select" data-job-status-filter>
+          <option value="">Alla statusar</option>
+          ${JOB_STATUSES.map((status) => `<option value="${escapeHtml(status)}">${escapeHtml(status)}</option>`).join("")}
+        </select>
+      </label>
+      <label class="field">
+        <span>Typ</span>
+        <select class="select" data-job-type-filter>
+          <option value="">Alla typer</option>
+          ${JOB_TYPES.map((type) => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join("")}
+        </select>
+      </label>
+    </div>
+    <div class="archive-list" data-job-list></div>
+  `;
+}
+
+function jobFormTemplate() {
+  return `
+    <form class="form" data-job-form novalidate>
+      <div class="form-grid">
+        <label class="field">
+          <span>Kund</span>
+          <select class="select" name="customerId"></select>
+        </label>
+        ${textField("customerName", "Kundnamn")}
+        ${selectField("type", "Jobbtyp", JOB_TYPES)}
+        ${selectField("status", "Status", JOB_STATUSES)}
+        ${textField("title", "Rubrik")}
+        ${textField("propertyName", "Fastighet")}
+        ${textField("municipality", "Kommun")}
+        ${numberField("areaHa", "Areal, ha", "0.1")}
+        ${numberField("estimatedValueExVat", "Värde exkl. moms", "1")}
+        ${numberField("estimatedValueIncVat", "Värde inkl. moms", "1")}
+        ${textField("quoteNumber", "Offertnummer")}
+        ${dateField("quoteDate", "Offertdatum")}
+        ${dateField("plannedStart", "Planerad start")}
+        ${dateField("completedDate", "Slutdatum")}
+      </div>
+      ${textareaField("description", "Beskrivning")}
+      ${textareaField("notes", "Anteckning")}
+      <div class="button-row">
+        <button class="button button--large" type="submit">Spara jobb</button>
+        <button class="button button--secondary" type="button" data-reset-job>Rensa formulär</button>
+      </div>
+      <p class="field-feedback" data-job-feedback></p>
+    </form>
+  `;
+}
+
+function importTemplate() {
+  return `
+    <p class="card__text">Skapa kund och jobb från det senaste sparade offertutkastet.</p>
+    <button class="button button--large" type="button" data-import-quote>Skapa kund/jobb från senaste offert</button>
+    <p class="field-feedback" data-import-feedback></p>
+  `;
+}
+
+function renderOverview(page, customers, jobs) {
+  const summary = summarizeArchive(customers, jobs);
+  page.querySelector("[data-archive-overview]").innerHTML = `
+    <div class="archive-stat">
+      ${statCard("Kunder", summary.customerCount)}
+      ${statCard("Jobb", summary.jobCount)}
+      ${statCard("Öppna jobb", summary.openJobCount)}
+      ${statCard("Offererat exkl. moms", formatCurrency(summary.offeredValueExVat))}
+      ${statCard("Senast uppdaterad", formatDateTime(summary.latestUpdatedAt) || "Ingen data")}
+    </div>
+  `;
+}
+
+function renderCustomerSelect(form, customers) {
+  const currentValue = form.elements.customerId.value;
+  form.elements.customerId.innerHTML = `
+    <option value="">Ingen kund vald</option>
+    ${sortCustomers(customers).map((customer) =>
+      `<option value="${escapeHtml(customer.id)}">${escapeHtml(customer.name)}${customer.propertyName ? `, ${escapeHtml(customer.propertyName)}` : ""}</option>`
+    ).join("")}
+  `;
+  form.elements.customerId.value = customers.some((customer) => customer.id === currentValue) ? currentValue : "";
+}
+
+function renderCustomerList(page, customers, jobs, searchTerm) {
+  const filtered = filterCustomers(customers, searchTerm);
+  const node = page.querySelector("[data-customer-list]");
+  if (!filtered.length) {
+    node.innerHTML = `<p class="archive-empty">Inga kunder sparade ännu.</p>`;
+    return;
+  }
+
+  node.innerHTML = filtered.map((customer) => {
+    const stats = getCustomerJobStats(customer.id, jobs);
+    return `
+      <article class="archive-card">
+        <div>
+          <span class="pill">${stats.jobCount} jobb</span>
+          <h3>${escapeHtml(customer.name)}</h3>
+          <p>${escapeHtml(customer.propertyName || "Ingen fastighet angiven")}</p>
+          <p>${escapeHtml(customer.municipality || "Ingen kommun angiven")}</p>
+          <p>${escapeHtml([customer.phone, customer.email].filter(Boolean).join(" / ") || "Ingen kontakt angiven")}</p>
+          <strong>${formatCurrency(stats.offeredValueExVat)} offererat exkl. moms</strong>
+        </div>
+        <div class="archive-card__actions">
+          <button class="button button--secondary" type="button" data-action="edit-customer" data-customer-id="${escapeHtml(customer.id)}">Redigera</button>
+          <button class="button button--secondary" type="button" data-action="new-job" data-customer-id="${escapeHtml(customer.id)}">Nytt jobb</button>
+          <button class="button button--secondary" type="button" data-action="delete-customer" data-customer-id="${escapeHtml(customer.id)}">Ta bort</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderJobArchive(page, jobs, filters) {
+  const filtered = filterJobs(jobs, filters);
+  const node = page.querySelector("[data-job-list]");
+  if (!filtered.length) {
+    node.innerHTML = `<p class="archive-empty">Inga jobb sparade ännu.</p>`;
+    return;
+  }
+
+  node.innerHTML = filtered.map((job) => `
+    <article class="archive-card">
+      <div>
+        <span class="pill">${escapeHtml(job.status)}</span>
+        <h3>${escapeHtml(job.title || "Namnlöst jobb")}</h3>
+        <p>${escapeHtml(job.customerName || "Ingen kund")} · ${escapeHtml(job.propertyName || "Ingen fastighet")}</p>
+        <p>${escapeHtml(job.type)} · ${escapeHtml(job.quoteDate || job.plannedStart || "Inget datum")}</p>
+        <strong>${formatCurrency(job.estimatedValueExVat)} exkl. moms</strong>
+      </div>
+      <div class="archive-card__actions">
+        <button class="button button--secondary" type="button" data-action="edit-job" data-job-id="${escapeHtml(job.id)}">Redigera</button>
+        <button class="button button--secondary" type="button" data-action="complete-job" data-job-id="${escapeHtml(job.id)}">Markera som klar</button>
+        <button class="button button--secondary" type="button" data-action="delete-job" data-job-id="${escapeHtml(job.id)}">Ta bort</button>
+      </div>
+    </article>
+  `).join("");
+}
+
+function readCustomerForm(form) {
+  return normalizeCustomer({
+    name: form.elements.name.value,
+    email: form.elements.email.value,
+    phone: form.elements.phone.value,
+    address: form.elements.address.value,
+    municipality: form.elements.municipality.value,
+    propertyName: form.elements.propertyName.value,
+    notes: form.elements.notes.value
+  });
+}
+
+function readJobForm(form, customers) {
+  const customer = customers.find((item) => item.id === form.elements.customerId.value);
+  return normalizeJob({
+    customerId: customer?.id || "",
+    customerName: form.elements.customerName.value || customer?.name || "",
+    propertyName: form.elements.propertyName.value || customer?.propertyName || "",
+    municipality: form.elements.municipality.value || customer?.municipality || "",
+    type: form.elements.type.value,
+    status: form.elements.status.value,
+    title: form.elements.title.value,
+    description: form.elements.description.value,
+    areaHa: form.elements.areaHa.value,
+    estimatedValueExVat: form.elements.estimatedValueExVat.value,
+    estimatedValueIncVat: form.elements.estimatedValueIncVat.value,
+    quoteNumber: form.elements.quoteNumber.value,
+    quoteDate: form.elements.quoteDate.value,
+    plannedStart: form.elements.plannedStart.value,
+    completedDate: form.elements.completedDate.value,
+    notes: form.elements.notes.value,
+    source: "manual"
+  });
+}
+
+function fillCustomerForm(form, customer) {
+  form.elements.name.value = customer.name;
+  form.elements.propertyName.value = customer.propertyName;
+  form.elements.municipality.value = customer.municipality;
+  form.elements.email.value = customer.email;
+  form.elements.phone.value = customer.phone;
+  form.elements.address.value = customer.address;
+  form.elements.notes.value = customer.notes;
+}
+
+function fillJobForm(form, job) {
+  form.elements.customerId.value = job.customerId;
+  form.elements.customerName.value = job.customerName;
+  form.elements.type.value = job.type;
+  form.elements.status.value = job.status;
+  form.elements.title.value = job.title;
+  form.elements.propertyName.value = job.propertyName;
+  form.elements.municipality.value = job.municipality;
+  form.elements.areaHa.value = job.areaHa || "";
+  form.elements.estimatedValueExVat.value = job.estimatedValueExVat || "";
+  form.elements.estimatedValueIncVat.value = job.estimatedValueIncVat || "";
+  form.elements.quoteNumber.value = job.quoteNumber;
+  form.elements.quoteDate.value = job.quoteDate;
+  form.elements.plannedStart.value = job.plannedStart;
+  form.elements.completedDate.value = job.completedDate;
+  form.elements.description.value = job.description;
+  form.elements.notes.value = job.notes;
+}
+
+function resetCustomerForm(form) {
+  form.reset();
+}
+
+function resetJobForm(form) {
+  form.reset();
+  form.elements.type.value = JOB_TYPES[0];
+  form.elements.status.value = JOB_STATUSES[0];
+}
+
+function setFeedback(node, message, isError = false) {
+  node.textContent = message;
+  node.classList.toggle("is-error", isError);
+}
+
+function cardTemplate(title, content) {
+  return `<section class="card"><div class="card__body"><h3 class="card__title">${escapeHtml(title)}</h3>${content}</div></section>`;
+}
+
+function statCard(label, value) {
+  return `<article class="card archive-stat-card"><div class="card__body"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div></article>`;
+}
+
+function textField(name, label) {
   return `
     <label class="field">
-      <span>${label}</span>
-      <input class="input" name="${name}" type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}">
+      <span>${escapeHtml(label)}</span>
+      <input class="input" name="${escapeHtml(name)}" type="text">
     </label>
   `;
 }
 
-function numberField(name, label, value, step) {
+function numberField(name, label, step) {
   return `
     <label class="field">
-      <span>${label}</span>
-      <input class="input" name="${name}" type="number" inputmode="decimal" step="${step}" min="0" value="${escapeHtml(value)}">
+      <span>${escapeHtml(label)}</span>
+      <input class="input" name="${escapeHtml(name)}" type="number" inputmode="decimal" min="0" step="${escapeHtml(step)}">
     </label>
   `;
 }
 
-function selectField(name, label, selected, options) {
+function dateField(name, label) {
   return `
     <label class="field">
-      <span>${label}</span>
-      <select class="select" name="${name}">
-        ${options.map(([value, optionLabel]) => `<option value="${value}" ${value === selected ? "selected" : ""}>${optionLabel}</option>`).join("")}
+      <span>${escapeHtml(label)}</span>
+      <input class="input" name="${escapeHtml(name)}" type="date">
+    </label>
+  `;
+}
+
+function textareaField(name, label) {
+  return `
+    <label class="field">
+      <span>${escapeHtml(label)}</span>
+      <textarea class="textarea" name="${escapeHtml(name)}"></textarea>
+    </label>
+  `;
+}
+
+function selectField(name, label, options) {
+  return `
+    <label class="field">
+      <span>${escapeHtml(label)}</span>
+      <select class="select" name="${escapeHtml(name)}">
+        ${options.map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join("")}
       </select>
     </label>
   `;
 }
 
-function readForm(form) {
-  const data = {};
-  TEXT_FIELDS.forEach(([name]) => {
-    data[name] = form.elements[name].value;
-  });
-  Object.values(NUMBER_FIELDS).flat().forEach(([name]) => {
-    data[name] = form.elements[name].value;
-  });
-  Object.keys(SELECTS).forEach((name) => {
-    data[name] = form.elements[name].value;
-  });
-  data.fieldNote = form.elements.fieldNote.value;
-  return data;
+function todayInput() {
+  return new Date().toISOString().slice(0, 10);
 }
 
-function fillForm(form, values) {
-  TEXT_FIELDS.forEach(([name]) => {
-    form.elements[name].value = values[name] ?? "";
-  });
-  Object.values(NUMBER_FIELDS).flat().forEach(([name]) => {
-    form.elements[name].value = values[name];
-  });
-  Object.keys(SELECTS).forEach((name) => {
-    form.elements[name].value = values[name];
-  });
-  form.elements.fieldNote.value = values.fieldNote ?? "";
-}
-
-function resultTemplate(result) {
-  if (!result.valid) {
-    return `
-      <div class="result-main">
-        <span>Resultat</span>
-        <strong>-</strong>
-      </div>
-      <div class="notice notice--danger">
-        <strong>Kontrollera underlaget</strong>
-        ${result.errors.map((error) => `<p>${escapeHtml(error)}</p>`).join("")}
-      </div>
-    `;
+function formatDateTime(value) {
+  if (!value) {
+    return "";
   }
-
-  return `
-    <div class="result-main">
-      <span>Totalpris inkl. moms</span>
-      <strong>${formatCurrency(result.totalIncVat)}</strong>
-    </div>
-    <div class="difficulty-meter" aria-label="Komplexitet ${result.complexityLabel}">
-      <span>Komplexitet: <strong>${result.complexityLabel}</strong></span>
-      <span aria-hidden="true">${complexityBars(result.complexityIndex)}</span>
-    </div>
-    ${statRow("Grundavgift", formatCurrency(result.baseFee))}
-    ${statRow("Arealpris", formatCurrency(result.areaPrice))}
-    ${statRow("Bestånd/skiften", formatCurrency(result.standPrice + result.parcelPrice))}
-    ${statRow("Fältarbete", formatCurrency(result.fieldWorkCost))}
-    ${statRow("Kontorsarbete", formatCurrency(result.officeWorkCost + result.qualityCost + result.meetingCost))}
-    ${statRow("Resa/etablering", formatCurrency(result.travelCost + result.establishmentCost))}
-    ${statRow("Påslag", formatCurrency(result.adminMarkup + result.profitMarkup))}
-    ${statRow("Pris exkl. moms", formatCurrency(result.subtotalExVat))}
-    ${statRow("Pris/ha exkl. moms", formatCurrency(result.pricePerHaExVat))}
-    ${statRow("Moms", formatCurrency(result.vat))}
-    <details class="factor-list">
-      <summary>Visa komplexitetsfaktorer</summary>
-      ${result.factors.map(factorRow).join("")}
-    </details>
-  `;
-}
-
-function feedbackTemplate(result) {
-  if (result.errors.length) {
-    return `<strong>Fel:</strong> ${result.errors.map(escapeHtml).join(" ")}`;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
   }
-
-  if (result.notes.length) {
-    return `<strong>Obs:</strong> ${result.notes.map(escapeHtml).join(" ")}`;
-  }
-
-  return "Kalkylen är uppdaterad och utkastet är sparat.";
-}
-
-function statRow(label, value) {
-  return `<div class="result-row"><span>${label}</span><strong>${value}</strong></div>`;
-}
-
-function factorRow(factor) {
-  const change = factor.changePercent >= 0 ? `+${formatNumber(factor.changePercent, 0)} %` : `${formatNumber(factor.changePercent, 0)} %`;
-  return `
-    <div class="factor-row">
-      <span>${escapeHtml(factor.name)} <small>${escapeHtml(factor.note)}</small></span>
-      <strong>${change}</strong>
-    </div>
-  `;
-}
-
-function complexityBars(index) {
-  const filled = index < 0.95 ? 1 : index < 1.2 ? 3 : index < 1.55 ? 4 : 5;
-  return "█".repeat(filled) + "░".repeat(5 - filled);
+  return new Intl.DateTimeFormat("sv-SE", {
+    dateStyle: "short",
+    timeStyle: "short"
+  }).format(date);
 }

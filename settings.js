@@ -1,27 +1,49 @@
 import {
-  CLEARING_DEFAULTS,
-  buildClearingOfferText,
-  calculateClearingEstimate,
-  normalizeClearingInput
+  FOREST_PLAN_DEFAULTS,
+  buildForestPlanOfferText,
+  calculateForestPlanEstimate,
+  normalizeForestPlanInput
 } from "../calculators/pricingEngine.js";
 import { createPageHeader, escapeHtml, formatCurrency, formatNumber, showToast } from "../ui.js";
 import { getStoredValue, setStoredValue } from "../storage.js";
 
-const STORAGE_KEY = "rojningDraft";
+const STORAGE_KEY = "forestPlanPricingDraft";
 
-const FIELD_GROUPS = {
-  stand: [
+const TEXT_FIELDS = [
+  ["propertyName", "Fastighetsbeteckning", "Ex. Skogen 1:4"],
+  ["customerName", "Kundnamn", "Kundens namn"],
+  ["municipality", "Kommun", "Kommun"]
+];
+
+const NUMBER_FIELDS = {
+  assignment: [
     ["areaHa", "Areal, ha", "0.1"],
-    ["stemsBeforePerHa", "Stamantal före röjning, st/ha", "100"],
-    ["stemsAfterPerHa", "Stamantal efter röjning, st/ha", "100"],
-    ["meanHeightM", "Medelhöjd, m", "0.1"],
-    ["dgvCm", "DGV, cm", "0.1"],
-    ["deciduousSharePercent", "Lövandel, %", "1"]
+    ["parcelCount", "Antal skiften", "1"],
+    ["standCount", "Antal bestånd/avdelningar", "1"]
   ],
-  price: [
-    ["hourlyRate", "Timpris, kr/h", "10"],
-    ["equipmentRate", "Maskin-/utrustningskostnad, kr/h", "10"],
-    ["travelCost", "Resa/etablering, kr", "50"],
+  scope: [
+    ["baseFee", "Grundavgift, kr", "100"],
+    ["hectareRate", "Hektarpris, kr/ha", "5"],
+    ["standRate", "Beståndstillägg, kr/bestånd", "10"],
+    ["parcelRate", "Skiftestillägg, kr/skifte", "50"],
+    ["mapCost", "Digitalt underlag/karta, kr", "50"],
+    ["adminFixedCost", "Administrationskostnad, kr", "50"]
+  ],
+  field: [
+    ["fieldDays", "Fältdagar", "0.5"],
+    ["fieldDayRate", "Dagpris fältarbete, kr/dag", "100"]
+  ],
+  office: [
+    ["officeHours", "Kontorstimmar", "0.5"],
+    ["officeHourlyRate", "Timpris kontor, kr/h", "10"],
+    ["qualityCost", "Kvalitetskontroll/granskning, kr", "50"],
+    ["meetingCost", "Kundmöte/genomgång, kr", "50"]
+  ],
+  travel: [
+    ["travelKmRoundtrip", "Körsträcka tur/retur, km", "1"],
+    ["kmRate", "Pris per km, kr/km", "0.5"],
+    ["tripCount", "Antal resor", "1"],
+    ["establishmentCost", "Etablering, kr", "50"],
     ["adminMarkupPercent", "Administration/påslag, %", "1"],
     ["profitMarkupPercent", "Vinstpåslag, %", "1"],
     ["vatPercent", "Moms, %", "1"]
@@ -29,81 +51,59 @@ const FIELD_GROUPS = {
 };
 
 const SELECTS = {
-  treeSpecies: [
-    ["pine", "Tall"],
-    ["spruce", "Gran"],
-    ["deciduous", "Björk/löv"],
-    ["mixed", "Blandskog"]
+  planType: [
+    ["simple", "Enkel plan"],
+    ["normal", "Normal skogsbruksplan"],
+    ["advanced", "Fördjupad plan"],
+    ["revision", "Uppdatering/revidering av befintlig plan"]
   ],
-  clearingType: [
-    ["young", "Ungskogsröjning"],
-    ["understory", "Underväxtröjning"],
-    ["reclearing", "Omröjning"],
-    ["roadside", "Siktröjning/vägröjning nära väg"]
-  ],
-  terrain: [
+  fieldDifficulty: [
     ["easy", "Lätt"],
     ["normal", "Normal"],
     ["hard", "Svår"],
     ["veryHard", "Mycket svår"]
   ],
-  vegetation: [
-    ["low", "Låg"],
-    ["normal", "Normal"],
-    ["dense", "Tät"],
-    ["veryDense", "Mycket tät"]
-  ],
-  stoniness: [
-    ["low", "Låg"],
-    ["normal", "Normal"],
-    ["high", "Hög"]
-  ],
-  slope: [
-    ["flat", "Plan"],
-    ["moderate", "Måttlig"],
-    ["steep", "Brant"]
-  ],
-  ground: [
-    ["normal", "Normal"],
-    ["wet", "Blöt"],
-    ["sensitive", "Känslig"]
-  ],
-  access: [
+  accessibility: [
     ["good", "God"],
     ["normal", "Normal"],
-    ["poor", "Dålig"]
+    ["hard", "Svår"]
+  ],
+  terrain: [
+    ["easy", "Lätt"],
+    ["normal", "Normal"],
+    ["hard", "Svår"]
   ]
 };
 
-export function renderRojningView() {
-  const draft = normalizeClearingInput(getStoredValue(STORAGE_KEY, CLEARING_DEFAULTS));
+export function renderForestPlanPricingView() {
+  const draft = normalizeForestPlanInput(getStoredValue(STORAGE_KEY, FOREST_PLAN_DEFAULTS));
   const page = document.createElement("div");
 
   page.append(
     createPageHeader(
-      "Röjningskalkyl",
-      "Bedöm tidsåtgång, svårighet, produktivitet och pris för röjningsarbete i fält."
+      "Prissättning skogsbruksplan",
+      "Ta fram ett professionellt pris- och offertunderlag för inventering, underlag och planarbete."
     )
   );
   page.insertAdjacentHTML("beforeend", viewTemplate(draft));
 
-  const form = page.querySelector("[data-clearing-form]");
-  const resultNode = page.querySelector("[data-clearing-result]");
-  const offerNode = page.querySelector("[data-offer-text]");
-  const feedbackNode = page.querySelector("[data-clearing-feedback]");
-  let latestEstimate = calculateClearingEstimate(readForm(form));
+  const form = page.querySelector("[data-plan-form]");
+  const resultNode = page.querySelector("[data-plan-result]");
+  const offerNode = page.querySelector("[data-plan-offer]");
+  const feedbackNode = page.querySelector("[data-plan-feedback]");
+  let latestEstimate = calculateForestPlanEstimate(readForm(form));
 
   function saveDraft(silent = true) {
     setStoredValue(STORAGE_KEY, readForm(form));
     if (!silent) {
-      showToast("Röjningsutkast sparat på enheten.");
+      showToast("Planprisutkast sparat på enheten.");
     }
   }
 
   function renderResult() {
-    latestEstimate = calculateClearingEstimate(readForm(form));
+    latestEstimate = calculateForestPlanEstimate(readForm(form));
     resultNode.innerHTML = resultTemplate(latestEstimate);
-    offerNode.value = buildClearingOfferText(latestEstimate);
+    offerNode.value = buildForestPlanOfferText(latestEstimate);
     feedbackNode.innerHTML = feedbackTemplate(latestEstimate);
     saveDraft(true);
   }
@@ -121,19 +121,19 @@ export function renderRojningView() {
     renderResult();
   });
 
-  page.querySelector("[data-save-clearing]").addEventListener("click", () => saveDraft(false));
+  page.querySelector("[data-save-plan]").addEventListener("click", () => saveDraft(false));
 
-  page.querySelector("[data-reset-clearing]").addEventListener("click", () => {
-    if (window.confirm("Rensa röjningsutkastet och återställ standardvärden?")) {
-      fillForm(form, CLEARING_DEFAULTS);
+  page.querySelector("[data-reset-plan]").addEventListener("click", () => {
+    if (window.confirm("Rensa planprisutkastet och återställ standardvärden?")) {
+      fillForm(form, FOREST_PLAN_DEFAULTS);
       renderResult();
-      showToast("Röjningsutkastet är återställt.");
+      showToast("Planprisutkastet är återställt.");
     }
   });
 
-  page.querySelector("[data-copy-offer]").addEventListener("click", async () => {
+  page.querySelector("[data-copy-plan-offer]").addEventListener("click", async () => {
     renderResult();
-    const text = buildClearingOfferText(latestEstimate);
+    const text = buildForestPlanOfferText(latestEstimate);
     if (!text) {
       showToast("Fyll i en giltig areal innan offerttext kopieras.");
       return;
@@ -159,61 +159,59 @@ export function renderRojningView() {
 
 function viewTemplate(draft) {
   return `
-    <form class="clearing-layout" data-clearing-form novalidate>
+    <form class="clearing-layout" data-plan-form novalidate>
       <div class="clearing-main">
-        ${cardTemplate("Bestånd", standTemplate(draft))}
-        ${cardTemplate("Svårighet", difficultyTemplate(draft))}
-        ${cardTemplate("Prisdata", priceTemplate(draft))}
+        ${cardTemplate("Uppdrag", assignmentTemplate(draft))}
+        ${cardTemplate("Omfattning", numberGroupTemplate(NUMBER_FIELDS.scope, draft))}
+        ${cardTemplate("Fältarbete", fieldTemplate(draft))}
+        ${cardTemplate("Kontorsarbete", numberGroupTemplate(NUMBER_FIELDS.office, draft))}
+        ${cardTemplate("Resa", numberGroupTemplate(NUMBER_FIELDS.travel, draft))}
       </div>
       <aside class="clearing-side">
-        <section class="result-panel result-panel--strong" data-clearing-result></section>
-        ${cardTemplate(
-          "Offertunderlag",
-          `<textarea class="textarea quote-textarea" data-offer-text readonly aria-label="Offerttext"></textarea>
-           <div class="button-row">
-             <button class="button" type="button" data-copy-offer>Kopiera offerttext</button>
-           </div>`
-        )}
         <div class="clearing-actions">
           <button class="button button--large" type="submit">Beräkna</button>
-          <button class="button button--secondary" type="button" data-save-clearing>Spara utkast</button>
-          <button class="button button--secondary" type="button" data-reset-clearing>Rensa</button>
+          <button class="button button--secondary" type="button" data-save-plan>Spara utkast</button>
+          <button class="button button--secondary" type="button" data-reset-plan>Rensa</button>
+          <button class="button button--secondary" type="button" data-copy-plan-offer>Kopiera offerttext</button>
         </div>
-        <div class="field-feedback" data-clearing-feedback></div>
+        <section class="result-panel result-panel--strong" data-plan-result></section>
+        ${cardTemplate(
+          "Offertunderlag",
+          `<textarea class="textarea quote-textarea" data-plan-offer readonly aria-label="Offerttext för skogsbruksplan"></textarea>`
+        )}
+        <div class="field-feedback" data-plan-feedback></div>
       </aside>
     </form>
   `;
 }
 
-function standTemplate(draft) {
+function assignmentTemplate(draft) {
   return `
     <div class="form-grid">
-      ${FIELD_GROUPS.stand.map(([name, label, step]) => numberField(name, label, draft[name], step)).join("")}
-      ${selectField("treeSpecies", "Huvudträdslag", draft.treeSpecies, SELECTS.treeSpecies)}
-      ${selectField("clearingType", "Röjningstyp", draft.clearingType, SELECTS.clearingType)}
+      ${TEXT_FIELDS.map(([name, label, placeholder]) => textField(name, label, draft[name], placeholder)).join("")}
+      ${numberGroupTemplate(NUMBER_FIELDS.assignment, draft)}
+      ${selectField("planType", "Plantyp", draft.planType, SELECTS.planType)}
     </div>
   `;
 }
 
-function difficultyTemplate(draft) {
+function fieldTemplate(draft) {
   return `
     <div class="form-grid">
+      ${numberGroupTemplate(NUMBER_FIELDS.field, draft)}
+      ${selectField("fieldDifficulty", "Svårighetsgrad fält", draft.fieldDifficulty, SELECTS.fieldDifficulty)}
+      ${selectField("accessibility", "Tillgänglighet", draft.accessibility, SELECTS.accessibility)}
       ${selectField("terrain", "Terräng", draft.terrain, SELECTS.terrain)}
-      ${selectField("vegetation", "Vegetation", draft.vegetation, SELECTS.vegetation)}
-      ${selectField("stoniness", "Blockighet", draft.stoniness, SELECTS.stoniness)}
-      ${selectField("slope", "Lutning", draft.slope, SELECTS.slope)}
-      ${selectField("ground", "Bärighet/mark", draft.ground, SELECTS.ground)}
-      ${selectField("access", "Framkomlighet", draft.access, SELECTS.access)}
     </div>
+    <label class="field">
+      <span>Kommentar/anteckning</span>
+      <textarea class="textarea" name="fieldNote" placeholder="Kort notering om fältförutsättningar">${escapeHtml(draft.fieldNote)}</textarea>
+    </label>
   `;
 }
 
-function priceTemplate(draft) {
-  return `
-    <div class="form-grid">
-      ${FIELD_GROUPS.price.map(([name, label, step]) => numberField(name, label, draft[name], step)).join("")}
-    </div>
-  `;
+function numberGroupTemplate(fields, draft) {
+  return fields.map(([name, label, step]) => numberField(name, label, draft[name], step)).join("");
 }
 
 function cardTemplate(title, content) {
@@ -224,6 +222,15 @@ function cardTemplate(title, content) {
         ${content}
       </div>
     </section>
+  `;
+}
+
+function textField(name, label, value, placeholder) {
+  return `
+    <label class="field">
+      <span>${label}</span>
+      <input class="input" name="${name}" type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}">
+    </label>
   `;
 }
 
@@ -249,22 +256,30 @@ function selectField(name, label, selected, options) {
 
 function readForm(form) {
   const data = {};
-  [...FIELD_GROUPS.stand, ...FIELD_GROUPS.price].forEach(([name]) => {
+  TEXT_FIELDS.forEach(([name]) => {
+    data[name] = form.elements[name].value;
+  });
+  Object.values(NUMBER_FIELDS).flat().forEach(([name]) => {
     data[name] = form.elements[name].value;
   });
   Object.keys(SELECTS).forEach((name) => {
     data[name] = form.elements[name].value;
   });
+  data.fieldNote = form.elements.fieldNote.value;
   return data;
 }
 
 function fillForm(form, values) {
-  [...FIELD_GROUPS.stand, ...FIELD_GROUPS.price].forEach(([name]) => {
+  TEXT_FIELDS.forEach(([name]) => {
+    form.elements[name].value = values[name] ?? "";
+  });
+  Object.values(NUMBER_FIELDS).flat().forEach(([name]) => {
     form.elements[name].value = values[name];
   });
   Object.keys(SELECTS).forEach((name) => {
     form.elements[name].value = values[name];
   });
+  form.elements.fieldNote.value = values.fieldNote ?? "";
 }
 
 function resultTemplate(result) {
@@ -286,18 +301,22 @@ function resultTemplate(result) {
       <span>Totalpris inkl. moms</span>
       <strong>${formatCurrency(result.totalIncVat)}</strong>
     </div>
-    <div class="difficulty-meter" aria-label="Svårighet ${result.difficultyLabel}">
-      <span>Svårighet: <strong>${result.difficultyLabel}</strong></span>
-      <span aria-hidden="true">${difficultyBars(result.difficultyIndex)}</span>
+    <div class="difficulty-meter" aria-label="Komplexitet ${result.complexityLabel}">
+      <span>Komplexitet: <strong>${result.complexityLabel}</strong></span>
+      <span aria-hidden="true">${complexityBars(result.complexityIndex)}</span>
     </div>
-    ${statRow("Produktivitet", `${formatNumber(result.productivityHaPerDay, 2)} ha/dag`)}
-    ${statRow("Timmar/ha", `${formatNumber(result.hoursPerHa, 1)} h/ha`)}
-    ${statRow("Total tid", `${formatNumber(result.totalHours, 1)} h`)}
+    ${statRow("Grundavgift", formatCurrency(result.baseFee))}
+    ${statRow("Arealpris", formatCurrency(result.areaPrice))}
+    ${statRow("Bestånd/skiften", formatCurrency(result.standPrice + result.parcelPrice))}
+    ${statRow("Fältarbete", formatCurrency(result.fieldWorkCost))}
+    ${statRow("Kontorsarbete", formatCurrency(result.officeWorkCost + result.qualityCost + result.meetingCost))}
+    ${statRow("Resa/etablering", formatCurrency(result.travelCost + result.establishmentCost))}
+    ${statRow("Påslag", formatCurrency(result.adminMarkup + result.profitMarkup))}
     ${statRow("Pris exkl. moms", formatCurrency(result.subtotalExVat))}
     ${statRow("Pris/ha exkl. moms", formatCurrency(result.pricePerHaExVat))}
     ${statRow("Moms", formatCurrency(result.vat))}
     <details class="factor-list">
-      <summary>Visa beräkningsfaktorer</summary>
+      <summary>Visa komplexitetsfaktorer</summary>
       ${result.factors.map(factorRow).join("")}
     </details>
   `;
@@ -329,7 +348,7 @@ function factorRow(factor) {
   `;
 }
 
-function difficultyBars(index) {
-  const filled = index < 1.05 ? 1 : index < 1.45 ? 2 : index < 2.05 ? 4 : 5;
+function complexityBars(index) {
+  const filled = index < 0.95 ? 1 : index < 1.2 ? 3 : index < 1.55 ? 4 : 5;
   return "█".repeat(filled) + "░".repeat(5 - filled);
 }
