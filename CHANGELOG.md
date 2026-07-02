@@ -2,6 +2,12 @@
 
 ## v2.0.0-alpha.1 - 2026-07-01
 
+### Changed - Dashboardstatusar
+
+- Uppdaterade modulstatusar och dashboardtexter för DGV, Medelhöjd, Röjning, Planpris, Offert och Kunder.
+- Startsidan visar nu fältverktyg och affärsstöd i statusrutan.
+- Uppdaterat service worker-cache-namn till skogskalkyl-2.0.0-alpha.1-dashboard.1.
+
 ### Fixed - Global layout och textbrytning
 
 - Global layoutfix med stabilare box sizing, min-width-skydd och textbrytning i kort, statistik och resultatpaneler.
