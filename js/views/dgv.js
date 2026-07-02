@@ -3,11 +3,14 @@ import { getStoredValue, setStoredValue } from "../storage.js";
 import { createPageHeader, escapeHtml, formatNumber } from "../ui.js";
 
 const STORAGE_KEY = "dgvDraftDiameters";
+const QUICK_DIAMETERS = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24];
+const KEYPAD_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "backspace"];
 
 export function renderDgvView() {
   const page = document.createElement("div");
   let diameters = calculateDgv(getStoredValue(STORAGE_KEY, [])).values;
   let lastRemoved = null;
+  let currentEntry = "";
 
   page.append(createPageHeader("DGV", "Mata in provträdsdiametrar i cm. DGV beräknas direkt och sparas automatiskt som utkast."));
   page.insertAdjacentHTML("beforeend", viewTemplate());
@@ -19,6 +22,9 @@ export function renderDgvView() {
   const feedback = page.querySelector("[data-diameter-feedback]");
   const undoButton = page.querySelector("[data-undo]");
   const clearButton = page.querySelector("[data-clear]");
+  const clearEntryButton = page.querySelector("[data-clear-entry]");
+  const keypad = page.querySelector("[data-diameter-keypad]");
+  const quickValues = page.querySelector("[data-diameter-quick]");
 
   function saveDraft() {
     setStoredValue(STORAGE_KEY, diameters);
@@ -30,20 +36,51 @@ export function renderDgvView() {
     feedback.classList.toggle("is-error", type === "error");
   }
 
-  function addDiameter() {
-    const value = parsePositiveDiameter(input.value);
-    if (value === null) {
+  function setEntry(value) {
+    currentEntry = value;
+    input.value = currentEntry;
+  }
+
+  function isValidEntry(value) {
+    const rawValue = String(value ?? "").trim();
+    return /^[0-9]+([,.][0-9]+)?$/.test(rawValue);
+  }
+
+  function addDiameter(rawValue = currentEntry, successMessage = "Diameter tillagd och utkast sparat.") {
+    const value = parsePositiveDiameter(rawValue);
+    if (!isValidEntry(rawValue) || value === null) {
       setFeedback("Ange en diameter större än 0 cm. Komma går bra som decimaltecken.", "error");
-      input.select();
+      input.focus();
       return;
     }
 
     diameters = [...diameters, value];
     lastRemoved = null;
-    input.value = "";
-    setFeedback("Diameter tillagd och utkast sparat.");
+    setEntry("");
+    setFeedback(successMessage);
     saveDraft();
     render();
+    input.focus();
+  }
+
+  function appendKey(key) {
+    if (/^[0-9]$/.test(key)) {
+      setEntry(currentEntry === "0" ? key : currentEntry + key);
+      return;
+    }
+
+    if ((key === "," || key === ".") && !currentEntry.includes(",")) {
+      setEntry(currentEntry ? currentEntry + "," : "0,");
+    }
+  }
+
+  function backspaceEntry() {
+    setEntry(currentEntry.slice(0, -1));
+  }
+
+  function clearEntry() {
+    setEntry("");
+    setFeedback("Aktuell inmatning är rensad.");
     input.focus();
   }
 
@@ -113,6 +150,37 @@ export function renderDgvView() {
     if (event.key === "Enter") {
       event.preventDefault();
       addDiameter();
+    } else if (event.key === "Backspace") {
+      event.preventDefault();
+      backspaceEntry();
+    } else if (/^[0-9]$/.test(event.key) || event.key === "," || event.key === ".") {
+      event.preventDefault();
+      appendKey(event.key);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      clearEntry();
+    }
+  });
+
+  keypad.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-keypad-value]");
+    if (!button) {
+      return;
+    }
+
+    if (button.dataset.keypadValue === "backspace") {
+      backspaceEntry();
+    } else {
+      appendKey(button.dataset.keypadValue);
+    }
+    input.focus();
+  });
+
+  quickValues.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-quick-value]");
+    if (button) {
+      const value = Number(button.dataset.quickValue);
+      addDiameter(String(value).replace(".", ","), "Snabbval " + formatNumber(value, 1) + " cm tillagt och utkast sparat.");
     }
   });
 
@@ -123,6 +191,7 @@ export function renderDgvView() {
     }
   });
 
+  clearEntryButton.addEventListener("click", clearEntry);
   undoButton.addEventListener("click", undoLast);
   clearButton.addEventListener("click", clearAll);
 
@@ -135,12 +204,25 @@ function viewTemplate() {
     "<article class='card field-entry-card'>" +
       "<div class='card__body'>" +
         "<h3 class='card__title'>Lägg till diameter</h3>" +
-        "<form class='field-entry-form' data-diameter-form>" +
-          "<label class='field field-entry-input'>" +
-            "<span>Diameter, cm</span>" +
-            "<input class='input input--large' data-diameter-input inputmode='decimal' autocomplete='off' placeholder='Ex. 18,5' aria-describedby='dgv-feedback'>" +
-          "</label>" +
-          "<button class='button button--large' type='submit'>Lägg till</button>" +
+        "<form class='field-entry-form field-entry-form--keypad' data-diameter-form>" +
+          "<div class='field-keypad'>" +
+            "<label class='field field-entry-input'>" +
+              "<span>Aktuell diameter</span>" +
+              "<span class='field-keypad__display-row'>" +
+                "<input class='input input--large field-keypad__display' data-diameter-input inputmode='none' autocomplete='off' placeholder='0,0' readonly aria-describedby='dgv-feedback'>" +
+                "<span class='field-keypad__unit'>cm</span>" +
+              "</span>" +
+            "</label>" +
+            "<div class='field-keypad__actions'>" +
+              "<button class='button button--large field-keypad__button--primary' type='submit'>Lägg till</button>" +
+              "<button class='button button--secondary button--large' type='button' data-clear-entry>Rensa inmatning</button>" +
+            "</div>" +
+            "<div>" +
+              "<p class='field-keypad__label'>Snabbval</p>" +
+              "<div class='field-keypad__quick' data-diameter-quick>" + quickButtonsTemplate(QUICK_DIAMETERS, "cm") + "</div>" +
+            "</div>" +
+            "<div class='field-keypad__grid' data-diameter-keypad>" + keypadButtonsTemplate() + "</div>" +
+          "</div>" +
         "</form>" +
         "<p class='field-feedback' id='dgv-feedback' data-diameter-feedback>Diametrar sparas automatiskt på enheten.</p>" +
         "<div class='field-actions'>" +
@@ -157,6 +239,22 @@ function viewTemplate() {
       "</div>" +
     "</article>" +
   "</section>";
+}
+
+function quickButtonsTemplate(values, unit) {
+  return values.map((value) =>
+    "<button class='button button--secondary field-keypad__quick-button' type='button' data-quick-value='" + value + "'>" +
+      formatNumber(value, 0) + " " + unit +
+    "</button>"
+  ).join("");
+}
+
+function keypadButtonsTemplate() {
+  return KEYPAD_KEYS.map((key) => {
+    const label = key === "backspace" ? "⌫" : key;
+    const ariaLabel = key === "backspace" ? "Ta bort senaste tecknet" : "Skriv " + key;
+    return "<button class='button button--secondary field-keypad__button' type='button' data-keypad-value='" + key + "' aria-label='" + ariaLabel + "'>" + label + "</button>";
+  }).join("");
 }
 
 function resultTemplate(result) {
