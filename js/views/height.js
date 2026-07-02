@@ -41,16 +41,25 @@ export function renderHeightView() {
     input.value = currentEntry;
   }
 
+  function focusEntryDisplay() {
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      return;
+    }
+    input.focus({ preventScroll: true });
+  }
+
   function isValidEntry(value) {
     const rawValue = String(value ?? "").trim();
     return /^[0-9]+([,.][0-9]+)?$/.test(rawValue);
   }
 
-  function addHeight(rawValue = currentEntry, successMessage = "Höjd tillagd och utkast sparat.") {
+  function addHeight(rawValue = currentEntry, successMessage = "Höjd tillagd och utkast sparat.", shouldFocus = true) {
     const value = parsePositiveHeight(rawValue);
     if (!isValidEntry(rawValue) || value === null) {
       setFeedback("Ange en höjd större än 0 m. Komma går bra som decimaltecken.", "error");
-      input.focus();
+      if (shouldFocus) {
+        focusEntryDisplay();
+      }
       return;
     }
 
@@ -60,7 +69,9 @@ export function renderHeightView() {
     setFeedback(successMessage);
     saveDraft();
     render();
-    input.focus();
+    if (shouldFocus) {
+      focusEntryDisplay();
+    }
   }
 
   function appendKey(key) {
@@ -78,10 +89,12 @@ export function renderHeightView() {
     setEntry(currentEntry.slice(0, -1));
   }
 
-  function clearEntry() {
+  function clearEntry(shouldFocus = true) {
     setEntry("");
     setFeedback("Aktuell inmatning är rensad.");
-    input.focus();
+    if (shouldFocus) {
+      focusEntryDisplay();
+    }
   }
 
   function removeHeight(index) {
@@ -90,7 +103,6 @@ export function renderHeightView() {
     setFeedback("Värdet togs bort. Du kan ångra direkt.");
     saveDraft();
     render();
-    input.focus();
   }
 
   function undoLast() {
@@ -109,13 +121,11 @@ export function renderHeightView() {
     }
     saveDraft();
     render();
-    input.focus();
   }
 
   function clearAll() {
     if (!heights.length) {
       setFeedback("Listan är redan tom.", "error");
-      input.focus();
       return;
     }
 
@@ -125,7 +135,6 @@ export function renderHeightView() {
       setFeedback("Alla höjder är rensade.");
       saveDraft();
       render();
-      input.focus();
     }
   }
 
@@ -143,7 +152,7 @@ export function renderHeightView() {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    addHeight();
+    addHeight(currentEntry, "Höjd tillagd och utkast sparat.", document.activeElement === input);
   });
 
   input.addEventListener("keydown", (event) => {
@@ -168,19 +177,20 @@ export function renderHeightView() {
       return;
     }
 
+    event.preventDefault();
     if (button.dataset.keypadValue === "backspace") {
       backspaceEntry();
     } else {
       appendKey(button.dataset.keypadValue);
     }
-    input.focus();
   });
 
   quickValues.addEventListener("click", (event) => {
     const button = event.target.closest("[data-quick-value]");
     if (button) {
+      event.preventDefault();
       const value = Number(button.dataset.quickValue);
-      addHeight(String(value).replace(".", ","), "Snabbval " + formatNumber(value, 1) + " m tillagt och utkast sparat.");
+      addHeight(String(value).replace(".", ","), "Snabbval " + formatNumber(value, 1) + " m tillagt och utkast sparat.", false);
     }
   });
 
@@ -191,7 +201,10 @@ export function renderHeightView() {
     }
   });
 
-  clearEntryButton.addEventListener("click", clearEntry);
+  clearEntryButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    clearEntry(false);
+  });
   undoButton.addEventListener("click", undoLast);
   clearButton.addEventListener("click", clearAll);
 
