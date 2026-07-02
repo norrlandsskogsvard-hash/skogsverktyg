@@ -94,6 +94,15 @@
     grid-template-columns: 1fr;
   }
 
+  .clearing-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .clearing-side {
+    position: static;
+    order: -1;
+  }
+
   .field-entry-card,
   .field-list-card,
   .field-module > .result-panel {
@@ -119,6 +128,12 @@
   }
 
   .field-value-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .difficulty-meter,
+  .factor-row {
     align-items: stretch;
     flex-direction: column;
   }

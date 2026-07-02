@@ -30,10 +30,9 @@ Lägg filerna i ett GitHub-repo och aktivera GitHub Pages för vald branch. Alla
 
 ## Nästa steg
 
-- Bygga färdig DGV-modul med tabeller och validerad beräkningslogik
-- Bygga färdig medelhöjd-modul med provträd, summering och export
-- Utöka offertgeneratorn med kunduppgifter, PDF/utskrift och malltexter
-
+- Koppla offertgeneratorn till sparade kalkyler.
+- Utöka utskrift och offertmallar.
+- Förbereda export av beräkningsunderlag.
 
 ## Fältmoduler i aktuell version
 
@@ -46,3 +45,56 @@ DGV beräknas med formeln sum(d^3) / sum(d^2). Resultatet visas tillsammans med 
 ### Medelhöjd
 
 Medelhöjdsmodulen låter användaren mata in höjder i meter med samma fältanpassade flöde. Medelhöjd beräknas som aritmetiskt medel och visas tillsammans med antal provträd, median, min, max och standardavvikelse. Utkast sparas automatiskt i localStorage.
+
+
+### Röjningskalkyl
+
+Röjningskalkylen är utbyggd till en professionell fältmodul. Den bedömer svårighet, produktivitet, tidsåtgång, arbetskostnad, utrustningskostnad, påslag, moms och pris per hektar.
+
+Faktorer som påverkar priset:
+
+- areal
+- stamantal före och efter röjning
+- medelhöjd
+- DGV
+- huvudträdslag och lövandel
+- röjningstyp
+- terräng, vegetation, blockighet, lutning, mark och framkomlighet
+- timpris, utrustningskostnad, resa, administration, vinstpåslag och moms
+
+Röjningsutkast sparas automatiskt i localStorage och laddas tillbaka efter omladdning. Modulen kan också skapa en kort offerttext som går att kopiera.
+
+Testa modulen:
+
+1. Öppna appen lokalt eller via GitHub Pages.
+2. Gå till #/rojning.
+3. Fyll i bestånd, svårighet och prisdata.
+4. Klicka på Beräkna.
+5. Kontrollera produktivitet, timmar per hektar, total tid, pris per hektar och totalpris.
+6. Klicka på Kopiera offerttext och klistra in texten där den ska användas.
+
+
+### Prissättning skogsbruksplan
+
+Skogsbruksplanmodulen är utbyggd för professionell prissättning av uppdraget att inventera, samla in underlag och ta fram/skapa en skogsbruksplan i ett annat system. Modulen skapar inte själva planen.
+
+Faktorer som påverkar priset:
+
+- areal, antal skiften och antal bestånd
+- plantyp: enkel, normal, fördjupad eller revidering
+- grundavgift, hektarpris, beståndstillägg, skiftestillägg, karta och administration
+- fältdagar, dagpris, fältsvårighet, tillgänglighet och terräng
+- kontorstimmar, timpris, kvalitetskontroll och kundgenomgång
+- körsträcka, kilometerpris, antal resor och etablering
+- administration/påslag, vinstpåslag och moms
+
+Modulen visar komplexitetsindex, pris exkl. moms, pris per hektar, moms och totalpris inkl. moms. Utkast sparas automatiskt i localStorage och en kort offerttext kan kopieras.
+
+Testa modulen:
+
+1. Öppna appen lokalt eller via GitHub Pages.
+2. Gå till #/forest-plan-pricing.
+3. Fyll i uppdrag, omfattning, fältarbete, kontorsarbete och resa.
+4. Klicka på Beräkna.
+5. Kontrollera komplexitet, delkostnader, pris/ha och totalpris.
+6. Klicka på Kopiera offerttext och klistra in texten där den ska användas.
