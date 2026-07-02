@@ -1,13 +1,13 @@
 import { MODULE_STATUS } from "../config.js";
-import { createPageHeader } from "../ui.js";
+import { createPageHeader, escapeHtml } from "../ui.js";
 
 const modules = [
-  { title: "DGV", href: "#/dgv", status: MODULE_STATUS.dgv, text: "Struktur för diametergrundytevägd volym är redo." },
-  { title: "Medelhöjd", href: "#/height", status: MODULE_STATUS.height, text: "Provträdsflöde och beräkningsmodul är förberett." },
-  { title: "Röjning", href: "#/rojning", status: MODULE_STATUS.rojning, text: "Snabb kalkyl för hektar, täthet och svårighetsgrad." },
-  { title: "Planpris", href: "#/forest-plan-pricing", status: MODULE_STATUS.forestPlanPricing, text: "Prissätt skogsbruksplan med areal och fältdagar." },
-  { title: "Offert", href: "#/quote", status: MODULE_STATUS.quote, text: "Skapa enkel offertsummering med moms." },
-  { title: "Kunder & jobb", href: "#/customers", status: MODULE_STATUS.customers, text: "Spara kunder, fastigheter och uppdrag lokalt." }
+  { title: "DGV", href: "#/dgv", status: MODULE_STATUS.dgv, text: "Beräkna diametergrundytevägd medeldiameter med snabb fältinmatning." },
+  { title: "Medelhöjd", href: "#/height", status: MODULE_STATUS.height, text: "Mata in provträdshöjder och få medelhöjd och statistik direkt." },
+  { title: "Röjning", href: "#/rojning", status: MODULE_STATUS.rojning, text: "Beräkna svårighet, tidsåtgång, pris per hektar och offertunderlag." },
+  { title: "Planpris", href: "#/forest-plan-pricing", status: MODULE_STATUS.forestPlanPricing, text: "Prissätt skogsbruksplan med fältarbete, kontor, resa och påslag." },
+  { title: "Offert", href: "#/quote", status: MODULE_STATUS.quote, text: "Skapa offert, importera kalkyler och skriv ut som PDF." },
+  { title: "Kunder & jobb", href: "#/customers", status: MODULE_STATUS.customers, text: "Spara kunder, fastigheter och uppdrag lokalt på enheten." }
 ];
 
 export function renderDashboardView() {
@@ -25,7 +25,8 @@ export function renderDashboardView() {
         "<ul class='status-list'>" +
           "<li class='status-item'><span>Appskal</span><strong>Klart</strong></li>" +
           "<li class='status-item'><span>Offline</span><strong>Aktivt</strong></li>" +
-          "<li class='status-item'><span>DGV och höjd</span><strong>Nästa steg</strong></li>" +
+          "<li class='status-item'><span>Fältverktyg</span><strong>DGV, Höjd, Röjning, Planpris</strong></li>" +
+          "<li class='status-item'><span>Affärsstöd</span><strong>Offert, Kunder</strong></li>" +
         "</ul>" +
       "</div></div>" +
     "</section>" +
@@ -36,9 +37,9 @@ export function renderDashboardView() {
 
 function moduleCard(module) {
   return "<article class='card module-card span-4'><div class='card__body'>" +
-    "<span class='pill'>" + module.status + "</span>" +
-    "<h3 class='card__title'>" + module.title + "</h3>" +
-    "<p class='card__text'>" + module.text + "</p>" +
-    "<div class='module-card__footer'><span>Öppna modul</span><a class='button button--secondary' href='" + module.href + "'>Gå vidare</a></div>" +
+    "<span class='pill'>" + escapeHtml(module.status) + "</span>" +
+    "<h3 class='card__title'>" + escapeHtml(module.title) + "</h3>" +
+    "<p class='card__text'>" + escapeHtml(module.text) + "</p>" +
+    "<div class='module-card__footer'><span>Öppna modul</span><a class='button button--secondary' href='" + escapeHtml(module.href) + "'>Gå vidare</a></div>" +
   "</div></article>";
 }
