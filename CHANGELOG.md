@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.0.0-alpha.1-fieldmode.3 - 2026-07-04
+
+### Fixed - Tajtare mobilfältläge
+
+- Fältläge på mobil tajtat ytterligare.
+- Sidhuvud döljs i DGV/Höjd mobilvy.
+- Bottennavigering täcker inte längre knappsats eller Lägg till.
+- PWA-cache höjd till fieldmode.3.
+
 ## v2.0.0-alpha.1-fieldmode.2 - 2026-07-04
 
 ### Changed - Finputsat mobilfältläge
