@@ -7,6 +7,7 @@ const KEYPAD_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "bac
 
 export function renderHeightView() {
   const page = document.createElement("div");
+  page.classList.add("field-page", "field-page--height");
   let heights = calculateMeanHeight(getStoredValue(STORAGE_KEY, [])).values;
   let lastRemoved = null;
   let currentEntry = "";

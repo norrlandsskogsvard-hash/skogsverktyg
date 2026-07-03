@@ -186,6 +186,10 @@
   align-items: start;
 }
 
+.field-page {
+  min-width: 0;
+}
+
 .field-entry-card,
 .field-list-card {
   min-width: 0;

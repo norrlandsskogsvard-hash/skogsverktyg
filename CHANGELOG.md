@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-fieldmode.2 - 2026-07-04
+
+### Changed - Finputsat mobilfältläge
+
+- Finputsat mobilfältläge för DGV och Höjd.
+- Topbar/inställningsknapp täcker inte längre resultat.
+- Mindre scroll i fältvy.
+- Resultat och detaljer flyttade efter inmatningsläget på mobil.
+- PWA-cache höjd till fieldmode.2.
+
 ## v2.0.0-alpha.1-fieldmode.1 - 2026-07-03
 
 ### Changed - Mobilanpassat fältläge

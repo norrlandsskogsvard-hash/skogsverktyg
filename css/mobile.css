@@ -180,9 +180,54 @@
     position: static;
     order: -1;
   }
+
+  .field-page .field-module > .result-panel {
+    order: 3;
+  }
+
+  .field-page .field-entry-card {
+    order: 1;
+  }
+
+  .field-page .field-list-card {
+    order: 2;
+  }
 }
 
 @media (max-width: 560px) {
+  .topbar {
+    z-index: 12;
+  }
+
+  .topbar .button {
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 2.45rem;
+    padding: 0 var(--space-3);
+  }
+
+  .topbar__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .page {
+    scroll-padding-top: calc(var(--header-height) + var(--space-2));
+  }
+
+  .page:has(.field-page) {
+    padding-top: var(--space-2);
+  }
+
+  .field-page {
+    padding-top: 0;
+  }
+
+  .field-page .page-header {
+    display: none;
+  }
+
   .field-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -197,8 +242,8 @@
   }
 
   .field-entry-card .card__body {
-    gap: var(--space-3);
-    padding: var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-2);
   }
 
   .field-entry-card .card__title {
@@ -207,19 +252,23 @@
 
   .field-workspace,
   .field-keypad {
-    gap: var(--space-2);
+    gap: 0.45rem;
   }
 
   .field-summary {
     display: flex;
     justify-content: space-between;
     gap: var(--space-2);
+    min-height: 2.6rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     background: var(--color-primary-soft);
     color: var(--color-primary-strong);
     font-weight: 850;
-    padding: 0.6rem 0.75rem;
+    position: relative;
+    z-index: 1;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.95rem;
   }
 
   .field-summary span {
@@ -235,30 +284,34 @@
     grid-template-columns: minmax(0, 1fr) minmax(3.25rem, auto);
   }
 
+  .field-entry-input > span:first-child {
+    display: none;
+  }
+
   .field-keypad__display {
-    min-height: 3.1rem;
-    font-size: clamp(1.7rem, 8vw, 2.35rem);
+    min-height: 2.85rem;
+    font-size: clamp(1.55rem, 7.5vw, 2.15rem);
   }
 
   .field-keypad__unit {
-    min-width: 3.25rem;
-    font-size: 1rem;
+    min-width: 3rem;
+    font-size: 0.95rem;
   }
 
   .field-keypad__grid {
-    gap: 0.45rem;
+    gap: 0.35rem;
   }
 
   .field-keypad__button {
-    min-height: 3.05rem;
-    font-size: 1.15rem;
+    min-height: 2.85rem;
+    font-size: 1.1rem;
   }
 
   .field-keypad__actions {
     position: static;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.45rem;
+    gap: 0.35rem;
     border: 0;
     background: transparent;
     box-shadow: none;
@@ -266,20 +319,26 @@
   }
 
   .field-keypad__actions .button {
-    min-height: 3.2rem;
+    min-height: 2.95rem;
   }
 
-  .field-module > .result-panel {
+  .field-keypad__actions .button--secondary {
+    min-height: 2.45rem;
+    font-size: 0.9rem;
+  }
+
+  .field-page .field-module > .result-panel {
     order: 3;
     gap: var(--space-2);
     padding: var(--space-3);
   }
 
-  .field-entry-card {
+  .field-page .field-entry-card {
     order: 1;
+    margin-top: 0;
   }
 
-  .field-list-card {
+  .field-page .field-list-card {
     order: 2;
   }
 
@@ -305,23 +364,23 @@
   }
 
   .field-list-card .card__body {
-    gap: var(--space-3);
-    padding: var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-2);
   }
 
   .field-value-list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
+    gap: 0.45rem;
   }
 
   .field-value-item {
     flex: 1 1 calc(50% - var(--space-2));
-    min-height: 2.75rem;
+    min-height: 2.45rem;
     align-items: center;
     flex-direction: row;
-    gap: var(--space-2);
-    padding: var(--space-2);
+    gap: 0.45rem;
+    padding: 0.4rem 0.5rem;
   }
 
   .field-value-item--latest {
@@ -329,13 +388,19 @@
   }
 
   .field-value-item strong {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
 
   .field-value-item .button {
     width: auto;
-    min-height: 2.25rem;
-    padding: 0 var(--space-2);
+    min-height: 2rem;
+    font-size: 0.82rem;
+    padding: 0 0.55rem;
+  }
+
+  .field-feedback {
+    margin: 0;
+    font-size: 0.85rem;
   }
 
   .difficulty-meter,

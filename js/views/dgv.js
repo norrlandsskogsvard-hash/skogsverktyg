@@ -7,6 +7,7 @@ const KEYPAD_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "bac
 
 export function renderDgvView() {
   const page = document.createElement("div");
+  page.classList.add("field-page", "field-page--dgv");
   let diameters = calculateDgv(getStoredValue(STORAGE_KEY, [])).values;
   let lastRemoved = null;
   let currentEntry = "";
