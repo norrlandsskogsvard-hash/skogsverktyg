@@ -3,7 +3,6 @@ import { getStoredValue, setStoredValue } from "../storage.js";
 import { createPageHeader, escapeHtml, formatNumber } from "../ui.js";
 
 const STORAGE_KEY = "dgvDraftDiameters";
-const QUICK_DIAMETERS = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24];
 const KEYPAD_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "backspace"];
 
 export function renderDgvView() {
@@ -19,12 +18,12 @@ export function renderDgvView() {
   const input = page.querySelector("[data-diameter-input]");
   const list = page.querySelector("[data-diameter-list]");
   const resultPanel = page.querySelector("[data-diameter-result]");
+  const summary = page.querySelector("[data-diameter-summary]");
   const feedback = page.querySelector("[data-diameter-feedback]");
   const undoButton = page.querySelector("[data-undo]");
   const clearButton = page.querySelector("[data-clear]");
   const clearEntryButton = page.querySelector("[data-clear-entry]");
   const keypad = page.querySelector("[data-diameter-keypad]");
-  const quickValues = page.querySelector("[data-diameter-quick]");
 
   function saveDraft() {
     setStoredValue(STORAGE_KEY, diameters);
@@ -140,6 +139,7 @@ export function renderDgvView() {
 
   function render() {
     const result = calculateDgv(diameters);
+    summary.innerHTML = summaryTemplate(result, "DGV", "cm", result.dgv);
     resultPanel.innerHTML = resultTemplate(result);
     list.innerHTML = valuesTemplate(diameters, "cm", "diameter");
     undoButton.disabled = !diameters.length && !lastRemoved;
@@ -185,15 +185,6 @@ export function renderDgvView() {
     }
   });
 
-  quickValues.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-quick-value]");
-    if (button) {
-      event.preventDefault();
-      const value = Number(button.dataset.quickValue);
-      addDiameter(String(value).replace(".", ","), "Snabbval " + formatNumber(value, 1) + " cm tillagt och utkast sparat.", false);
-    }
-  });
-
   list.addEventListener("click", (event) => {
     const button = event.target.closest("[data-remove-index]");
     if (button) {
@@ -219,21 +210,20 @@ function viewTemplate() {
         "<h3 class='card__title'>Lägg till diameter</h3>" +
         "<form class='field-entry-form field-entry-form--keypad' data-diameter-form>" +
           "<div class='field-keypad'>" +
-            "<label class='field field-entry-input'>" +
-              "<span>Aktuell diameter</span>" +
-              "<span class='field-keypad__display-row'>" +
-                "<input class='input input--large field-keypad__display' data-diameter-input inputmode='none' autocomplete='off' placeholder='0,0' readonly aria-describedby='dgv-feedback'>" +
-                "<span class='field-keypad__unit'>cm</span>" +
-              "</span>" +
-            "</label>" +
-            "<div class='field-keypad__quick-section'>" +
-              "<p class='field-keypad__label'>Snabbval</p>" +
-              "<div class='field-keypad__quick' data-diameter-quick>" + quickButtonsTemplate(QUICK_DIAMETERS, "cm") + "</div>" +
-            "</div>" +
-            "<div class='field-keypad__grid' data-diameter-keypad>" + keypadButtonsTemplate() + "</div>" +
-            "<div class='field-keypad__actions'>" +
-              "<button class='button button--large field-keypad__button--primary' type='submit'>Lägg till</button>" +
-              "<button class='button button--secondary button--large' type='button' data-clear-entry>Rensa inmatning</button>" +
+            "<div class='field-workspace'>" +
+              "<div class='field-summary' data-diameter-summary></div>" +
+              "<label class='field field-entry-input'>" +
+                "<span>Aktuell diameter</span>" +
+                "<span class='field-keypad__display-row'>" +
+                  "<input class='input input--large field-keypad__display' data-diameter-input inputmode='none' autocomplete='off' placeholder='0,0' readonly aria-describedby='dgv-feedback'>" +
+                  "<span class='field-keypad__unit'>cm</span>" +
+                "</span>" +
+              "</label>" +
+              "<div class='field-keypad__grid' data-diameter-keypad>" + keypadButtonsTemplate() + "</div>" +
+              "<div class='field-keypad__actions'>" +
+                "<button class='button button--large field-keypad__button--primary' type='submit'>Lägg till</button>" +
+                "<button class='button button--secondary' type='button' data-clear-entry>Rensa inmatning</button>" +
+              "</div>" +
             "</div>" +
           "</div>" +
         "</form>" +
@@ -254,14 +244,6 @@ function viewTemplate() {
   "</section>";
 }
 
-function quickButtonsTemplate(values, unit) {
-  return values.map((value) =>
-    "<button class='button button--secondary field-keypad__quick-button' type='button' data-quick-value='" + value + "'>" +
-      formatNumber(value, 0) + " " + unit +
-    "</button>"
-  ).join("");
-}
-
 function keypadButtonsTemplate() {
   return KEYPAD_KEYS.map((key) => {
     const label = key === "backspace" ? "⌫" : key;
@@ -270,14 +252,21 @@ function keypadButtonsTemplate() {
   }).join("");
 }
 
+function summaryTemplate(result, label, unit, value) {
+  if (!result.hasValues) {
+    return "<span>" + label + "</span><strong>- " + unit + " · 0 träd</strong>";
+  }
+
+  return "<span>" + label + "</span><strong>" + formatNumber(value, 1) + " " + unit + " · " + result.count + " träd</strong>";
+}
+
 function resultTemplate(result) {
   if (!result.hasValues) {
-    return "<div class='result-main'><span>DGV</span><strong>-</strong></div>" +
+    return "<div class='result-main result-main--compact'><span>Detaljerad statistik</span><strong>-</strong></div>" +
       "<p class='card__text'>" + escapeHtml(result.error) + "</p>";
   }
 
-  return "<div class='result-main'><span>DGV</span><strong>" + formatNumber(result.dgv, 1) + " cm</strong></div>" +
-    "<p class='result-compact-summary'>DGV: " + formatNumber(result.dgv, 1) + " cm · " + result.count + " träd</p>" +
+  return "<div class='result-main result-main--compact'><span>Detaljerad statistik</span><strong>DGV " + formatNumber(result.dgv, 1) + " cm</strong></div>" +
     statRow("Antal provträd", String(result.count)) +
     statRow("Aritmetiskt medel", formatNumber(result.arithmeticMean, 1) + " cm") +
     statRow("Median", formatNumber(result.median, 1) + " cm") +
@@ -291,10 +280,10 @@ function valuesTemplate(values, unit, label) {
     return "<p class='card__text'>Inga värden inmatade ännu.</p>";
   }
 
-  return values.map((value, index) =>
-    "<div class='field-value-item'>" +
-      "<span><strong>" + formatNumber(value, 1) + "</strong> " + unit + "</span>" +
-      "<button class='button button--secondary button--compact' type='button' data-remove-index='" + index + "' aria-label='Ta bort " + label + " " + formatNumber(value, 1) + "'>Ta bort</button>" +
+  return values.map((value, index) => ({ value, index })).reverse().map((item, listIndex) =>
+    "<div class='field-value-item" + (listIndex === 0 ? " field-value-item--latest" : "") + "'>" +
+      "<span class='field-value-item__meta'><strong>" + formatNumber(item.value, 1) + "</strong> " + unit + (listIndex === 0 ? "<small>Senast</small>" : "") + "</span>" +
+      "<button class='button button--secondary button--compact' type='button' data-remove-index='" + item.index + "' aria-label='Ta bort " + label + " " + formatNumber(item.value, 1) + "'>Ta bort</button>" +
     "</div>"
   ).join("");
 }

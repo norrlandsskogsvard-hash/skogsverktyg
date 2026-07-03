@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.0.0-alpha.1-fieldmode.1 - 2026-07-03
+
+### Changed - Mobilanpassat fältläge
+
+- DGV och Höjd har fått riktigt mobilanpassat fältläge.
+- Snabbval borttagna för att minska scroll och göra inmatning tydligare.
+- Knappsats, aktuell inmatning och Lägg till är nu samlade.
+- PWA-cache höjd till fieldmode.1.
+
 ## v2.0.0-alpha.1 - 2026-07-01
 
 ### Changed - Kompakt fältläge på mobil

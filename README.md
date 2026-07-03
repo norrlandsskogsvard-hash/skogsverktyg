@@ -163,5 +163,3 @@ Testa modulen:
 4. Lägg till rader manuellt eller hämta senaste röjning/planpris.
 5. Kontrollera summering och förhandsvisning.
 6. Klicka på Kopiera offerttext eller Skriv ut / Spara som PDF.
-
-Deploy check keypad 1

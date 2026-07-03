@@ -3,7 +3,6 @@ import { getStoredValue, setStoredValue } from "../storage.js";
 import { createPageHeader, escapeHtml, formatNumber } from "../ui.js";
 
 const STORAGE_KEY = "heightDraftValues";
-const QUICK_HEIGHTS = [1, 1.3, 1.5, 2, 2.5, 3, 4, 5, 6];
 const KEYPAD_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "backspace"];
 
 export function renderHeightView() {
@@ -19,12 +18,12 @@ export function renderHeightView() {
   const input = page.querySelector("[data-height-input]");
   const list = page.querySelector("[data-height-list]");
   const resultPanel = page.querySelector("[data-height-result]");
+  const summary = page.querySelector("[data-height-summary]");
   const feedback = page.querySelector("[data-height-feedback]");
   const undoButton = page.querySelector("[data-undo]");
   const clearButton = page.querySelector("[data-clear]");
   const clearEntryButton = page.querySelector("[data-clear-entry]");
   const keypad = page.querySelector("[data-height-keypad]");
-  const quickValues = page.querySelector("[data-height-quick]");
 
   function saveDraft() {
     setStoredValue(STORAGE_KEY, heights);
@@ -140,6 +139,7 @@ export function renderHeightView() {
 
   function render() {
     const result = calculateMeanHeight(heights);
+    summary.innerHTML = summaryTemplate(result, "Medelhöjd", "m", result.meanHeight);
     resultPanel.innerHTML = resultTemplate(result);
     list.innerHTML = valuesTemplate(heights);
     undoButton.disabled = !heights.length && !lastRemoved;
@@ -185,15 +185,6 @@ export function renderHeightView() {
     }
   });
 
-  quickValues.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-quick-value]");
-    if (button) {
-      event.preventDefault();
-      const value = Number(button.dataset.quickValue);
-      addHeight(String(value).replace(".", ","), "Snabbval " + formatNumber(value, 1) + " m tillagt och utkast sparat.", false);
-    }
-  });
-
   list.addEventListener("click", (event) => {
     const button = event.target.closest("[data-remove-index]");
     if (button) {
@@ -219,21 +210,20 @@ function viewTemplate() {
         "<h3 class='card__title'>Lägg till höjd</h3>" +
         "<form class='field-entry-form field-entry-form--keypad' data-height-form>" +
           "<div class='field-keypad'>" +
-            "<label class='field field-entry-input'>" +
-              "<span>Aktuell höjd</span>" +
-              "<span class='field-keypad__display-row'>" +
-                "<input class='input input--large field-keypad__display' data-height-input inputmode='none' autocomplete='off' placeholder='0,0' readonly aria-describedby='height-feedback'>" +
-                "<span class='field-keypad__unit'>m</span>" +
-              "</span>" +
-            "</label>" +
-            "<div class='field-keypad__quick-section'>" +
-              "<p class='field-keypad__label'>Snabbval</p>" +
-              "<div class='field-keypad__quick' data-height-quick>" + quickButtonsTemplate(QUICK_HEIGHTS, "m") + "</div>" +
-            "</div>" +
-            "<div class='field-keypad__grid' data-height-keypad>" + keypadButtonsTemplate() + "</div>" +
-            "<div class='field-keypad__actions'>" +
-              "<button class='button button--large field-keypad__button--primary' type='submit'>Lägg till</button>" +
-              "<button class='button button--secondary button--large' type='button' data-clear-entry>Rensa inmatning</button>" +
+            "<div class='field-workspace'>" +
+              "<div class='field-summary' data-height-summary></div>" +
+              "<label class='field field-entry-input'>" +
+                "<span>Aktuell höjd</span>" +
+                "<span class='field-keypad__display-row'>" +
+                  "<input class='input input--large field-keypad__display' data-height-input inputmode='none' autocomplete='off' placeholder='0,0' readonly aria-describedby='height-feedback'>" +
+                  "<span class='field-keypad__unit'>m</span>" +
+                "</span>" +
+              "</label>" +
+              "<div class='field-keypad__grid' data-height-keypad>" + keypadButtonsTemplate() + "</div>" +
+              "<div class='field-keypad__actions'>" +
+                "<button class='button button--large field-keypad__button--primary' type='submit'>Lägg till</button>" +
+                "<button class='button button--secondary' type='button' data-clear-entry>Rensa inmatning</button>" +
+              "</div>" +
             "</div>" +
           "</div>" +
         "</form>" +
@@ -254,14 +244,6 @@ function viewTemplate() {
   "</section>";
 }
 
-function quickButtonsTemplate(values, unit) {
-  return values.map((value) =>
-    "<button class='button button--secondary field-keypad__quick-button' type='button' data-quick-value='" + value + "'>" +
-      formatNumber(value, 1) + " " + unit +
-    "</button>"
-  ).join("");
-}
-
 function keypadButtonsTemplate() {
   return KEYPAD_KEYS.map((key) => {
     const label = key === "backspace" ? "⌫" : key;
@@ -270,14 +252,21 @@ function keypadButtonsTemplate() {
   }).join("");
 }
 
+function summaryTemplate(result, label, unit, value) {
+  if (!result.hasValues) {
+    return "<span>" + label + "</span><strong>- " + unit + " · 0 träd</strong>";
+  }
+
+  return "<span>" + label + "</span><strong>" + formatNumber(value, 1) + " " + unit + " · " + result.count + " träd</strong>";
+}
+
 function resultTemplate(result) {
   if (!result.hasValues) {
-    return "<div class='result-main'><span>Medelhöjd</span><strong>-</strong></div>" +
+    return "<div class='result-main result-main--compact'><span>Detaljerad statistik</span><strong>-</strong></div>" +
       "<p class='card__text'>" + escapeHtml(result.error) + "</p>";
   }
 
-  return "<div class='result-main'><span>Medelhöjd</span><strong>" + formatNumber(result.meanHeight, 1) + " m</strong></div>" +
-    "<p class='result-compact-summary'>Medelhöjd: " + formatNumber(result.meanHeight, 1) + " m · " + result.count + " träd</p>" +
+  return "<div class='result-main result-main--compact'><span>Detaljerad statistik</span><strong>Medelhöjd " + formatNumber(result.meanHeight, 1) + " m</strong></div>" +
     statRow("Antal provträd", String(result.count)) +
     statRow("Median", formatNumber(result.median, 1) + " m") +
     statRow("Min", formatNumber(result.min, 1) + " m") +
@@ -290,10 +279,10 @@ function valuesTemplate(values) {
     return "<p class='card__text'>Inga värden inmatade ännu.</p>";
   }
 
-  return values.map((value, index) =>
-    "<div class='field-value-item'>" +
-      "<span><strong>" + formatNumber(value, 1) + "</strong> m</span>" +
-      "<button class='button button--secondary button--compact' type='button' data-remove-index='" + index + "' aria-label='Ta bort höjd " + formatNumber(value, 1) + "'>Ta bort</button>" +
+  return values.map((value, index) => ({ value, index })).reverse().map((item, listIndex) =>
+    "<div class='field-value-item" + (listIndex === 0 ? " field-value-item--latest" : "") + "'>" +
+      "<span class='field-value-item__meta'><strong>" + formatNumber(item.value, 1) + "</strong> m" + (listIndex === 0 ? "<small>Senast</small>" : "") + "</span>" +
+      "<button class='button button--secondary button--compact' type='button' data-remove-index='" + item.index + "' aria-label='Ta bort höjd " + formatNumber(item.value, 1) + "'>Ta bort</button>" +
     "</div>"
   ).join("");
 }

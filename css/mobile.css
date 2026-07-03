@@ -183,8 +183,11 @@
 }
 
 @media (max-width: 560px) {
-  .field-entry-form,
   .field-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .field-entry-form--keypad {
     grid-template-columns: 1fr;
   }
 
@@ -195,62 +198,89 @@
 
   .field-entry-card .card__body {
     gap: var(--space-3);
+    padding: var(--space-3);
   }
 
+  .field-entry-card .card__title {
+    display: none;
+  }
+
+  .field-workspace,
   .field-keypad {
     gap: var(--space-2);
   }
 
+  .field-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-primary-soft);
+    color: var(--color-primary-strong);
+    font-weight: 850;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .field-summary span {
+    flex: 0 0 auto;
+  }
+
+  .field-summary strong {
+    flex: 1 1 auto;
+    text-align: right;
+  }
+
   .field-keypad__display-row {
-    grid-template-columns: minmax(0, 1fr) minmax(3.5rem, auto);
+    grid-template-columns: minmax(0, 1fr) minmax(3.25rem, auto);
   }
 
   .field-keypad__display {
-    min-height: 3.25rem;
-    font-size: clamp(1.6rem, 8vw, 2.2rem);
+    min-height: 3.1rem;
+    font-size: clamp(1.7rem, 8vw, 2.35rem);
   }
 
-  .field-keypad__quick {
-    display: flex;
-    gap: var(--space-2);
-    overflow-x: auto;
-    padding-bottom: 0.15rem;
+  .field-keypad__unit {
+    min-width: 3.25rem;
+    font-size: 1rem;
   }
 
-  .field-keypad__quick-button {
-    flex: 0 0 auto;
-    width: auto;
-    min-width: 4.25rem;
-    min-height: 2.55rem;
-    padding: 0 var(--space-2);
+  .field-keypad__grid {
+    gap: 0.45rem;
   }
 
   .field-keypad__button {
-    min-height: 3.1rem;
+    min-height: 3.05rem;
     font-size: 1.15rem;
   }
 
   .field-keypad__actions {
-    position: sticky;
-    bottom: calc(var(--bottom-nav-height) + 0.35rem);
-    z-index: 8;
+    position: static;
     display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    gap: var(--space-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-md);
-    padding: var(--space-2);
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
   }
 
   .field-keypad__actions .button {
-    min-height: 3.1rem;
+    min-height: 3.2rem;
   }
 
   .field-module > .result-panel {
+    order: 3;
     gap: var(--space-2);
     padding: var(--space-3);
+  }
+
+  .field-entry-card {
+    order: 1;
+  }
+
+  .field-list-card {
+    order: 2;
   }
 
   .result-main {
@@ -259,11 +289,7 @@
   }
 
   .result-main strong {
-    font-size: clamp(1.9rem, 9vw, 2.8rem);
-  }
-
-  .result-compact-summary {
-    display: block;
+    font-size: clamp(1.45rem, 6vw, 2rem);
   }
 
   .field-module .result-row {
@@ -278,9 +304,38 @@
     text-align: right;
   }
 
+  .field-list-card .card__body {
+    gap: var(--space-3);
+    padding: var(--space-3);
+  }
+
+  .field-value-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
   .field-value-item {
-    align-items: stretch;
-    flex-direction: column;
+    flex: 1 1 calc(50% - var(--space-2));
+    min-height: 2.75rem;
+    align-items: center;
+    flex-direction: row;
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .field-value-item--latest {
+    flex-basis: 100%;
+  }
+
+  .field-value-item strong {
+    font-size: 1.05rem;
+  }
+
+  .field-value-item .button {
+    width: auto;
+    min-height: 2.25rem;
+    padding: 0 var(--space-2);
   }
 
   .difficulty-meter,
@@ -293,5 +348,13 @@
 @media (max-width: 360px) {
   .field-keypad__actions {
     grid-template-columns: 1fr;
+  }
+
+  .field-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .field-value-item {
+    flex-basis: 100%;
   }
 }
