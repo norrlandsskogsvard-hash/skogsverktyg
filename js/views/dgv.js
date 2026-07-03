@@ -277,6 +277,7 @@ function resultTemplate(result) {
   }
 
   return "<div class='result-main'><span>DGV</span><strong>" + formatNumber(result.dgv, 1) + " cm</strong></div>" +
+    "<p class='result-compact-summary'>DGV: " + formatNumber(result.dgv, 1) + " cm · " + result.count + " träd</p>" +
     statRow("Antal provträd", String(result.count)) +
     statRow("Aritmetiskt medel", formatNumber(result.arithmeticMean, 1) + " cm") +
     statRow("Median", formatNumber(result.median, 1) + " cm") +
