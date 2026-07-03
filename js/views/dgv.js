@@ -226,15 +226,15 @@ function viewTemplate() {
                 "<span class='field-keypad__unit'>cm</span>" +
               "</span>" +
             "</label>" +
-            "<div class='field-keypad__actions'>" +
-              "<button class='button button--large field-keypad__button--primary' type='submit'>Lägg till</button>" +
-              "<button class='button button--secondary button--large' type='button' data-clear-entry>Rensa inmatning</button>" +
-            "</div>" +
-            "<div>" +
+            "<div class='field-keypad__quick-section'>" +
               "<p class='field-keypad__label'>Snabbval</p>" +
               "<div class='field-keypad__quick' data-diameter-quick>" + quickButtonsTemplate(QUICK_DIAMETERS, "cm") + "</div>" +
             "</div>" +
             "<div class='field-keypad__grid' data-diameter-keypad>" + keypadButtonsTemplate() + "</div>" +
+            "<div class='field-keypad__actions'>" +
+              "<button class='button button--large field-keypad__button--primary' type='submit'>Lägg till</button>" +
+              "<button class='button button--secondary button--large' type='button' data-clear-entry>Rensa inmatning</button>" +
+            "</div>" +
           "</div>" +
         "</form>" +
         "<p class='field-feedback' id='dgv-feedback' data-diameter-feedback>Diametrar sparas automatiskt på enheten.</p>" +
