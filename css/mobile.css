@@ -183,8 +183,7 @@
 
 @media (max-width: 560px) {
   .field-entry-form,
-  .field-actions,
-  .field-keypad__actions {
+  .field-actions {
     grid-template-columns: 1fr;
   }
 
@@ -193,12 +192,48 @@
     min-height: 4.5rem;
   }
 
+  .field-keypad {
+    gap: var(--space-3);
+  }
+
   .field-keypad__display-row {
     grid-template-columns: minmax(0, 1fr) minmax(3.5rem, auto);
   }
 
-  .field-keypad__button {
+  .field-keypad__display {
     min-height: 3.75rem;
+    font-size: clamp(1.8rem, 9vw, 2.5rem);
+  }
+
+  .field-keypad__quick {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .field-keypad__quick-button {
+    min-height: 2.8rem;
+  }
+
+  .field-keypad__button {
+    min-height: 3.35rem;
+    font-size: 1.25rem;
+  }
+
+  .field-keypad__actions {
+    position: sticky;
+    bottom: calc(var(--bottom-nav-height) + 0.5rem);
+    z-index: 8;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-2);
+  }
+
+  .field-keypad__actions .button {
+    min-height: 3.4rem;
   }
 
   .field-value-item {
@@ -210,5 +245,11 @@
   .factor-row {
     align-items: stretch;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 390px) {
+  .field-keypad__actions {
+    grid-template-columns: 1fr;
   }
 }
