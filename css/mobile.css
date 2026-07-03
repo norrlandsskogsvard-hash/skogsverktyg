@@ -120,6 +120,7 @@
 @media (max-width: 980px) {
   .field-module {
     grid-template-columns: 1fr;
+    gap: var(--space-3);
   }
 
   .clearing-layout {
@@ -192,8 +193,12 @@
     min-height: 4.5rem;
   }
 
-  .field-keypad {
+  .field-entry-card .card__body {
     gap: var(--space-3);
+  }
+
+  .field-keypad {
+    gap: var(--space-2);
   }
 
   .field-keypad__display-row {
@@ -201,26 +206,33 @@
   }
 
   .field-keypad__display {
-    min-height: 3.75rem;
-    font-size: clamp(1.8rem, 9vw, 2.5rem);
+    min-height: 3.25rem;
+    font-size: clamp(1.6rem, 8vw, 2.2rem);
   }
 
   .field-keypad__quick {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
   }
 
   .field-keypad__quick-button {
-    min-height: 2.8rem;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 4.25rem;
+    min-height: 2.55rem;
+    padding: 0 var(--space-2);
   }
 
   .field-keypad__button {
-    min-height: 3.35rem;
-    font-size: 1.25rem;
+    min-height: 3.1rem;
+    font-size: 1.15rem;
   }
 
   .field-keypad__actions {
     position: sticky;
-    bottom: calc(var(--bottom-nav-height) + 0.5rem);
+    bottom: calc(var(--bottom-nav-height) + 0.35rem);
     z-index: 8;
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
@@ -233,7 +245,37 @@
   }
 
   .field-keypad__actions .button {
-    min-height: 3.4rem;
+    min-height: 3.1rem;
+  }
+
+  .field-module > .result-panel {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .result-main {
+    gap: 0.15rem;
+    padding-bottom: var(--space-2);
+  }
+
+  .result-main strong {
+    font-size: clamp(1.9rem, 9vw, 2.8rem);
+  }
+
+  .result-compact-summary {
+    display: block;
+  }
+
+  .field-module .result-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2);
+    font-size: 0.92rem;
+  }
+
+  .field-module .result-row strong {
+    justify-self: end;
+    font-size: 1rem;
+    text-align: right;
   }
 
   .field-value-item {
@@ -248,7 +290,7 @@
   }
 }
 
-@media (max-width: 390px) {
+@media (max-width: 360px) {
   .field-keypad__actions {
     grid-template-columns: 1fr;
   }
