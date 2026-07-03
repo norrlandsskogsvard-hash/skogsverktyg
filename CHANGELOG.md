@@ -2,6 +2,12 @@
 
 ## v2.0.0-alpha.1 - 2026-07-01
 
+### Changed - Kompakt fältläge på mobil
+
+- Förbättrad kompakt mobilvy för DGV och Höjd.
+- Mindre scroll i fältläge med kompaktare knappsats, snabbval och resultat.
+- Uppdaterat service worker-cache-namn till skogskalkyl-2.0.0-alpha.1-keypad.4.
+
 ### Fixed - Mobil-UX för fältknappsats
 
 - Förbättrad mobil-UX för DGV och Höjd så Lägg till-knappen är nåbar tillsammans med knappsatsen.
