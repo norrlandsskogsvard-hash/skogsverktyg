@@ -226,15 +226,15 @@ function viewTemplate() {
                 "<span class='field-keypad__unit'>m</span>" +
               "</span>" +
             "</label>" +
-            "<div class='field-keypad__actions'>" +
-              "<button class='button button--large field-keypad__button--primary' type='submit'>Lägg till</button>" +
-              "<button class='button button--secondary button--large' type='button' data-clear-entry>Rensa inmatning</button>" +
-            "</div>" +
-            "<div>" +
+            "<div class='field-keypad__quick-section'>" +
               "<p class='field-keypad__label'>Snabbval</p>" +
               "<div class='field-keypad__quick' data-height-quick>" + quickButtonsTemplate(QUICK_HEIGHTS, "m") + "</div>" +
             "</div>" +
             "<div class='field-keypad__grid' data-height-keypad>" + keypadButtonsTemplate() + "</div>" +
+            "<div class='field-keypad__actions'>" +
+              "<button class='button button--large field-keypad__button--primary' type='submit'>Lägg till</button>" +
+              "<button class='button button--secondary button--large' type='button' data-clear-entry>Rensa inmatning</button>" +
+            "</div>" +
           "</div>" +
         "</form>" +
         "<p class='field-feedback' id='height-feedback' data-height-feedback>Höjder sparas automatiskt på enheten.</p>" +
