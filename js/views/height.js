@@ -277,6 +277,7 @@ function resultTemplate(result) {
   }
 
   return "<div class='result-main'><span>Medelhöjd</span><strong>" + formatNumber(result.meanHeight, 1) + " m</strong></div>" +
+    "<p class='result-compact-summary'>Medelhöjd: " + formatNumber(result.meanHeight, 1) + " m · " + result.count + " träd</p>" +
     statRow("Antal provträd", String(result.count)) +
     statRow("Median", formatNumber(result.median, 1) + " m") +
     statRow("Min", formatNumber(result.min, 1) + " m") +
