@@ -1,4 +1,4 @@
-const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-skotselkollen.7";
+const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-smoketest.1";
 
 const CORE_ASSETS = [
   "./",

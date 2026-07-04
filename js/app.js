@@ -3,6 +3,10 @@ import { startRouter } from "./router.js";
 import { initTheme } from "./theme.js";
 
 function registerServiceWorker() {
+  if (window.location.search.includes("test=1")) {
+    return;
+  }
+
   if (!("serviceWorker" in navigator)) {
     return;
   }

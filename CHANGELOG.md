@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-smoketest.1 - 2026-07-04
+
+### Added - Automatiska app-smoketester
+
+- Playwright-smoketester tillagda för desktop och mobil.
+- GitHub Actions-workflow tillagt för automatisk appkontroll.
+- Testläget `?test=1` hoppar över service worker-registrering.
+- Screenshots sparas automatiskt i testresultaten.
+- PWA-cache höjd till smoketest.1.
+
 ## v2.0.0-alpha.1-skotselkollen.7 - 2026-07-04
 
 ### Changed - Fältvänligare källviktning
