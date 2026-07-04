@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-mobile-ux.1 - 2026-07-04
+
+### Changed - Kompakt mobil-UX
+
+- Mobil layout har komprimerats för Röjning, Planpris och Offert.
+- Långa formulär har delats upp i tydligare sektioner.
+- Bottom-nav har förbättrats så att alla alternativ kan nås på mobil.
+- Resultatkort prioriteras högre i mobil vy.
+- PWA-cache höjd till mobile-ux.1.
+
 ## v2.0.0-alpha.1-skotselkollen.12 - 2026-07-04
 
 ### Changed - Norra massimport och granskningsgrund

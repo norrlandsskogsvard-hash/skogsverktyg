@@ -59,6 +59,51 @@ test("mobil routes render utan console errors", async ({ page }) => {
   await page.screenshot({ path: `${SCREENSHOT_DIR}/dashboard-mobile.png`, fullPage: true });
 });
 
+test("mobil UX är kompakt för röjning, planpris, offert och bottom-nav", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  await gotoRoute(page, "/rojning");
+  await expect(page.locator("[data-clearing-result]")).toBeVisible();
+  await expect(page.locator('input[name="areaHa"]')).toBeVisible();
+  await expect(page.locator('input[name="stemsBeforePerHa"]')).toBeVisible();
+  await expect(page.locator('input[name="stemsAfterPerHa"]')).toBeVisible();
+  await expect(page.locator('input[name="meanHeightM"]')).toBeVisible();
+  await expect(page.locator('select[name="treeSpecies"]')).toBeVisible();
+  await expect(page.locator('select[name="clearingType"]')).toBeVisible();
+  await expect(page.locator("details.clearing-source-support")).not.toHaveAttribute("open", "");
+  await expect(page.locator("details.mobile-compact-details").first()).not.toHaveAttribute("open", "");
+  await expectNoHorizontalScroll(page);
+
+  await gotoRoute(page, "/forest-plan-pricing");
+  await expect(page.locator("[data-plan-result]")).toBeVisible();
+  await expect(page.locator('input[name="areaHa"]')).toBeVisible();
+  await expect(page.locator('input[name="parcelCount"]')).toBeVisible();
+  await expect(page.locator('select[name="planType"]')).toBeVisible();
+  const closedPlanDetails = await page.locator("details.mobile-compact-details:not([open])").count();
+  expect(closedPlanDetails).toBeGreaterThanOrEqual(3);
+  await expectNoHorizontalScroll(page);
+
+  await gotoRoute(page, "/quote");
+  await expect(page.locator("[data-quote-summary]")).toBeVisible();
+  await expect(page.locator("body")).toContainText("1. Kund");
+  await expect(page.locator("body")).toContainText("2. Uppdrag");
+  await expect(page.locator("body")).toContainText("3. Pris / sammanställning");
+  await expect(page.locator("body")).toContainText("4. Text / villkor");
+  await expect(page.locator("details.mobile-compact-details").first()).toHaveAttribute("open", "");
+  await expectNoHorizontalScroll(page);
+
+  const navInfo = await page.locator(".bottom-nav").evaluate((nav) => ({
+    links: nav.querySelectorAll("a").length,
+    text: nav.textContent.trim(),
+    scrollable: nav.scrollWidth > nav.clientWidth,
+    visibleWidth: nav.clientWidth,
+    fullWidth: nav.scrollWidth
+  }));
+  expect(navInfo.links).toBeGreaterThanOrEqual(9);
+  expect(navInfo.text.length).toBeGreaterThan(0);
+  expect(navInfo.scrollable || navInfo.fullWidth <= navInfo.visibleWidth + 1).toBeTruthy();
+});
+
 test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoRoute(page, "/skotselkollen");

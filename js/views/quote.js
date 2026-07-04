@@ -33,6 +33,7 @@ export function renderQuoteView() {
     )
   );
   page.insertAdjacentHTML("beforeend", viewTemplate(quote));
+  applyMobileCollapses(page);
 
   const form = page.querySelector("[data-quote-form]");
   const rowsNode = page.querySelector("[data-quote-rows]");
@@ -232,13 +233,17 @@ function formTemplate(quote) {
   return `
     <form class="quote-layout" data-quote-form novalidate>
       <div class="quote-editor">
-        ${cardTemplate("Företag", companyTemplate(quote.company))}
-        ${cardTemplate("Kund", customerTemplate(quote.customer))}
-        ${cardTemplate("Offertuppgifter", metaTemplate(quote.meta))}
-        ${cardTemplate("Offertposter", rowsSectionTemplate())}
-        ${cardTemplate("Villkor", termsTemplate(quote.terms, quote.adjustments, quote.notes))}
+        ${detailsCardTemplate("1. Kund", customerTemplate(quote.customer), true, false)}
+        ${detailsCardTemplate("2. Uppdrag", metaTemplate(quote.meta) + rowsSectionTemplate(), true, false)}
+        ${detailsCardTemplate("Företag", companyTemplate(quote.company), true, true)}
+        ${detailsCardTemplate("4. Text / villkor", termsTemplate(quote.terms, quote.adjustments, quote.notes), true, true)}
       </div>
       <aside class="quote-side">
+        <section class="quote-step-heading">
+          <strong>3. Pris / sammanställning</strong>
+          <span>Summering och åtgärder</span>
+        </section>
+        <section class="result-panel result-panel--strong" data-quote-summary></section>
         <div class="clearing-actions">
           <button class="button button--large" type="submit">Summera offert</button>
           <button class="button button--secondary" type="button" data-save-quote>Spara utkast</button>
@@ -246,7 +251,6 @@ function formTemplate(quote) {
           <button class="button button--secondary" type="button" data-copy-quote>Kopiera offerttext</button>
           <button class="button button--secondary" type="button" data-print-quote>Skriv ut / Spara som PDF</button>
         </div>
-        <section class="result-panel result-panel--strong" data-quote-summary></section>
         <div class="field-feedback" data-quote-feedback></div>
       </aside>
       <section class="quote-preview-shell">
@@ -526,6 +530,24 @@ function cardTemplate(title, content) {
       </div>
     </section>
   `;
+}
+
+function detailsCardTemplate(title, content, openOnDesktop = false, collapseOnMobile = true) {
+  return `
+    <details class="card mobile-compact-details" ${openOnDesktop ? "open" : ""} ${collapseOnMobile ? "data-mobile-collapsed" : ""}>
+      <summary>${title}</summary>
+      <div class="card__body">
+        ${content}
+      </div>
+    </details>
+  `;
+}
+
+function applyMobileCollapses(root) {
+  if (!window.matchMedia("(max-width: 560px)").matches) return;
+  root.querySelectorAll("[data-mobile-collapsed]").forEach((details) => {
+    details.open = false;
+  });
 }
 
 function textField(name, label, value) {

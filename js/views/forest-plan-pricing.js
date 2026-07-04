@@ -86,6 +86,7 @@ export function renderForestPlanPricingView() {
     )
   );
   page.insertAdjacentHTML("beforeend", viewTemplate(draft));
+  applyMobileCollapses(page);
 
   const form = page.querySelector("[data-plan-form]");
   const resultNode = page.querySelector("[data-plan-result]");
@@ -162,24 +163,25 @@ function viewTemplate(draft) {
     <form class="clearing-layout" data-plan-form novalidate>
       <div class="clearing-main">
         ${cardTemplate("Uppdrag", assignmentTemplate(draft))}
-        ${cardTemplate("Omfattning", numberGroupTemplate(NUMBER_FIELDS.scope, draft))}
-        ${cardTemplate("Fältarbete", fieldTemplate(draft))}
-        ${cardTemplate("Kontorsarbete", numberGroupTemplate(NUMBER_FIELDS.office, draft))}
-        ${cardTemplate("Resa", numberGroupTemplate(NUMBER_FIELDS.travel, draft))}
+        ${detailsCardTemplate("Prisdata och omfattning", numberGroupTemplate(NUMBER_FIELDS.scope, draft), true)}
+        ${detailsCardTemplate("Fältarbete", fieldTemplate(draft), true)}
+        ${detailsCardTemplate("Kontorsarbete", numberGroupTemplate(NUMBER_FIELDS.office, draft), true)}
+        ${detailsCardTemplate("Resa och påslag", numberGroupTemplate(NUMBER_FIELDS.travel, draft), true)}
       </div>
       <aside class="clearing-side">
+        <section class="result-panel result-panel--strong" data-plan-result></section>
         <div class="clearing-actions">
           <button class="button button--large" type="submit">Beräkna</button>
           <button class="button button--secondary" type="button" data-save-plan>Spara utkast</button>
           <button class="button button--secondary" type="button" data-reset-plan>Rensa</button>
           <button class="button button--secondary" type="button" data-copy-plan-offer>Kopiera offerttext</button>
         </div>
-        <section class="result-panel result-panel--strong" data-plan-result></section>
-        ${cardTemplate(
-          "Offertunderlag",
-          `<textarea class="textarea quote-textarea" data-plan-offer readonly aria-label="Offerttext för skogsbruksplan"></textarea>`
-        )}
         <div class="field-feedback" data-plan-feedback></div>
+        ${detailsCardTemplate(
+          "Offertunderlag",
+          `<textarea class="textarea quote-textarea" data-plan-offer readonly aria-label="Offerttext för skogsbruksplan"></textarea>`,
+          true
+        )}
       </aside>
     </form>
   `;
@@ -223,6 +225,24 @@ function cardTemplate(title, content) {
       </div>
     </section>
   `;
+}
+
+function detailsCardTemplate(title, content, openOnDesktop = false) {
+  return `
+    <details class="card mobile-compact-details" ${openOnDesktop ? "open" : ""} data-mobile-collapsed>
+      <summary>${title}</summary>
+      <div class="card__body">
+        ${content}
+      </div>
+    </details>
+  `;
+}
+
+function applyMobileCollapses(root) {
+  if (!window.matchMedia("(max-width: 560px)").matches) return;
+  root.querySelectorAll("[data-mobile-collapsed]").forEach((details) => {
+    details.open = false;
+  });
 }
 
 function textField(name, label, value, placeholder) {

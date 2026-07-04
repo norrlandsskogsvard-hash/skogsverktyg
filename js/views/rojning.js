@@ -87,6 +87,7 @@ export function renderRojningView() {
     )
   );
   page.insertAdjacentHTML("beforeend", viewTemplate(draft));
+  applyMobileCollapses(page);
 
   const form = page.querySelector("[data-clearing-form]");
   const resultNode = page.querySelector("[data-clearing-result]");
@@ -163,24 +164,25 @@ function viewTemplate(draft) {
     <form class="clearing-layout" data-clearing-form novalidate>
       <div class="clearing-main">
         ${cardTemplate("Bestånd", standTemplate(draft))}
-        ${cardTemplate("Svårighet", difficultyTemplate(draft))}
-        ${cardTemplate("Prisdata", priceTemplate(draft))}
+        ${detailsCardTemplate("Svårighet och extra beståndsdata", difficultyTemplate(draft), true)}
+        ${detailsCardTemplate("Prisdata", priceTemplate(draft), true)}
       </div>
       <aside class="clearing-side">
         <section class="result-panel result-panel--strong" data-clearing-result></section>
-        ${cardTemplate(
-          "Offertunderlag",
-          `<textarea class="textarea quote-textarea" data-offer-text readonly aria-label="Offerttext"></textarea>
-           <div class="button-row">
-             <button class="button" type="button" data-copy-offer>Kopiera offerttext</button>
-           </div>`
-        )}
         <div class="clearing-actions">
           <button class="button button--large" type="submit">Beräkna</button>
           <button class="button button--secondary" type="button" data-save-clearing>Spara utkast</button>
           <button class="button button--secondary" type="button" data-reset-clearing>Rensa</button>
         </div>
         <div class="field-feedback" data-clearing-feedback></div>
+        ${detailsCardTemplate(
+          "Offertunderlag",
+          `<textarea class="textarea quote-textarea" data-offer-text readonly aria-label="Offerttext"></textarea>
+           <div class="button-row">
+             <button class="button" type="button" data-copy-offer>Kopiera offerttext</button>
+           </div>`,
+          true
+        )}
         ${sourceSupportTemplate()}
       </aside>
     </form>
@@ -188,9 +190,13 @@ function viewTemplate(draft) {
 }
 
 function standTemplate(draft) {
+  const primaryFields = FIELD_GROUPS.stand.filter(([name]) =>
+    ["areaHa", "stemsBeforePerHa", "stemsAfterPerHa", "meanHeightM"].includes(name)
+  );
+
   return `
     <div class="form-grid">
-      ${FIELD_GROUPS.stand.map(([name, label, step]) => numberField(name, label, draft[name], step)).join("")}
+      ${primaryFields.map(([name, label, step]) => numberField(name, label, draft[name], step)).join("")}
       ${selectField("treeSpecies", "Huvudträdslag", draft.treeSpecies, SELECTS.treeSpecies)}
       ${selectField("clearingType", "Röjningstyp", draft.clearingType, SELECTS.clearingType)}
     </div>
@@ -198,8 +204,13 @@ function standTemplate(draft) {
 }
 
 function difficultyTemplate(draft) {
+  const extraStandFields = FIELD_GROUPS.stand.filter(([name]) =>
+    ["dgvCm", "deciduousSharePercent"].includes(name)
+  );
+
   return `
     <div class="form-grid">
+      ${extraStandFields.map(([name, label, step]) => numberField(name, label, draft[name], step)).join("")}
       ${selectField("terrain", "Terräng", draft.terrain, SELECTS.terrain)}
       ${selectField("vegetation", "Vegetation", draft.vegetation, SELECTS.vegetation)}
       ${selectField("stoniness", "Blockighet", draft.stoniness, SELECTS.stoniness)}
@@ -267,6 +278,24 @@ function cardTemplate(title, content) {
       </div>
     </section>
   `;
+}
+
+function detailsCardTemplate(title, content, openOnDesktop = false) {
+  return `
+    <details class="card mobile-compact-details" ${openOnDesktop ? "open" : ""} data-mobile-collapsed>
+      <summary>${title}</summary>
+      <div class="card__body">
+        ${content}
+      </div>
+    </details>
+  `;
+}
+
+function applyMobileCollapses(root) {
+  if (!window.matchMedia("(max-width: 560px)").matches) return;
+  root.querySelectorAll("[data-mobile-collapsed]").forEach((details) => {
+    details.open = false;
+  });
 }
 
 function numberField(name, label, value, step) {

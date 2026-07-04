@@ -18,7 +18,7 @@ function shellTemplate() {
       "</header>" +
       "<section id='view' class='page' tabindex='-1'></section>" +
     "</main>" +
-    "<nav class='bottom-nav' aria-label='Mobilmeny'>" + NAV_ITEMS.filter((item) => item.primary).map(navLinkTemplate).join("") + "</nav>" +
+    "<nav class='bottom-nav' aria-label='Mobilmeny'>" + NAV_ITEMS.map(navLinkTemplate).join("") + "</nav>" +
   "</div>";
 }
 
