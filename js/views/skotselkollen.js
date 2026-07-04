@@ -26,7 +26,7 @@ const DEFAULT_DRAFT = {
   snowWindRisk: "nej",
   conservation: "nej",
   reindeerMountain: "nej",
-  productiveForest: "osakert",
+  productiveForestLandAssumption: "assumed_productive",
   soilMoisture: "okand",
   movingGroundwater: "okand",
   vegetationType: "",
@@ -45,7 +45,7 @@ const SELECTS = {
   bearing: [["god", "God"], ["normal", "Normal"], ["svag_blot", "Svag/blöt"]],
   yesNo: [["nej", "Nej"], ["ja", "Ja"]],
   yesNoUnknown: [["nej", "Nej"], ["ja", "Ja"], ["osakert", "Osäkert"]],
-  productive: [["ja", "Ja"], ["nej", "Nej"], ["osakert", "Osäkert"]],
+  landClass: [["assumed_productive", "Produktiv skogsmark, antas"], ["uncertain", "Osäker markklass"], ["non_productive", "Ej produktiv / impediment / specialfall"]],
   moisture: [["okand", "Okänd"], ["torr", "Torr"], ["frisk", "Frisk"], ["fuktig", "Fuktig"], ["blot", "Blöt"]],
   movingWater: [["okand", "Okänd"], ["nej", "Nej"], ["ja", "Ja"], ["osakert", "Osäkert"]]
 };
@@ -57,7 +57,7 @@ const SOURCE_GROUPS = [
   ["skogskunskap", "Skogskunskap"],
   ["decision_support_reference", "Beslutsstöd"],
   ["scenario_reference", "Scenarioverktyg"],
-  ["practice_guide", "Praktisk mall"],
+  ["practice_guide", "Praktiska skötselmallar"],
   ["field_observation", "Fältobservationer"],
   ["warning", "Fältvarningar"]
 ];
@@ -179,6 +179,7 @@ function advancedControl(values) {
   return "<details class='skotsel-advanced-root'>" +
     "<summary>Fördjupad kontroll</summary>" +
     "<div class='skotsel-advanced'>" +
+      "<p class='skotsel-assumption-note'>Produktiv skogsmark antas vid fältmätning. Ändra i avancerat vid specialfall.</p>" +
       advancedDetails("Trädslagsandelar och risk", fields(riskFields(values))) +
       advancedDetails("Juridisk kontroll", fields(legalFields(values))) +
       advancedDetails("Naturvärden/kulturmiljö", fields(natureFields(values))) +
@@ -204,7 +205,7 @@ function riskFields(values) {
 }
 
 function legalFields(values) {
-  return [selectField("productiveForest", "Produktiv skogsmark", SELECTS.productive, values.productiveForest)];
+  return [selectField("productiveForestLandAssumption", "Markförutsättning", SELECTS.landClass, values.productiveForestLandAssumption)];
 }
 
 function natureFields(values) {
@@ -327,7 +328,7 @@ function sourceRoleLabel(type) {
 function sourceLimitation(item) {
   if (item.type === "decision_support_reference") return "referensram, inte facit";
   if (item.type === "scenario_reference") return "långsiktig analys, inte fältgräns";
-  if (item.type === "practice_guide") return "stöd, inte ensam hög säkerhet";
+  if (item.type === "practice_guide") return "förenklad, ej facit";
   if (item.type === "skogskunskap_tool") return skogskunskapToolLimitation(item);
   if (item.type === "skogskunskap_guidance") return "ska vägas mot lag/forskning/fält";
   if (item.type === "regional_curve" && item.strength === "pilot") return "pilot, inte full kurva";

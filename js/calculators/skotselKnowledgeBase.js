@@ -5,7 +5,9 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-input-output.md",
   "docs/skotselkollen-kurvdata.md",
   "docs/skotselkollen-kallviktning.md",
-  "docs/skotselkollen-kallbank-skogskunskap.md"
+  "docs/skotselkollen-kallbank-skogskunskap.md",
+  "docs/skotselkollen-praktiska-mallar.md",
+  "docs/rojningskalkyl-kallstod.md"
 ];
 
 export const EVIDENCE_TYPE_WEIGHTS = {
@@ -114,6 +116,75 @@ export const THINNING_CURVES = [
         }
       ]
     }
+  }
+];
+
+export const PRACTICE_GUIDE_SUPPORT = [
+  {
+    id: "norra-skog-skotselmallar-2024",
+    sourceName: "Norra Skog skötselmallar 2024",
+    sourceType: "practice_guide",
+    sourceYear: 2024,
+    sourceRef: "Norra Skog 2024",
+    area: "skotsel",
+    species: "all",
+    claim: "Norra Skog 2024 används som praktisk skötselmall och skogsägarstöd.",
+    value: null,
+    unit: "",
+    role: "praktisk skötselmall / skogsägarstöd",
+    limitation: "Förenklad praktisk mall, inte ensam facit, ska vägas mot forskning, regionala mallar, lag och fältbild.",
+    confidence: "low",
+    status: "documentation_only",
+    canRaiseConfidence: false,
+    canAloneGiveHighConfidence: false
+  }
+];
+
+export const CLEARING_SOURCE_SUPPORT = [
+  {
+    id: "skogskunskap-clearing-analysis",
+    sourceName: "Skogskunskap Röjningsanalys",
+    sourceType: "skogskunskap_tool",
+    area: "rojning",
+    usedBy: ["rojningCalculator", "skotselkollen"],
+    role: "lonsamhetsstod",
+    claim: "Skogskunskap listar Röjningsanalys som verktyg inom skogsvård för röjning.",
+    limitation: "Modell/förenkling, inte facit för enskilt bestånd. Inga värden aktiverade i kalkyl utan exakt källa.",
+    status: "documentation_only"
+  },
+  {
+    id: "skogskunskap-clearing-clock",
+    sourceName: "Skogskunskap Röjningsklockan",
+    sourceType: "skogskunskap_tool",
+    area: "rojning",
+    usedBy: ["rojningCalculator", "skotselkollen"],
+    role: "sasongsrisk",
+    claim: "Röjningsklockan stödjer bedömning av när på året röjning bör göras med hänsyn till insektsskador.",
+    limitation: "Säsongs-/riskstöd, inte kostnadsmodell eller beståndsmodell.",
+    status: "advisory"
+  },
+  {
+    id: "skogskunskap-broadleaf-clearing-template",
+    sourceName: "Skogskunskap Lövröjningsmall",
+    sourceType: "skogskunskap_tool",
+    area: "rojning",
+    species: ["bjork", "klibbal", "asp"],
+    usedBy: ["rojningCalculator", "skotselkollen"],
+    role: "lovrojningsstod",
+    claim: "Skogskunskap har ett särskilt verktyg för röjning i björk, al och asp.",
+    limitation: "Förenklad modell. Inga stamantal eller höjdgränser aktiveras utan exakt källutdrag.",
+    status: "documentation_only"
+  },
+  {
+    id: "skogskunskap-silviculture-tools-clearing",
+    sourceName: "Skogskunskap Skogsvård verktyg",
+    sourceType: "skogskunskap_guidance",
+    area: "rojning",
+    usedBy: ["rojningCalculator", "skotselkollen"],
+    role: "praktiskt verktygsstod",
+    claim: "Skogskunskap samlar verktyg för tillväxt och lönsamhet vid röjning, gallring och gödsling.",
+    limitation: "Rådgivande stöd. Ska vägas mot fältdata och egna kostnadsschabloner.",
+    status: "documentation_only"
   }
 ];
 
@@ -337,18 +408,19 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
   {
     id: "norra-skog-2024-practice",
     type: "practice_guide",
-    source: "norra-skog-2024",
+    source: "norra-skog-skotselmallar-2024",
     sourceLabel: "Norra Skog 2024",
     area: "practice",
     species: "all",
     region: "norra-sverige",
     appliesTo: ["curve_reference_pilot", "curve_missing", "final_felling_check"],
-    claim: "Praktiska skötselmallar kan stödja fältkontroll och arbetsflöde.",
+    claim: "Norra Skog 2024 kan stödja fältkontroll och arbetsflöde som praktisk skötselmall.",
+    role: "praktisk skötselmall / skogsägarstöd",
     strength: "support",
     weight: EVIDENCE_TYPE_WEIGHTS.practice_guide,
     confidence: "low",
-    limitations: ["Practice guide är stöd, inte facit, och får aldrig ensam ge hög säkerhet."],
-    notes: ["Ska visas som praktiskt stöd under källor och antaganden."]
+    limitations: ["Förenklad praktisk mall, inte ensam facit, ska vägas mot forskning, regionala mallar, lag och fältbild."],
+    notes: ["Dokumentationsläge i detta steg. Inga värden från praktiska mallar används som hårda regler."]
   },
   {
     id: "field-observation-core-values",
@@ -448,6 +520,7 @@ export function sourceNotesForInput(input = {}) {
   notes.push("INGVAR används endast som referens för arbetsgång och variabler, inte som direkt facit.");
   notes.push("Heureka används som referens för långsiktigt scenario- och beslutsstöd, inte som direkt fältgräns.");
   notes.push("Skogskunskap används som forskningsnära verktygs- och vägledningsstöd, inte som ensam facitkälla.");
+  notes.push("Norra Skog 2024 används som praktisk skötselmall och skogsägarstöd, inte som facit eller regional kurva.");
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
   notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];
@@ -488,8 +561,12 @@ function buildFieldWarnings(input, baseRecommendation) {
     warnings.push(warningItem("field-reindeer", "Rennäring/fjällnära läge kräver juridisk kontroll.", "legal"));
   }
 
-  if (input.productiveForest && input.productiveForest !== "ja") {
-    warnings.push(warningItem("field-productive-forest", "Produktiv skogsmark är inte bekräftad.", "legal"));
+  if (input.productiveForestLandAssumption === "uncertain") {
+    warnings.push(warningItem("field-land-class-uncertain", "Markklass är osäker. Kontrollera innan åtgärdsbeslut.", "legal"));
+  }
+
+  if (input.productiveForestLandAssumption === "non_productive") {
+    warnings.push(warningItem("field-land-class-special", "Ej produktiv/impediment/specialfall är markerat. Kontroll krävs innan åtgärdsbeslut.", "legal"));
   }
 
   if (input.damage === "tydliga" || input.damage === "svara") {
@@ -583,6 +660,13 @@ function buildEvidenceSummary(baseRecommendation, supportingEvidence, conflictin
 
   const supportTypes = [...new Set(supportingEvidence.map((item) => typeLabel(item.type)))];
   const missingTypes = [...new Set(conflictingEvidence.map((item) => item.area === "source" ? item.claim : ""))].filter(Boolean);
+  const onlyPracticeGuide = supportingEvidence.length > 0 && supportingEvidence.every((item) =>
+    item.type === "practice_guide" || item.type === "field_observation"
+  );
+
+  if (onlyPracticeGuide) {
+    return "Förenklat praktiskt stöd. Kontrollera mot regional mall, forskning och fältbild. Samlad säkerhet: " + confidenceLabel(combinedConfidence) + ".";
+  }
 
   if (baseRecommendation.actionCode === "curve_reference_pilot") {
     return "Bedömningen bygger på pilotunderlag från T20-exempel och principer från gallringsbeslutsstöd. Full digitaliserad gallringskurva och forskningsmatris saknas ännu, därför hålls säkerheten på " + confidenceLabel(combinedConfidence) + ".";
@@ -597,7 +681,7 @@ function buildFieldSummary(input, baseRecommendation, supportingEvidence, confli
   const actionCode = baseRecommendation.actionCode;
   const evidence = shortEvidence(input, actionCode, supportingEvidence);
   const missing = shortMissing(input, actionCode, conflictingEvidence);
-  const legalPrefix = legalBlocks.length ? "Juridisk kontroll krävs. " : "";
+  const legalPrefix = fieldLegalPrefix(input, legalBlocks);
   const regionSuffix = input.region === "okand" ? " Välj region för säkrare regional jämförelse." : "";
 
   if (actionCode === "curve_reference_pilot") {
@@ -634,19 +718,20 @@ function buildFieldSummary(input, baseRecommendation, supportingEvidence, confli
 function shortEvidence(input, actionCode, supportingEvidence) {
   const hasSkogskunskapTool = supportingEvidence.some((item) => item.type === "skogskunskap_tool");
   const hasSkogskunskapGuidance = supportingEvidence.some((item) => item.type === "skogskunskap_guidance");
+  const hasPracticeGuide = supportingEvidence.some((item) => item.type === "practice_guide");
 
   if (actionCode === "curve_reference_pilot") {
-    return withSkogskunskap(["T20-exempel", "gallringsbeslutsstöd", "praktiskt fältstöd"], hasSkogskunskapTool, hasSkogskunskapGuidance);
+    return withPracticeGuide(withSkogskunskap(["T20-exempel", "gallringsbeslutsstöd", "praktiskt fältstöd"], hasSkogskunskapTool, hasSkogskunskapGuidance), hasPracticeGuide);
   }
 
   if (input.mainSpecies === "bjork") {
-    return withSkogskunskap(["fältvärden", "björkspecifika kontrollpunkter"], hasSkogskunskapTool, hasSkogskunskapGuidance);
+    return withPracticeGuide(withSkogskunskap(["fältvärden", "björkspecifika kontrollpunkter"], hasSkogskunskapTool, hasSkogskunskapGuidance), hasPracticeGuide);
   }
 
   const hasResearch = supportingEvidence.some((item) => item.type === "research");
   const values = ["inmatade fältvärden"];
   if (hasResearch) values.push("generella gallringsprinciper");
-  return withSkogskunskap(values, hasSkogskunskapTool, hasSkogskunskapGuidance).slice(0, 4);
+  return withPracticeGuide(withSkogskunskap(values, hasSkogskunskapTool, hasSkogskunskapGuidance), hasPracticeGuide).slice(0, 4);
 }
 
 function withSkogskunskap(values, hasTool, hasGuidance) {
@@ -654,6 +739,24 @@ function withSkogskunskap(values, hasTool, hasGuidance) {
   if (hasTool) nextValues.push("Skogskunskap verktygsstöd");
   if (!hasTool && hasGuidance) nextValues.push("Skogskunskap vägledning");
   return [...new Set(nextValues)];
+}
+
+function withPracticeGuide(values, hasPracticeGuide) {
+  const nextValues = [...values];
+  if (hasPracticeGuide) nextValues.push("Praktisk skötselmall");
+  return [...new Set(nextValues)];
+}
+
+function fieldLegalPrefix(input, legalBlocks) {
+  if (input.productiveForestLandAssumption === "uncertain") {
+    return "Markklass är osäker. Kontrollera innan åtgärdsbeslut. ";
+  }
+
+  if (input.productiveForestLandAssumption === "non_productive") {
+    return "Markklass/specialfall kräver kontroll innan åtgärdsbeslut. ";
+  }
+
+  return legalBlocks.length ? "Juridisk kontroll krävs. " : "";
 }
 
 function shortMissing(input, actionCode, conflictingEvidence) {
@@ -712,8 +815,7 @@ function isLegalFlagged(input) {
     input.conservation === "osakert" ||
     input.reindeerMountain === "ja" ||
     input.reindeerMountain === "osakert" ||
-    input.productiveForest === "nej" ||
-    input.productiveForest === "osakert";
+    input.productiveForestLandAssumption === "non_productive";
 }
 
 function regionMatches(curveRegion, inputRegion) {
@@ -749,7 +851,7 @@ function typeLabel(type) {
     skogskunskap_guidance: "Skogskunskap vägledning",
     decision_support_reference: "beslutsstöd",
     scenario_reference: "scenarioverktyg",
-    practice_guide: "praktisk mall",
+    practice_guide: "praktisk skötselmall",
     field_observation: "fältobservationer",
     warning: "fältvarningar"
   }[type] || type;

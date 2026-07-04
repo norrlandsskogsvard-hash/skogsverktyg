@@ -66,8 +66,11 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Pilotunderlag");
   await expect(page.locator("body")).toContainText("Samlad bedömning");
   await expect(page.locator("body")).toContainText("T20");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Ingen flagga");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
+  await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
+  await expect(page.locator("body")).toContainText("Norra Skog 2024");
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-desktop.png`, fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -76,10 +79,31 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Pilotunderlag");
   await expect(page.locator("body")).toContainText("Samlad bedömning");
   await expect(page.locator("body")).toContainText("T20");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Ingen flagga");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
+  await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
+  await expect(page.locator("body")).toContainText("Norra Skog 2024");
   await expectNoHorizontalScroll(page);
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-mobile.png`, fullPage: true });
+});
+
+test("Skötselkollen markförutsättning styr juridisk status utan att dölja skoglig status", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/skotselkollen");
+  await fillSkotselkollenPilot(page);
+  await openSkotselAdvanced(page);
+
+  await page.locator('select[name="productiveForestLandAssumption"]').selectOption("uncertain");
+  await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Pilotunderlag");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Kontroll rekommenderas");
+  await expect(page.locator("body")).toContainText("Markklass är osäker");
+
+  await page.locator('select[name="productiveForestLandAssumption"]').selectOption("non_productive");
+  await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Pilotunderlag");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Kontroll krävs");
 });
 
 test("Skötselkollen håller björk som eget spår", async ({ page }) => {
@@ -90,6 +114,24 @@ test("Skötselkollen håller björk som eget spår", async ({ page }) => {
   await expect(page.locator("body")).toContainText(/Björkspår|Björkspåret/i);
   await expect(page.locator("body")).toContainText(/Tall- eller granmall används inte som facit/i);
   await expect(page.locator("body")).not.toContainText(/Tall- eller granmall används som facit för björk/i);
+});
+
+test("Röjningskalkyl visar källstöd utan att ändra kalkylresultat", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/rojning");
+  const resultPanel = page.locator("[data-clearing-result]");
+  const totalBefore = await resultPanel.locator(".result-main strong").innerText();
+
+  await expect(page.locator("details.clearing-source-support")).toContainText("Källstöd och antaganden");
+  await page.locator("details.clearing-source-support").evaluate((details) => {
+    details.open = true;
+  });
+  await expect(page.locator("details.clearing-source-support")).toContainText("Skogskunskap Röjningsanalys");
+  await expect(page.locator("details.clearing-source-support")).toContainText("Skogskunskap Röjningsklockan");
+  await expect(page.locator("details.clearing-source-support")).toContainText("Skogskunskap Lövröjningsmall");
+  await expect(page.locator("details.clearing-source-support")).toContainText("inte som prisfacit");
+  await expect(resultPanel.locator(".result-main strong")).toHaveText(totalBefore);
+  await expectNoHorizontalScroll(page);
 });
 
 test("DGV mobil: knappsats lägger till 18,5 utan horisontell scroll", async ({ page }) => {
@@ -158,6 +200,19 @@ async function openSources(page) {
     document.querySelectorAll("details").forEach((details) => {
       const summary = details.querySelector(":scope > summary");
       if (summary?.textContent?.includes("Källor och antaganden")) {
+        details.open = true;
+      }
+    });
+  });
+}
+
+async function openSkotselAdvanced(page) {
+  await page.evaluate(() => {
+    const advanced = document.querySelector(".skotsel-advanced-root");
+    if (advanced) advanced.open = true;
+    document.querySelectorAll(".skotsel-advanced details").forEach((details) => {
+      const summary = details.querySelector(":scope > summary");
+      if (summary?.textContent?.includes("Juridisk kontroll")) {
         details.open = true;
       }
     });

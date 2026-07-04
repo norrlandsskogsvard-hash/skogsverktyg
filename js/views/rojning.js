@@ -4,6 +4,7 @@ import {
   calculateClearingEstimate,
   normalizeClearingInput
 } from "../calculators/pricingEngine.js";
+import { CLEARING_SOURCE_SUPPORT } from "../calculators/skotselKnowledgeBase.js";
 import { createPageHeader, escapeHtml, formatCurrency, formatNumber, showToast } from "../ui.js";
 import { getStoredValue, setStoredValue } from "../storage.js";
 
@@ -180,6 +181,7 @@ function viewTemplate(draft) {
           <button class="button button--secondary" type="button" data-reset-clearing>Rensa</button>
         </div>
         <div class="field-feedback" data-clearing-feedback></div>
+        ${sourceSupportTemplate()}
       </aside>
     </form>
   `;
@@ -214,6 +216,46 @@ function priceTemplate(draft) {
       ${FIELD_GROUPS.price.map(([name, label, step]) => numberField(name, label, draft[name], step)).join("")}
     </div>
   `;
+}
+
+function sourceSupportTemplate() {
+  const visibleSources = CLEARING_SOURCE_SUPPORT.filter((item) =>
+    ["skogskunskap-clearing-analysis", "skogskunskap-clearing-clock", "skogskunskap-broadleaf-clearing-template"].includes(item.id)
+  );
+
+  return `
+    <details class="clearing-source-support">
+      <summary>Källstöd och antaganden</summary>
+      <div class="clearing-source-support__body">
+        <p>Röjningskalkylen räknar på dina kostnader och schabloner. Källstödet används som rådgivande kontroll, inte som prisfacit.</p>
+        <ul>
+          ${visibleSources.map(sourceSupportItemTemplate).join("")}
+        </ul>
+      </div>
+    </details>
+  `;
+}
+
+function sourceSupportItemTemplate(item) {
+  return `
+    <li>
+      <strong>${escapeHtml(item.sourceName)}</strong>
+      <span>${escapeHtml(sourceSupportRole(item))} — ${escapeHtml(sourceSupportLimitation(item))}</span>
+    </li>
+  `;
+}
+
+function sourceSupportRole(item) {
+  if (item.role === "lonsamhetsstod") return "lönsamhetsstöd";
+  if (item.role === "sasongsrisk") return "säsongsrisk";
+  if (item.role === "lovrojningsstod") return "björk/al/asp";
+  return "rådgivande stöd";
+}
+
+function sourceSupportLimitation(item) {
+  if (item.role === "sasongsrisk") return "ej kostnadsregel";
+  if (item.role === "lovrojningsstod") return "ej aktiv regel ännu";
+  return "ej facit";
 }
 
 function cardTemplate(title, content) {

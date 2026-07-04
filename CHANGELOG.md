@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.9 - 2026-07-04
+
+### Changed - Praktiska mallar och markförutsättning
+
+- Produktiv skogsmark antas nu som standard vid fältmätning.
+- Markklass/specialfall har flyttats till avancerade kontroller.
+- Praktiska skötselmallar har lagts till som egen källkategori.
+- Norra Skog 2024 har lagts in som praktiskt stöd, inte facit.
+- PWA-cache höjd till skotselkollen.9.
+
+### Added - Röjningskalkyl källstöd
+
+- Röjningskalkylen har fått dokumenterat källstöd från Skogskunskap.
+- Röjningsanalys, Röjningsklockan och lövröjningsmall är tillagda som rådgivande källor.
+- Inga nya röjningspriser eller hårda röjningsgränsvärden har aktiverats.
+- PWA-cache höjd till rojningsstod.1.
+
 ## v2.0.0-alpha.1-skotselkollen.8 - 2026-07-04
 
 ### Added - Skogskunskap som källbank

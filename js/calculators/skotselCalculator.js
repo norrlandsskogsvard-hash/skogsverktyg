@@ -92,6 +92,7 @@ function normalizeInput(input) {
     conservation: clean(input.conservation),
     reindeerMountain: clean(input.reindeerMountain),
     productiveForest: clean(input.productiveForest),
+    productiveForestLandAssumption: normalizeProductiveForestLandAssumption(input),
     soilMoisture: clean(input.soilMoisture),
     movingGroundwater: clean(input.movingGroundwater),
     vegetationType: clean(input.vegetationType),
@@ -203,9 +204,14 @@ function buildLegalAssessment(input) {
   const warnings = [];
   const nextChecks = [];
 
-  if (input.productiveForest !== "ja") {
-    warnings.push("Produktiv skogsmark är inte bekräftad.");
+  if (input.productiveForestLandAssumption === "uncertain") {
+    warnings.push("Markklass är osäker. Kontrollera innan åtgärdsbeslut.");
     nextChecks.push("Kontrollera markslag och om Skogsvårdslagens krav är tillämpliga.");
+  }
+
+  if (input.productiveForestLandAssumption === "non_productive") {
+    warnings.push("Ej produktiv/impediment/specialfall är markerat.");
+    nextChecks.push("Kontrollera markklass, impediment/specialfall och juridiska krav innan åtgärdsförslag används.");
   }
 
   if (input.reindeerMountain === "ja" || input.reindeerMountain === "osakert") {
@@ -222,7 +228,9 @@ function buildLegalAssessment(input) {
     hasConservationFlag: input.conservation === "ja" ||
       input.conservation === "osakert" ||
       input.reindeerMountain === "ja" ||
-      input.reindeerMountain === "osakert",
+      input.reindeerMountain === "osakert" ||
+      input.productiveForestLandAssumption === "uncertain" ||
+      input.productiveForestLandAssumption === "non_productive",
     text: warnings.length
       ? "Juridisk kontroll krävs eller bör göras innan åtgärdsförslag används i planering."
       : "Inga särskilda juridiska varningsflaggor är markerade, men lagkrav ska alltid kontrolleras före åtgärd.",
@@ -356,12 +364,15 @@ function chartNote(actionCode, input, siteIndexEstimate, curveReference) {
 }
 
 function legalStatusLabel(input) {
+  if (input.productiveForestLandAssumption === "uncertain") {
+    return "Kontroll rekommenderas";
+  }
+
   if (input.conservation === "ja" ||
     input.conservation === "osakert" ||
     input.reindeerMountain === "ja" ||
     input.reindeerMountain === "osakert" ||
-    input.productiveForest === "nej" ||
-    input.productiveForest === "osakert") {
+    input.productiveForestLandAssumption === "non_productive") {
     return "Kontroll krävs";
   }
   return "Ingen flagga";
@@ -404,6 +415,15 @@ function toNumber(value) {
 
 function clean(value) {
   return String(value ?? "").trim();
+}
+
+function normalizeProductiveForestLandAssumption(input) {
+  const current = clean(input.productiveForestLandAssumption);
+  if (current) return current;
+
+  const legacy = clean(input.productiveForest);
+  if (legacy === "nej") return "non_productive";
+  return "assumed_productive";
 }
 
 function unique(values) {
