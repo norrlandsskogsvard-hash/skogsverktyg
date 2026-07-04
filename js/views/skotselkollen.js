@@ -236,12 +236,7 @@ function resultTemplate(result) {
     "</div>" +
     chartTemplate(result.chartData) +
     regionWarningTemplate(result.regionWarning) +
-    "<section class='skotsel-fast-proposal'>" +
-      "<h3>Snabbt förslag</h3>" +
-      "<p><strong>Förslag:</strong> " + escapeHtml(result.recommendationDirection) + "</p>" +
-      "<p class='card__text'><strong>Prioritet:</strong> " + escapeHtml(result.actionPriority) + "</p>" +
-      listBlock("Nästa kontroll", result.quickChecks || []) +
-    "</section>" +
+    quickProposalTemplate(result) +
     evidenceSummaryTemplate(result.evidenceAssessment) +
     "<div class='skotsel-result-core'>" +
       resultBlock("Varför?", result.why) +
@@ -254,6 +249,59 @@ function resultTemplate(result) {
       advancedDetails("Källor och antaganden", groupedSourcesTemplate(result.groupedSourceNotes || {}, result.sourceNotes, result.evidenceAssessment), false, "skotsel-sources") +
     "</div>" +
   "</section>";
+}
+
+function quickProposalTemplate(result) {
+  const proposal = quickProposal(result);
+  return "<section class='skotsel-fast-proposal'>" +
+    "<h3>Snabbt förslag</h3>" +
+    "<div class='skotsel-proposal-grid'>" +
+      proposalBlock("Förslag", proposal.proposal) +
+      proposalBlock("Varför", proposal.why) +
+      "<section><h4>Kontrollera i fält</h4>" + listTemplate(proposal.checks) + "</section>" +
+      proposalBlock("Nästa steg", proposal.nextStep) +
+    "</div>" +
+  "</section>";
+}
+
+function quickProposal(result) {
+  if (result.actionCode === "curve_reference_pilot") {
+    return {
+      proposal: "Använd T20-exemplet som jämförelse, inte som färdigt åtgärdsbeslut.",
+      why: "Beståndspunkten kan jämföras mot källstött pilotunderlag, men full kurva saknas.",
+      checks: ["Stabilitet och kronslängd.", "Full regional gallringsmall.", "Naturvärden och hänsyn."],
+      nextStep: "Jämför mot komplett mall innan åtgärd."
+    };
+  }
+
+  if (result.actionCode === "curve_missing" && /björk/i.test(result.why || "")) {
+    return {
+      proposal: "Gör manuell björkbedömning utifrån kvalitet, mål och vitala huvudstammar.",
+      why: "Björkkurva saknas i appens kunskapsbas.",
+      checks: ["Raka och vitala huvudstammar.", "Mål med beståndet.", "Röta, krokighet och storm-/snörisk."],
+      nextStep: "Använd inte tall-/granmall som facit för björk."
+    };
+  }
+
+  if (result.actionCode === "curve_missing") {
+    return {
+      proposal: "Använd punkten som fältstöd, inte som gallringsbeslut.",
+      why: "Kurvunderlag saknas för vald kombination.",
+      checks: ["Stabilitet och kronslängd.", "Trädslagsblandning.", "Regional mall eller annan källa."],
+      nextStep: "Hämta rätt kurvunderlag innan åtgärd."
+    };
+  }
+
+  return {
+    proposal: result.recommendationDirection || "Använd resultatet som fältstöd innan åtgärd.",
+    why: result.why || "Bedömningen bygger på inmatade fältvärden och källstöd.",
+    checks: (result.quickChecks || []).slice(0, 3),
+    nextStep: "Kontrollera fältbilden innan förslaget används."
+  };
+}
+
+function proposalBlock(title, text) {
+  return "<section><h4>" + escapeHtml(title) + "</h4><p>" + escapeHtml(text || "") + "</p></section>";
 }
 
 function evidenceSummaryTemplate(evidenceAssessment) {
@@ -364,8 +412,8 @@ function chartTemplate(chartData) {
   const hasPoint = height !== null && basal !== null;
   const x = hasPoint ? chartX(height) : 44;
   const y = hasPoint ? chartY(basal) : 188;
-  const point = hasPoint ? "<circle cx='" + x + "' cy='" + y + "' r='7' class='skotsel-chart__point'></circle>" : "";
-  const label = hasPoint ? escapeHtml(formatNumber(height) + " m / " + formatNumber(basal) + " m²/ha") : "Ange höjd och grundyta";
+  const point = hasPoint ? pointTemplate(x, y, height, basal) : "";
+  const label = hasPoint ? escapeHtml("Bestånd: " + formatNumber(height) + " m / " + formatNumber(basal) + " m²/ha") : "Ange höjd och grundyta";
   const curveReference = chartData.curveReference;
   const hasPilot = curveReference?.status === "pilot";
   const hasComplete = curveReference?.status === "complete";
@@ -375,17 +423,62 @@ function chartTemplate(chartData) {
 
   return "<article class='skotsel-chart' role='img' aria-label='Gallringskurva med beståndets punkt'>" +
     "<div class='skotsel-chart__head'><h3>Gallringskurva</h3>" + badge + "</div>" +
-    "<svg viewBox='0 0 330 220' focusable='false'>" +
+    "<svg viewBox='0 0 340 230' focusable='false'>" +
+      gridTemplate() +
       zones +
       pilot +
       "<line x1='38' y1='192' x2='305' y2='192'></line>" +
       "<line x1='38' y1='18' x2='38' y2='192'></line>" +
-      "<text x='160' y='214'>Höjd</text>" +
-      "<text x='4' y='110' transform='rotate(-90 12 110)'>Grundyta</text>" +
+      "<text x='160' y='224' class='skotsel-chart__axis-title'>Höjd, m</text>" +
+      "<text x='8' y='116' class='skotsel-chart__axis-title' transform='rotate(-90 8 116)'>Grundyta, m²/ha</text>" +
       point +
     "</svg>" +
-    "<p class='card__text'><strong>" + escapeHtml(label) + "</strong><br>" + escapeHtml(chartData.note) + "</p>" +
+    chartLegendTemplate(hasPoint, hasPilot, hasComplete) +
+    "<p class='card__text skotsel-chart__note'><strong>" + label + "</strong><br>" + escapeHtml(chartStatusText(chartData, hasPilot, hasComplete)) + "</p>" +
   "</article>";
+}
+
+function gridTemplate() {
+  const yTicks = [10, 20, 30, 40].map((value) =>
+    "<g class='skotsel-chart__tick'><line class='skotsel-chart__grid' x1='38' y1='" + chartY(value) + "' x2='305' y2='" + chartY(value) + "'></line><text x='18' y='" + (chartY(value) + 4) + "'>" + value + "</text></g>"
+  ).join("");
+  const xTicks = [10, 20, 30].map((value) =>
+    "<g class='skotsel-chart__tick'><line class='skotsel-chart__grid' x1='" + chartX(value) + "' y1='18' x2='" + chartX(value) + "' y2='192'></line><text x='" + (chartX(value) - 6) + "' y='207'>" + value + "</text></g>"
+  ).join("");
+  return yTicks + xTicks;
+}
+
+function pointTemplate(x, y, height, basal) {
+  const labelX = clamp(x + 10, 64, 222);
+  const labelY = clamp(y - 12, 30, 178);
+  return "<g class='skotsel-chart__stand-point'>" +
+    "<circle cx='" + x + "' cy='" + y + "' r='8' class='skotsel-chart__point'></circle>" +
+    "<text x='" + labelX + "' y='" + labelY + "'>Bestånd: " + escapeHtml(formatNumber(height)) + " m / " + escapeHtml(formatNumber(basal)) + " m²/ha</text>" +
+  "</g>";
+}
+
+function chartLegendTemplate(hasPoint, hasPilot, hasComplete) {
+  const items = [];
+  if (hasPoint) items.push("<span><i class='skotsel-chart__legend-dot skotsel-chart__legend-dot--stand'></i>Beståndspunkt</span>");
+  if (hasPilot) {
+    items.push("<span><i class='skotsel-chart__legend-dot skotsel-chart__legend-dot--pilot'></i>T20-pilotpunkter</span>");
+    items.push("<span><i class='skotsel-chart__legend-line'></i>Exempellinje</span>");
+  }
+  if (hasComplete) items.push("<span><i class='skotsel-chart__legend-zone'></i>Källstödd zon</span>");
+  if (!items.length) return "";
+  return "<div class='skotsel-chart__legend'>" + items.join("") + "</div>";
+}
+
+function chartStatusText(chartData, hasPilot, hasComplete) {
+  const parts = [];
+  if (hasPilot) {
+    parts.push("T20-exempel, ej full kurva. Full digitaliserad gallringskurva saknas.");
+  } else if (!hasComplete) {
+    parts.push("Full digitaliserad gallringskurva saknas.");
+  }
+  if (chartData.note) parts.push(chartData.note);
+  if (chartData.regionWarning) parts.push(chartData.regionWarning);
+  return [...new Set(parts)].join(" ");
 }
 
 function pilotCurveTemplate(curve) {
@@ -394,8 +487,8 @@ function pilotCurveTemplate(curve) {
   const beforePoints = events.map((event) => chartX(event.topHeight) + "," + chartY(event.basalAreaBefore)).join(" ");
   const dots = events.map((event) =>
     "<g class='skotsel-chart__pilot-point'>" +
-      "<circle cx='" + chartX(event.topHeight) + "' cy='" + chartY(event.basalAreaBefore) + "' r='4'></circle>" +
-      "<text x='" + (chartX(event.topHeight) + 7) + "' y='" + (chartY(event.basalAreaBefore) - 6) + "'>" + escapeHtml(event.label) + "</text>" +
+      "<circle cx='" + chartX(event.topHeight) + "' cy='" + chartY(event.basalAreaBefore) + "' r='5'></circle>" +
+      "<text x='" + (chartX(event.topHeight) + 7) + "' y='" + (chartY(event.basalAreaBefore) - 7) + "'>" + escapeHtml(event.label) + "</text>" +
     "</g>"
   ).join("");
   return "<polyline class='skotsel-chart__pilot-line' points='" + beforePoints + "'></polyline>" + dots;

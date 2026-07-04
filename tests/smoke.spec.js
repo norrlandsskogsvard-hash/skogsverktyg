@@ -66,11 +66,15 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Pilotunderlag");
   await expect(page.locator("body")).toContainText("Samlad bedömning");
   await expect(page.locator("body")).toContainText("T20");
+  await expect(page.locator("body")).toContainText("T20-exempel, ej full kurva");
+  await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
+  await expect(page.locator("body")).toContainText("Jämför mot komplett mall innan åtgärd");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Ingen flagga");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
   await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
   await expect(page.locator("body")).toContainText("Norra Skog 2024");
+  await expect(page.locator(".skotsel-source-balance-details").first()).not.toHaveAttribute("open", "");
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-desktop.png`, fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -79,6 +83,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Pilotunderlag");
   await expect(page.locator("body")).toContainText("Samlad bedömning");
   await expect(page.locator("body")).toContainText("T20");
+  await expect(page.locator("body")).toContainText("T20-exempel, ej full kurva");
+  await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Ingen flagga");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
@@ -113,7 +119,20 @@ test("Skötselkollen håller björk som eget spår", async ({ page }) => {
   await page.locator('select[name="mainSpecies"]').selectOption("bjork");
   await expect(page.locator("body")).toContainText(/Björkspår|Björkspåret/i);
   await expect(page.locator("body")).toContainText(/Tall- eller granmall används inte som facit/i);
+  await expect(page.locator("body")).toContainText(/Punkten visas utan tall-\/granmall som facit/i);
   await expect(page.locator("body")).not.toContainText(/Tall- eller granmall används som facit för björk/i);
+});
+
+test("Skötselkollen visar saknad kurva för tall T22 utan att skapa falsk kurva", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/skotselkollen");
+  await fillSkotselkollenPilot(page);
+  await fillNumber(page, 'input[name="siteIndex"]', "22");
+  await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
+  await expect(page.locator("body")).toContainText(/Kurvunderlag saknas|kurva saknas/i);
+  await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
+  await expect(page.locator("body")).toContainText("Hämta rätt kurvunderlag innan åtgärd");
+  await expectNoHorizontalScroll(page);
 });
 
 test("Röjningskalkyl visar källstöd utan att ändra kalkylresultat", async ({ page }) => {

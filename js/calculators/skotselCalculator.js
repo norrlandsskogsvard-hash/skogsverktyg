@@ -274,7 +274,8 @@ function buildResult(input, parts) {
       basalArea: input.basalArea,
       curveReference,
       status: actionLabel,
-      note: chartNote(parts.actionCode, input, parts.siteIndexEstimate, curveReference)
+      note: chartNote(parts.actionCode, input, parts.siteIndexEstimate, curveReference),
+      regionWarning: regionWarningText(input, curveReference, parts.actionCode)
     },
     debug: {
       normalizedInput: input,

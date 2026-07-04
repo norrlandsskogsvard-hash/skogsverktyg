@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.10 - 2026-07-04
+
+### Changed - Källvärden och gallringsgraf
+
+- Källvärdes-backlog skapad för framtida skogliga värden.
+- Gallringsgrafen i Skötselkollen har gjorts tydligare.
+- T20-pilot visas tydligare som exempel/pilot, inte full kurva.
+- Björkspår visar tydligare att tall-/granmall inte används som facit.
+- Snabbförslag har fått tydligare fältstruktur.
+- PWA-cache höjd till skotselkollen.10.
+
 ## v2.0.0-alpha.1-skotselkollen.9 - 2026-07-04
 
 ### Changed - Praktiska mallar och markförutsättning

@@ -828,16 +828,33 @@
   stroke-width: 2;
 }
 
+.skotsel-chart .skotsel-chart__grid {
+  opacity: 0.65;
+  stroke-width: 1;
+}
+
 .skotsel-chart text {
   fill: var(--color-muted);
   font-size: 0.8rem;
   font-weight: 700;
 }
 
+.skotsel-chart__axis-title {
+  fill: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
 .skotsel-chart__point {
   fill: var(--color-primary);
   stroke: #ffffff;
   stroke-width: 3;
+}
+
+.skotsel-chart__stand-point text {
+  fill: var(--color-primary-strong);
+  font-size: 0.68rem;
+  font-weight: 900;
 }
 
 .skotsel-chart__pilot-line {
@@ -858,6 +875,58 @@
   fill: var(--color-text);
   font-size: 0.68rem;
   font-weight: 800;
+}
+
+.skotsel-chart__legend {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+  align-items: center;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.skotsel-chart__legend span {
+  display: inline-flex;
+  min-width: 0;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.skotsel-chart__legend-dot {
+  display: inline-block;
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+}
+
+.skotsel-chart__legend-dot--stand {
+  background: var(--color-primary);
+}
+
+.skotsel-chart__legend-dot--pilot {
+  background: var(--color-accent);
+}
+
+.skotsel-chart__legend-line {
+  display: inline-block;
+  width: 1.4rem;
+  border-top: 2px dashed var(--color-accent);
+}
+
+.skotsel-chart__legend-zone {
+  display: inline-block;
+  width: 1rem;
+  height: 0.55rem;
+  border-radius: 0.15rem;
+  background: var(--color-primary-soft);
+}
+
+.skotsel-chart__note {
+  margin: 0;
 }
 
 .skotsel-result-section {
@@ -1077,6 +1146,30 @@
 .skotsel-fast-proposal h3,
 .skotsel-fast-proposal p {
   margin: 0;
+}
+
+.skotsel-proposal-grid {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2);
+}
+
+.skotsel-proposal-grid section {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+.skotsel-proposal-grid h4 {
+  margin: 0;
+  color: var(--color-primary-strong);
+  font-size: 0.85rem;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.skotsel-proposal-grid .skotsel-list {
+  margin-top: 0;
 }
 
 .skotsel-evidence-summary {

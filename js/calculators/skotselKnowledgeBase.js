@@ -7,6 +7,8 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-kallviktning.md",
   "docs/skotselkollen-kallbank-skogskunskap.md",
   "docs/skotselkollen-praktiska-mallar.md",
+  "docs/skotselkollen-kallvarden-backlog.md",
+  "docs/skotselkollen-gallringskurva-ui.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
 

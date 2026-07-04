@@ -604,11 +604,24 @@
   }
 
   .skotsel-chart svg {
-    max-height: 9rem;
+    max-height: 11.5rem;
+  }
+
+  .skotsel-chart text {
+    font-size: 0.6rem;
+  }
+
+  .skotsel-chart__stand-point text {
+    font-size: 0.56rem;
   }
 
   .skotsel-chart__pilot-point text {
-    font-size: 0.58rem;
+    font-size: 0.54rem;
+  }
+
+  .skotsel-chart__legend {
+    gap: 0.35rem 0.55rem;
+    font-size: 0.76rem;
   }
 
   .skotsel-chart__head {
