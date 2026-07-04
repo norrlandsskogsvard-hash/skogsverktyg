@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.5 - 2026-07-04
+
+### Changed - Första källstyrda kurvdata-steget
+
+- Skötselkollen har fått första källstyrda kurvdata-strukturen.
+- T20 Norra Sverige inlagt som pilot-/exempelunderlag.
+- Grafen kan visa pilotunderlag utan att låtsas vara full gallringskurva.
+- Manuell SI normaliseras till T/G/B-format.
+- Auto-SI visar tydligt när källstödd kurvtabell saknas.
+- PWA-cache höjd till skotselkollen.5.
+
 ## v2.0.0-alpha.1-skotselkollen.4 - 2026-07-04
 
 ### Changed - Snabb digital gallringsmall

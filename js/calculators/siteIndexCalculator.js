@@ -25,7 +25,7 @@ export function estimateSiteIndex(input = {}) {
       siteIndex: speciesCode + formatSiteIndex(manualSiteIndex),
       numericSiteIndex: manualSiteIndex,
       speciesCode,
-      method: "Manuellt angivet",
+      method: "manual",
       confidence: "medium",
       sourceNotes,
       warnings,
@@ -47,7 +47,7 @@ export function estimateSiteIndex(input = {}) {
 
   if (!hasSiteIndexCurveData(speciesCode)) {
     missing.push("källstödd höjdutvecklingskurva");
-    warnings.push("SI saknas - välj manuellt eller gör fördjupad bonitering.");
+    warnings.push("Auto-SI saknar inlagd källstödd kurvtabell.");
     return missingResult(speciesCode, sourceNotes, warnings, missing);
   }
 
@@ -73,7 +73,7 @@ export function estimateSiteIndex(input = {}) {
     siteIndex: speciesCode + formatSiteIndex(nearest.curve.siteIndex),
     numericSiteIndex: nearest.curve.siteIndex,
     speciesCode,
-    method: "Höjd + ålder",
+    method: "height-age",
     confidence: ageType === "brosthojdsalder" ? "medium" : "low",
     sourceNotes,
     warnings,
@@ -86,7 +86,7 @@ function missingResult(speciesCode, sourceNotes, warnings, missing) {
     siteIndex: null,
     numericSiteIndex: null,
     speciesCode,
-    method: "Saknas",
+    method: "not-available",
     confidence: "low",
     sourceNotes,
     warnings,

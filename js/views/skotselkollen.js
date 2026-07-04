@@ -256,36 +256,74 @@ function resultTemplate(result) {
 
 function siTemplate(siteIndexEstimate) {
   const value = siteIndexEstimate.siteIndex || "saknas";
-  const method = siteIndexEstimate.method && siteIndexEstimate.method !== "Saknas" ? " · " + siteIndexEstimate.method : "";
+  const method = methodLabel(siteIndexEstimate.method);
   const warning = siteIndexEstimate.missing?.length
-    ? "<small>SI saknas - välj manuellt eller gör fördjupad bonitering.</small>"
-    : "<small>Säkerhet: " + escapeHtml(confidenceLabel(siteIndexEstimate.confidence)) + method + "</small>";
-  return "<div class='skotsel-si-summary'><span>Beräknat SI</span><strong>" + escapeHtml(value) + "</strong>" + warning + "</div>";
+    ? "<small>SI saknas - v?lj manuellt eller g?r f?rdjupad bonitering.</small>"
+    : "<small>S?kerhet: " + escapeHtml(confidenceLabel(siteIndexEstimate.confidence)) + (method ? " ? " + escapeHtml(method) : "") + "</small>";
+  return "<div class='skotsel-si-summary'><span>Ber?knat SI</span><strong>" + escapeHtml(value) + "</strong>" + warning + "</div>";
 }
 
 function chartTemplate(chartData) {
   const height = chartData.heightMeters;
   const basal = chartData.basalArea;
   const hasPoint = height !== null && basal !== null;
-  const x = hasPoint ? clamp(44 + height * 7, 44, 288) : 44;
-  const y = hasPoint ? clamp(188 - basal * 4, 24, 188) : 188;
+  const x = hasPoint ? chartX(height) : 44;
+  const y = hasPoint ? chartY(basal) : 188;
   const point = hasPoint ? "<circle cx='" + x + "' cy='" + y + "' r='7' class='skotsel-chart__point'></circle>" : "";
-  const label = hasPoint ? escapeHtml(formatNumber(height) + " m / " + formatNumber(basal) + " m²/ha") : "Ange höjd och grundyta";
+  const label = hasPoint ? escapeHtml(formatNumber(height) + " m / " + formatNumber(basal) + " m?/ha") : "Ange h?jd och grundyta";
+  const curveReference = chartData.curveReference;
+  const hasPilot = curveReference?.status === "pilot";
+  const hasComplete = curveReference?.status === "complete";
+  const zones = hasComplete ? completeZonesTemplate() : "";
+  const pilot = hasPilot ? pilotCurveTemplate(curveReference.curve) : "";
+  const badge = hasPilot ? "<span>Pilot: T20-exempel, ej full kurva</span>" : "<span>" + escapeHtml(chartData.status || "") + "</span>";
 
-  return "<article class='skotsel-chart' role='img' aria-label='Gallringskurva med beståndets punkt'>" +
-    "<div class='skotsel-chart__head'><h3>Gallringskurva</h3><span>" + escapeHtml(chartData.status || "") + "</span></div>" +
+  return "<article class='skotsel-chart' role='img' aria-label='Gallringskurva med best?ndets punkt'>" +
+    "<div class='skotsel-chart__head'><h3>Gallringskurva</h3>" + badge + "</div>" +
     "<svg viewBox='0 0 330 220' focusable='false'>" +
-      "<rect x='38' y='126' width='267' height='34' class='skotsel-chart__zone skotsel-chart__zone--low'></rect>" +
-      "<rect x='38' y='82' width='267' height='44' class='skotsel-chart__zone skotsel-chart__zone--mid'></rect>" +
-      "<rect x='38' y='38' width='267' height='44' class='skotsel-chart__zone skotsel-chart__zone--high'></rect>" +
+      zones +
+      pilot +
       "<line x1='38' y1='192' x2='305' y2='192'></line>" +
       "<line x1='38' y1='18' x2='38' y2='192'></line>" +
-      "<text x='160' y='214'>Höjd</text>" +
+      "<text x='160' y='214'>H?jd</text>" +
       "<text x='4' y='110' transform='rotate(-90 12 110)'>Grundyta</text>" +
       point +
     "</svg>" +
     "<p class='card__text'><strong>" + escapeHtml(label) + "</strong><br>" + escapeHtml(chartData.note) + "</p>" +
   "</article>";
+}
+
+function pilotCurveTemplate(curve) {
+  const events = curve?.points?.thinningEvents || [];
+  if (!events.length) return "";
+  const beforePoints = events.map((event) => chartX(event.topHeight) + "," + chartY(event.basalAreaBefore)).join(" ");
+  const dots = events.map((event) =>
+    "<g class='skotsel-chart__pilot-point'>" +
+      "<circle cx='" + chartX(event.topHeight) + "' cy='" + chartY(event.basalAreaBefore) + "' r='4'></circle>" +
+      "<text x='" + (chartX(event.topHeight) + 7) + "' y='" + (chartY(event.basalAreaBefore) - 6) + "'>" + escapeHtml(event.label) + "</text>" +
+    "</g>"
+  ).join("");
+  return "<polyline class='skotsel-chart__pilot-line' points='" + beforePoints + "'></polyline>" + dots;
+}
+
+function completeZonesTemplate() {
+  return "<rect x='38' y='126' width='267' height='34' class='skotsel-chart__zone skotsel-chart__zone--low'></rect>" +
+    "<rect x='38' y='82' width='267' height='44' class='skotsel-chart__zone skotsel-chart__zone--mid'></rect>" +
+    "<rect x='38' y='38' width='267' height='44' class='skotsel-chart__zone skotsel-chart__zone--high'></rect>";
+}
+
+function chartX(height) {
+  return clamp(44 + height * 7, 44, 288);
+}
+
+function chartY(basalArea) {
+  return clamp(188 - basalArea * 4, 24, 188);
+}
+
+function methodLabel(method) {
+  if (method === "manual") return "Manuellt angivet";
+  if (method === "height-age") return "H?jd + ?lder";
+  return "";
 }
 
 function listBlock(title, values) {

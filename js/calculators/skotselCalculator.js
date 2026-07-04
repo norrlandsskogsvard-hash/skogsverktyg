@@ -7,6 +7,7 @@ const ACTIONS = {
   curve_thinning_zone: ["Gallringsläge", "Medel"],
   curve_thinning_now: ["Gallra nu", "Hög"],
   curve_late_risk: ["Sen gallring-risk", "Hög"],
+  curve_reference_pilot: ["Pilotunderlag", "Medel"],
   curve_missing: ["Kurvunderlag saknas", "Låg"],
   final_felling_check: ["Slutavverkning kontroll", "Hög"],
   conservation_check: ["Hänsynskontroll", "Hög"],
@@ -109,7 +110,7 @@ function missingQuickFields(input) {
 }
 
 function assessQuickCurve(input, siteIndexEstimate) {
-  const zone = findGallringZone(input, siteIndexEstimate);
+  const curveReference = findGallringZone(input, siteIndexEstimate);
   const fieldChecks = baseFieldChecks(input);
   const warnings = [];
 
@@ -143,6 +144,25 @@ function assessQuickCurve(input, siteIndexEstimate) {
     };
   }
 
+  if (curveReference?.status === "pilot") {
+    return {
+      actionCode: curveReference.actionCode,
+      confidence: curveReference.confidence,
+      why: curveReference.explanation,
+      recommendationDirection: curveReference.recommendation,
+      fieldChecks: [
+        "Jämför beståndspunkten mot T20-exemplets höjd och grundyta.",
+        "Kontrollera full regional gallringsmall innan åtgärdsförslag.",
+        ...fieldChecks
+      ],
+      warnings: [
+        "Pilotunderlaget är ett textbaserat exempel, inte en komplett digitaliserad kurva.",
+        ...curveReference.curve.limitations
+      ],
+      curveReference
+    };
+  }
+
   if (!siteIndexEstimate.numericSiteIndex) {
     return {
       actionCode: "curve_missing",
@@ -158,7 +178,7 @@ function assessQuickCurve(input, siteIndexEstimate) {
     };
   }
 
-  if (!zone) {
+  if (!curveReference) {
     return {
       actionCode: "curve_missing",
       confidence: "low",
@@ -170,12 +190,13 @@ function assessQuickCurve(input, siteIndexEstimate) {
   }
 
   return {
-    actionCode: zone.actionCode || "curve_monitor",
-    confidence: zone.confidence || "medium",
-    why: zone.explanation || "Beståndets punkt har jämförts mot inlagd gallringskurva.",
-    recommendationDirection: zone.recommendation || "Kontrollera stabilitet, kronlängd, bärighet och hänsyn innan förslag skrivs.",
+    actionCode: curveReference.actionCode || "curve_monitor",
+    confidence: curveReference.confidence || "medium",
+    why: curveReference.explanation || "Beståndets punkt har jämförts mot inlagd gallringskurva.",
+    recommendationDirection: curveReference.recommendation || "Kontrollera stabilitet, kronlängd, bärighet och hänsyn innan förslag skrivs.",
     fieldChecks,
-    warnings
+    warnings,
+    curveReference
   };
 }
 
@@ -210,10 +231,14 @@ function buildLegalAssessment(input) {
 
 function buildResult(input, parts) {
   const [actionLabel, actionPriority] = ACTIONS[parts.actionCode] ?? ACTIONS.insufficient_data;
-  const zone = findGallringZone(input, parts.siteIndexEstimate);
+  const curveReference = parts.curveReference ?? findGallringZone(input, parts.siteIndexEstimate);
   const warnings = unique(parts.warnings);
   const fieldChecks = unique(parts.fieldChecks).slice(0, 7);
   const quickChecks = fieldChecks.slice(0, 3);
+  const sourceNotes = unique([
+    ...parts.sourceNotes,
+    ...curveSourceNotes(curveReference)
+  ]);
   const planText = buildPlanText(parts.actionCode, parts.recommendationDirection);
 
   return {
@@ -230,14 +255,14 @@ function buildResult(input, parts) {
     warnings,
     nextChecks: fieldChecks,
     planText,
-    sourceNotes: unique(parts.sourceNotes),
+    sourceNotes,
     siteIndexEstimate: parts.siteIndexEstimate,
     chartData: {
       heightMeters: input.heightMeters,
       basalArea: input.basalArea,
-      zone,
-      status: parts.actionLabel,
-      note: chartNote(parts.actionCode, input, parts.siteIndexEstimate)
+      curveReference,
+      status: actionLabel,
+      note: chartNote(parts.actionCode, input, parts.siteIndexEstimate, curveReference)
     },
     debug: {
       normalizedInput: input,
@@ -260,9 +285,21 @@ function baseFieldChecks(input) {
   return checks;
 }
 
-function chartNote(actionCode, input, siteIndexEstimate) {
+function curveSourceNotes(curveReference) {
+  if (!curveReference?.curve) return [];
+  return [
+    `${curveReference.curve.source}, ${curveReference.curve.sourcePage}.`,
+    `Kurvstatus: ${curveReference.curve.status}; precision: ${curveReference.curve.precision}.`,
+    ...curveReference.curve.limitations
+  ];
+}
+
+function chartNote(actionCode, input, siteIndexEstimate, curveReference) {
   if (input.mainSpecies === "bjork") {
     return "Björkspår: kurvunderlag saknas eller är ofullständigt. Punkten visas utan tall-/granmall som facit.";
+  }
+  if (actionCode === "curve_reference_pilot") {
+    return "Källstött T20-exempel finns. Jämför mot full gallringsmall innan åtgärd.";
   }
   if (actionCode === "insufficient_data") {
     return "Ange huvudträdslag, höjd och grundyta för att visa punkten.";
@@ -270,10 +307,17 @@ function chartNote(actionCode, input, siteIndexEstimate) {
   if (!siteIndexEstimate.numericSiteIndex) {
     return "Kurvunderlag saknas eller SI saknas. Jämför manuellt mot regional mall.";
   }
-  return "SI finns, men gallringskurva saknas i appens kunskapsbas för vald kombination.";
+  if (!curveReference) {
+    return "SI finns, men gallringskurva saknas i appens kunskapsbas för vald kombination.";
+  }
+  return "Kurvstatus visas från källstött underlag.";
 }
 
 function buildPlanText(actionCode, recommendationDirection) {
+  if (actionCode === "curve_reference_pilot") {
+    return "Beståndet har jämförts mot källstött T20-exempel för norra Sverige. Underlaget är ett pilotstöd och bör kontrolleras mot full gallringsmall innan åtgärd skrivs in i planen.";
+  }
+
   if (actionCode === "final_felling_check") {
     return "Beståndet kan vara aktuellt för föryngringsavverkning enligt inmatade värden. Kontroll av lägsta ålder, anmälan/tillstånd, naturvärden, rennäring och föryngringsförutsättningar krävs före åtgärdsförslag.";
   }

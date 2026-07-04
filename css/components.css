@@ -840,6 +840,26 @@
   stroke-width: 3;
 }
 
+.skotsel-chart__pilot-line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-dasharray: 6 5;
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.skotsel-chart__pilot-point circle {
+  fill: var(--color-accent);
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+.skotsel-chart__pilot-point text {
+  fill: var(--color-text);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
 .skotsel-result-section {
   display: grid;
   min-width: 0;

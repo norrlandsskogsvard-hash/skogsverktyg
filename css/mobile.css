@@ -607,6 +607,10 @@
     max-height: 9rem;
   }
 
+  .skotsel-chart__pilot-point text {
+    font-size: 0.58rem;
+  }
+
   .skotsel-chart__head {
     align-items: flex-start;
     flex-direction: column;
