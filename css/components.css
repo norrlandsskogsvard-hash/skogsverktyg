@@ -751,3 +751,126 @@
     padding: 0;
   }
 }
+
+
+.skotsel-layout {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.skotsel-form,
+.skotsel-result {
+  min-width: 0;
+}
+
+.skotsel-result {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-4));
+  display: grid;
+  gap: var(--space-3);
+}
+
+.skotsel-result-card {
+  background: var(--color-surface);
+}
+
+.skotsel-result-top {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.skotsel-metric {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+  padding: var(--space-3);
+}
+
+.skotsel-metric span {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.skotsel-metric strong {
+  min-width: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.skotsel-chart {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  padding: var(--space-3);
+}
+
+.skotsel-chart svg {
+  width: 100%;
+  max-height: 14rem;
+  min-width: 0;
+}
+
+.skotsel-chart line {
+  stroke: var(--color-border);
+  stroke-width: 2;
+}
+
+.skotsel-chart text {
+  fill: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.skotsel-chart__point {
+  fill: var(--color-primary);
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+.skotsel-result-section {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+
+.skotsel-result-section h3,
+.skotsel-result-section p {
+  margin: 0;
+}
+
+.skotsel-result-section h3 {
+  font-size: 1rem;
+}
+
+.skotsel-list {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.skotsel-sources {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+
+.skotsel-sources summary {
+  cursor: pointer;
+  font-weight: 800;
+}

@@ -1,4 +1,4 @@
-const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-fieldmode.3";
+const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-skotselkollen.1";
 
 const CORE_ASSETS = [
   "./",
@@ -19,6 +19,7 @@ const CORE_ASSETS = [
   "./js/views/dashboard.js",
   "./js/views/dgv.js",
   "./js/views/height.js",
+  "./js/views/skotselkollen.js",
   "./js/views/rojning.js",
   "./js/views/forest-plan-pricing.js",
   "./js/views/quote.js",
@@ -26,6 +27,8 @@ const CORE_ASSETS = [
   "./js/views/settings.js",
   "./js/calculators/dgvCalculator.js",
   "./js/calculators/heightCalculator.js",
+  "./js/calculators/skotselCalculator.js",
+  "./js/calculators/skotselKnowledgeBase.js",
   "./js/calculators/customerArchive.js",
   "./js/calculators/quoteCalculator.js",
   "./js/calculators/pricingEngine.js"

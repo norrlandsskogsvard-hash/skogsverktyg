@@ -1,6 +1,7 @@
 import { renderDashboardView } from "./views/dashboard.js";
 import { renderDgvView } from "./views/dgv.js";
 import { renderHeightView } from "./views/height.js";
+import { renderSkotselkollenView } from "./views/skotselkollen.js";
 import { renderRojningView } from "./views/rojning.js";
 import { renderForestPlanPricingView } from "./views/forest-plan-pricing.js";
 import { renderQuoteView } from "./views/quote.js";
@@ -13,6 +14,7 @@ const routes = {
   "/": { id: "dashboard", title: "Start", render: renderDashboardView },
   "/dgv": { id: "dgv", title: "DGV", render: renderDgvView },
   "/height": { id: "height", title: "Medelhöjd", render: renderHeightView },
+  "/skotselkollen": { id: "skotselkollen", title: "Skötselkollen", render: renderSkotselkollenView },
   "/rojning": { id: "rojning", title: "Röjning", render: renderRojningView },
   "/forest-plan-pricing": { id: "forest-plan-pricing", title: "Planpris", render: renderForestPlanPricingView },
   "/quote": { id: "quote", title: "Offert", render: renderQuoteView },

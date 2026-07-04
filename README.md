@@ -51,7 +51,7 @@ Skogskalkyl 2.0 är en modern PWA för svenska skogsvårdsentreprenörer och sm�
 - Responsiv layout för mobil, surfplatta och desktop
 - PWA-manifest och service worker med defensiv cachelogik
 - Lokalt sparade inställningar med localStorage
-- Förberedda moduler för DGV, medelhöjd, röjning, skogsbruksplan och offert
+- Förberedda moduler för DGV, medelhöjd, Skötselkollen, röjning, skogsbruksplan och offert
 - Grundläggande kalkylmotor för röjning, planprissättning och offertsummering
 
 ## Kör lokalt
@@ -163,3 +163,8 @@ Testa modulen:
 4. Lägg till rader manuellt eller hämta senaste röjning/planpris.
 5. Kontrollera summering och förhandsvisning.
 6. Klicka på Kopiera offerttext eller Skriv ut / Spara som PDF.
+
+
+## Skötselkollen
+
+Skötselkollen är ett fältstöd för att bedöma nästa möjliga åtgärd i ett bestånd. Modulen skiljer på skoglig bedömning och juridisk kontroll, sparar utkast lokalt i `skotselkollenDraft`, visar källor och antaganden och undviker numeriska gränsvärden när källmatrisen saknas i repo.

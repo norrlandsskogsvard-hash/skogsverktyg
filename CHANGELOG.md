@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.1 - 2026-07-04
+
+### Added - Skötselkollen v1
+
+- Ny modul Skötselkollen v1.
+- Bedömer röjning, gallring och möjlig slutavverkning som beslutsstöd.
+- Separat juridisk kontroll.
+- Stöd för björk som eget spår.
+- Källor och antaganden visas i resultatet.
+- PWA-cache höjd till skotselkollen.1.
+
 ## v2.0.0-alpha.1-fieldmode.3 - 2026-07-04
 
 ### Fixed - Tajtare mobilfältläge
