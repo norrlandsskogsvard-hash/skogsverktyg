@@ -66,5 +66,9 @@ export function sourceNotesForInput(input = {}) {
   }
 
   notes.push("Gallringszon visas bara när kunskapsbasen innehåller granskad zondata. För vald v1 saknas sådan zondata.");
+  notes.push("INGVAR används endast som referens för arbetsgång och variabler, inte som direkt facit.");
+  notes.push("Heureka används som referens för långsiktigt scenario- och beslutsstöd, inte som direkt fältgräns.");
+  notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
+  notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];
 }

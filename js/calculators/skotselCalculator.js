@@ -2,7 +2,7 @@ import { findGallringZone, sourceNotesForInput } from "./skotselKnowledgeBase.js
 
 const ACTIONS = {
   no_action: ["Ingen åtgärd nu", "Låg"],
-  monitor: ["Följ upp i fält", "Låg"],
+  monitor: ["Följ upp", "Låg"],
   cleaning_plan: ["Röjning bör planeras", "Medel"],
   cleaning_now: ["Röjning behövs nu", "Hög"],
   delayed_cleaning: ["Försenad röjning / gallringsförberedelse", "Hög"],
@@ -33,7 +33,7 @@ export function calculateSkotselRecommendation(input = {}) {
       forestryAssessment: "Underlaget saknar de bärande fältvärdena. Ange minst trädslag, fas och centrala mätvärden innan Skötselkollen ger ett skogligt förslag.",
       legalAssessment: legal.text,
       warnings: [...warnings, ...legal.warnings, "Otillräckligt underlag för skoglig rekommendation."],
-      nextChecks: ["Komplettera höjd, stamantal, grundyta, DGV, beståndsfas och huvudträdslag."],
+      nextChecks: ["Komplettera saknade fält: " + missingCore.join(", ") + "."],
       sourceNotes
     });
   }
@@ -94,7 +94,7 @@ function missingCoreFields(input) {
   if (!input.mainSpecies || input.mainSpecies === "okand") missing.push("huvudträdslag");
   if (!input.standPhase || input.standPhase === "okand") missing.push("beståndsfas");
   REQUIRED_MEASURES.forEach((key) => {
-    if (input[key] === null) missing.push(key);
+    if (input[key] === null) missing.push(fieldLabel(key));
   });
   return missing;
 }
@@ -221,17 +221,25 @@ function buildResult(input, parts) {
   const [actionLabel, actionPriority] = ACTIONS[parts.actionCode] ?? ACTIONS.insufficient_data;
   const zone = findGallringZone(input);
   const legalAssessment = addFinalFellingLegalText(parts.actionCode, input, parts.legalAssessment, parts.warnings, parts.nextChecks);
-  const planText = buildPlanText(parts.actionCode, parts.forestryAssessment, legalAssessment);
+  const warnings = unique(parts.warnings);
+  const baseChecks = unique(parts.nextChecks);
+  const fieldChecks = buildFieldChecks(parts.actionCode, input, baseChecks);
+  const why = buildWhy(input, parts.actionCode, parts.forestryAssessment, warnings);
+  const recommendationDirection = buildRecommendationDirection(parts.actionCode, input);
+  const planText = buildPlanText(parts.actionCode, why, recommendationDirection, legalAssessment, fieldChecks);
 
   return {
     actionCode: parts.actionCode,
     actionLabel,
     actionPriority,
     confidence: parts.confidence,
+    why,
+    fieldChecks,
+    recommendationDirection,
     forestryAssessment: parts.forestryAssessment,
     legalAssessment,
-    warnings: unique(parts.warnings),
-    nextChecks: unique(parts.nextChecks),
+    warnings,
+    nextChecks: fieldChecks,
     planText,
     sourceNotes: unique(parts.sourceNotes),
     chartData: {
@@ -248,24 +256,119 @@ function buildResult(input, parts) {
   };
 }
 
-function addFinalFellingLegalText(actionCode, input, legalText, warnings, nextChecks) {
-  if (!actionCode.startsWith("final_felling")) {
-    return legalText;
+function buildFieldChecks(actionCode, input, baseChecks) {
+  let checks = [...baseChecks];
+
+  if (["thinning_soon", "thinning_now", "monitor"].includes(actionCode) && input.standPhase === "gallringsskog") {
+    checks.push(
+      "Kontrollera om beståndet är jämnt, välslutet och tidigare skött.",
+      "Mät grundyta på flera punkter, inte bara en.",
+      "Kontrollera kronlängd och om träden är upphissade.",
+      "Bedöm snö- och vindrisk innan gallringsstyrka föreslås.",
+      "Kontrollera stickvägar och bärighet.",
+      "Kontrollera naturvärden och kulturmiljö innan åtgärdsförslag skrivs.",
+      "Jämför mot regional gallringsmall eller Skogsstyrelsens/Skogforsks underlag när källkurva saknas i appen."
+    );
   }
 
-  if (input.ageYears === null || input.siteIndex === null) {
-    warnings.push("Slutavverkningskontroll saknar ålder eller ståndortsindex.");
+  if (input.mainSpecies === "bjork") {
+    checks.push(
+      "Avgör om målet är björkproduktion, barrföryngring under björk eller naturhänsyn.",
+      "Kontrollera antal raka, vitala huvudstammar.",
+      "Kontrollera kronutrymme och om huvudstammarna börjar hämmas.",
+      "Kontrollera om björken fungerar som skärm över gran/tall.",
+      "Kontrollera röta, krokighet, dubbeltoppar och storm-/snöskador.",
+      "Använd inte tall/granmall som direkt facit."
+    );
   }
+
+  if (["cleaning_plan", "cleaning_now"].includes(actionCode)) {
+    checks.push(
+      "Kontrollera huvudträdslag och framtida mål.",
+      "Bedöm om björk ska sparas, reduceras eller gynnas.",
+      "Kontrollera höjdskiktning och stammar som hämmar huvudstammar.",
+      "Kontrollera älgskador och skadade stammar.",
+      "Bedöm om röjningen är sen och om förröjning inför framtida gallring behövs."
+    );
+  }
+
+  if (["final_felling_possible", "final_felling_priority"].includes(actionCode)) {
+    checks.push(
+      "Kontrollera lägsta slutavverkningsålder.",
+      "Kontrollera om åtgärden kräver anmälan eller tillstånd.",
+      "Kontrollera naturvärden, kulturmiljö och rennäring.",
+      "Kontrollera föryngringsförutsättningar.",
+      "Kontrollera bärighet, väg och hänsynsytor.",
+      "Bedöm om beståndet fortfarande har god tillväxt eller om slutavverkning bör planeras."
+    );
+  }
+
+  if (input.conservation === "ja" || input.conservation === "osakert") {
+    checks.push(
+      "Avgränsa hänsynsytor innan produktionsåtgärd föreslås.",
+      "Kontrollera nyckelbiotopsliknande strukturer, död ved, äldre löv, grova träd och vattenmiljöer.",
+      "Skriv inte produktionsåtgärd som huvudförslag innan hänsynsbedömning är gjord."
+    );
+  }
+
+  if (input.reindeerMountain === "ja" || input.reindeerMountain === "osakert") {
+    checks.push(
+      "Kontrollera om området ligger inom fjällnära skog eller renskötselns viktiga marker.",
+      "Kontrollera om tillstånd, samråd eller särskild hänsyn krävs.",
+      "Föreslå inte åtgärd utan juridisk kontroll."
+    );
+  }
+
+  if (actionCode === "insufficient_data") {
+    checks.push("Komplettera med ålder, DGV, grundyta och ståndortsindex innan åtgärd föreslås.");
+  }
+
+  return unique(checks);
+}
+
+function buildWhy(input, actionCode, forestryAssessment, warnings) {
+  const parts = [];
+  if (input.standPhase && input.standPhase !== "okand") parts.push("Beståndsfasen är angiven som " + phaseLabel(input.standPhase) + ".");
+  if (input.mainSpecies && input.mainSpecies !== "okand") parts.push("Huvudträdslag är " + speciesLabel(input.mainSpecies) + ".");
+  if (input.heightMeters !== null) parts.push("Höjd är inmatad som " + formatNumber(input.heightMeters) + " m.");
+  if (input.basalArea !== null) parts.push("Grundyta är inmatad som " + formatNumber(input.basalArea) + " m²/ha.");
+  if (input.stemsPerHa !== null) parts.push("Stamantal är inmatat som " + formatNumber(input.stemsPerHa, 0) + " st/ha.");
+  if (input.ageYears !== null) parts.push("Ålder är inmatad som " + formatNumber(input.ageYears, 0) + " år.");
+  if (warnings.length) parts.push("Risk- eller hänsynsflaggor finns och ska vägas in.");
+
+  if (actionCode === "insufficient_data") {
+    parts.push("Underlaget är för ofullständigt för en tydlig åtgärdsriktning.");
+  } else if (input.standPhase === "gallringsskog") {
+    parts.push("Skötselkollen saknar granskad gallringszon för exakt kombination, men grundyta, höjd och stamantal är centrala ingångsvärden som bör jämföras mot regional gallringsmall.");
+  } else if (actionCode.startsWith("final_felling")) {
+    parts.push("Äldre skog och mognadsdata gör att slutavverkningsfas kan vara aktuell att kontrollera, men lagkrav och hänsyn är inte avgjorda av appen.");
+  }
+
+  return parts.length ? parts.join(" ") : forestryAssessment;
+}
+
+function buildRecommendationDirection(actionCode, input) {
+  if (actionCode === "insufficient_data") return "Komplettera med ålder, DGV, grundyta och ståndortsindex innan åtgärd föreslås.";
+  if (actionCode === "conservation_check") return "Behandla som hänsynsbedömning innan produktionsåtgärd.";
+  if (["cleaning_plan", "cleaning_now"].includes(actionCode)) return "Planera röjningskontroll och föreslå röjning först när huvudstammar, skador och målbild är bekräftade.";
+  if (["thinning_soon", "thinning_now", "monitor"].includes(actionCode) && input.standPhase === "gallringsskog") return "Planera gallring inom planperioden om fältkontrollerna bekräftar stabilt bestånd. Undvik hård gallring vid upphissade kronor eller snörisk.";
+  if (["final_felling_possible", "final_felling_priority"].includes(actionCode)) return "Överväg slutavverkning endast efter lag- och naturvärdeskontroll.";
+  return "Följ upp inom 3-5 år eller när nya fältvärden finns.";
+}
+
+function addFinalFellingLegalText(actionCode, input, legalText, warnings, nextChecks) {
+  if (!actionCode.startsWith("final_felling")) return legalText;
+  if (input.ageYears === null || input.siteIndex === null) warnings.push("Slutavverkningskontroll saknar ålder eller ståndortsindex.");
   nextChecks.push("Kontrollera lägsta ålder, anmälningsplikt/tillstånd, naturvärden, rennäring och återväxt innan förslag används.");
   return legalText + " Slutavverkningsfas kräver alltid kontroll av lägsta ålder, anmälan/tillstånd, hänsyn och återväxtkrav.";
 }
 
-function buildPlanText(actionCode, forestryAssessment, legalAssessment) {
+function buildPlanText(actionCode, why, recommendationDirection, legalAssessment, fieldChecks) {
+  const checks = fieldChecks.slice(0, 4).join(" ");
   if (actionCode.startsWith("final_felling")) {
-    return "Beståndet bedöms kunna vara i slutavverkningsfas enligt inmatade värden. Före förslag om föryngringsavverkning ska lägsta ålder, anmälningsplikt/tillstånd, naturvärden, rennäring, återväxt och övriga krav enligt Skogsvårdslagen kontrolleras.";
+    return "Beståndet bedöms kunna vara i slutavverkningsfas enligt inmatade värden. " + recommendationDirection + " Före förslag om föryngringsavverkning ska lägsta ålder, anmälningsplikt/tillstånd, naturvärden, rennäring, återväxt och övriga krav enligt Skogsvårdslagen kontrolleras. Viktiga fältkontroller: " + checks;
   }
-
-  return "Beståndet är bedömt i fält med Skötselkollen. " + forestryAssessment + " Bedömningen ska vägas mot faktisk beståndsbild, skador, bärighet, naturvärden och juridiska krav innan åtgärd föreslås. " + legalAssessment;
+  return "Beståndet är bedömt i fält med Skötselkollen. " + why + " Rekommenderad riktning: " + recommendationDirection + " Kontrollbehov: " + checks + " " + legalAssessment;
 }
 
 function lowerConfidence(confidence) {
@@ -287,4 +390,34 @@ function clean(value) {
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))];
+}
+
+function fieldLabel(key) {
+  return {
+    heightMeters: "höjd",
+    stemsPerHa: "stamantal",
+    basalArea: "grundyta",
+    dgvCm: "DGV"
+  }[key] ?? key;
+}
+
+function phaseLabel(value) {
+  return {
+    ungskog: "ungskog",
+    gallringsskog: "gallringsskog",
+    aldre_skog: "äldre skog"
+  }[value] ?? value;
+}
+
+function speciesLabel(value) {
+  return {
+    tall: "tall",
+    gran: "gran",
+    bjork: "björk",
+    blandat: "blandbestånd"
+  }[value] ?? value;
+}
+
+function formatNumber(value, digits = 1) {
+  return new Intl.NumberFormat("sv-SE", { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(value);
 }

@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.3 - 2026-07-04
+
+### Changed - Tydligare fältbeslutsstöd
+
+- Skötselkollen ger nu tydligare fältkontroller.
+- Resultatet visar varför bedömningen görs.
+- Rekommenderad riktning och plantext har förbättrats.
+- Björk, röjning, gallring och slutavverkning har egna checklistor.
+- INGVAR och Heureka nämns som referensramar, inte facit.
+- PWA-cache höjd till skotselkollen.3.
+
 ## v2.0.0-alpha.1-skotselkollen.2 - 2026-07-04
 
 ### Changed - Kompakt mobilvy för Skötselkollen

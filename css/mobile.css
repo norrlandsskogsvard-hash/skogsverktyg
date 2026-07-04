@@ -639,3 +639,20 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* skotsel-fieldchecks-readable */
+@media (max-width: 560px) {
+  .skotsel-list {
+    gap: 0.55rem;
+    padding-left: 1.05rem;
+  }
+
+  .skotsel-list li {
+    line-height: 1.35;
+  }
+
+  .skotsel-direction {
+    padding: var(--space-3);
+  }
+}

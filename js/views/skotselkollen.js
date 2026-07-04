@@ -173,17 +173,26 @@ function resultTemplate(result) {
       resultMetric("Prioritet", result.actionPriority) +
     "</div>" +
     "<div class='skotsel-result-core'>" +
-      resultBlock("Skoglig bedömning", result.forestryAssessment) +
+      resultBlock("Varför?", result.why || result.forestryAssessment) +
+      listBlock("Kontrollera i fält", result.fieldChecks || result.nextChecks || []) +
+      directionBlock(result.recommendationDirection) +
       resultBlock("Juridisk kontroll", result.legalAssessment) +
     "</div>" +
     "<div class='skotsel-advanced skotsel-advanced--result'>" +
       advancedDetails("Graf", chartTemplate(result.chartData)) +
       advancedDetails("Varningar", listTemplate(result.warnings), hasWarnings) +
-      advancedDetails("Nästa fältkontroller", listTemplate(result.nextChecks)) +
       advancedDetails("Plantext", "<div class='skotsel-plantext'><p>" + escapeHtml(result.planText) + "</p><button class='button button--secondary' type='button' data-copy-plantext>Kopiera plantext</button></div>") +
       advancedDetails("Källor och antaganden", listTemplate(result.sourceNotes), false, "skotsel-sources") +
     "</div>" +
   "</section>";
+}
+
+function listBlock(title, values) {
+  return "<section class='skotsel-result-section'><h3>" + escapeHtml(title) + "</h3>" + listTemplate(values) + "</section>";
+}
+
+function directionBlock(text) {
+  return "<section class='skotsel-direction'><h3>Rekommenderad riktning</h3><p>" + escapeHtml(text || "Följ upp när fler fältvärden finns.") + "</p></section>";
 }
 
 function chartTemplate(chartData) {
