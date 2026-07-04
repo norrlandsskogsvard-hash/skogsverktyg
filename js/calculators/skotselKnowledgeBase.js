@@ -9,6 +9,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-praktiska-mallar.md",
   "docs/skotselkollen-kallvarden-backlog.md",
   "docs/skotselkollen-gallringskurva-ui.md",
+  "docs/skotselkollen-norra-gallringsvarden.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
 
@@ -70,24 +71,41 @@ export const SKOTSEL_SOURCE_RULES = [
   }
 ];
 
-export const THINNING_CURVES = [
+const NORRA_SOURCE_NAME = "Gallringsriktlinjer & gallringsmallar, norra Sverige";
+const NORRA_SOURCE_REF = "Gallringsriktlinjer & gallringsmallar norra Sverige";
+const NORRA_CANDIDATE_SITE_INDICES = {
+  tall: [14, 16, 18, 22, 24, 26, 28],
+  gran: [16, 18, 20, 22, 24, 26, 28, 30, 32]
+};
+
+export const NORRA_THINNING_SOURCE_VALUES = [
   {
     id: "norra-tall-t20-pilot",
+    sourceName: NORRA_SOURCE_NAME,
+    sourceType: "regional_curve",
+    sourceYear: null,
+    sourceRef: NORRA_SOURCE_REF,
+    sourcePage: "s. 36, exempel normalfall T20",
     species: "tall",
     speciesCode: "T",
     siteIndex: 20,
     region: "norra-sverige",
-    source: "Gallringsriktlinjer & gallringsmallar norra Sverige",
-    sourcePage: "s. 36, exempel normalfall T20",
+    area: "thinning",
+    actionType: "gallring",
+    title: "T20-exempel normalfall",
+    description: "Direkta exempelvärden för tall T20 i norra Sverige.",
     status: "pilot",
-    precision: "text-example",
+    precision: "direct_text_example",
     confidence: "medium",
+    activeUse: "chart_reference",
+    canCreateFullCurve: false,
+    canAloneGiveHighConfidence: false,
     limitations: [
-      "Bygger på exempelvärden, inte full digitaliserad kurva.",
-      "Ska inte användas som komplett gallringsmall.",
-      "Används för att testa kurvfunktion och visning."
+      "Exempelvärden, inte komplett digitaliserad kurva.",
+      "Gäller T20-exempel för norra Sverige.",
+      "Ska jämföras mot komplett mall innan åtgärdsbeslut."
     ],
-    points: {
+    values: {
       thinningEvents: [
         {
           label: "1:a gallring",
@@ -118,8 +136,57 @@ export const THINNING_CURVES = [
         }
       ]
     }
-  }
+  },
+  ...candidateSourceValuePackages("tall", "T", NORRA_CANDIDATE_SITE_INDICES.tall),
+  ...candidateSourceValuePackages("gran", "G", NORRA_CANDIDATE_SITE_INDICES.gran)
 ];
+
+export const THINNING_CURVES = NORRA_THINNING_SOURCE_VALUES
+  .filter((sourceValue) => sourceValue.activeUse === "chart_reference")
+  .map((sourceValue) => ({
+    id: sourceValue.id,
+    species: sourceValue.species,
+    speciesCode: sourceValue.speciesCode,
+    siteIndex: sourceValue.siteIndex,
+    region: sourceValue.region,
+    source: sourceValue.sourceName,
+    sourcePage: sourceValue.sourcePage,
+    status: sourceValue.status,
+    precision: sourceValue.precision,
+    confidence: sourceValue.confidence,
+    activeUse: sourceValue.activeUse,
+    canCreateFullCurve: sourceValue.canCreateFullCurve,
+    canAloneGiveHighConfidence: sourceValue.canAloneGiveHighConfidence,
+    limitations: sourceValue.limitations,
+    points: sourceValue.values
+  }));
+
+function candidateSourceValuePackages(species, speciesCode, siteIndices) {
+  return siteIndices.map((siteIndex) => ({
+    id: "norra-" + species + "-" + speciesCode.toLowerCase() + siteIndex + "-candidate",
+    sourceName: NORRA_SOURCE_NAME,
+    sourceType: "regional_curve",
+    sourceYear: null,
+    sourceRef: NORRA_SOURCE_REF,
+    sourcePage: "",
+    status: "candidate",
+    precision: "documentation_only",
+    confidence: "low",
+    area: "thinning",
+    actionType: "gallring",
+    species,
+    speciesCode,
+    siteIndex,
+    region: "norra-sverige",
+    title: speciesCode + siteIndex + " identifierad gallringsmall",
+    description: "Gallringsmall identifierad i källmaterial men inte digitaliserad/verifierad i appen.",
+    values: [],
+    limitations: ["Kurvan finns i källmaterial men är inte digitaliserad/verifierad i appen."],
+    activeUse: "documentation_only",
+    canCreateFullCurve: false,
+    canAloneGiveHighConfidence: false
+  }));
+}
 
 export const PRACTICE_GUIDE_SUPPORT = [
   {
@@ -479,6 +546,21 @@ export function findGallringZone(input = {}, siteIndexEstimate = {}) {
   };
 }
 
+export function findThinningSourceCandidate(input = {}, siteIndexEstimate = {}) {
+  if (!["tall", "gran"].includes(input.mainSpecies)) return null;
+
+  const numericSiteIndex = siteIndexEstimate.numericSiteIndex ?? input.siteIndex;
+  if (!numericSiteIndex) return null;
+
+  return NORRA_THINNING_SOURCE_VALUES.find((sourceValue) =>
+    sourceValue.activeUse === "documentation_only" &&
+    sourceValue.status === "candidate" &&
+    sourceValue.species === input.mainSpecies &&
+    sourceValue.siteIndex === numericSiteIndex &&
+    regionMatches(sourceValue.region, input.region)
+  ) || null;
+}
+
 export function buildEvidenceAssessment(input = {}, baseRecommendation = {}) {
   const evidenceItems = buildEvidenceItems(input, baseRecommendation);
   const legalBlocks = evidenceItems.filter((item) => item.type === "law" && item.strength === "blockingWhenFlagged" && isLegalFlagged(input));
@@ -612,7 +694,10 @@ function missingEvidence(input, baseRecommendation) {
   const missing = [];
 
   if (baseRecommendation.actionCode === "curve_missing" && input.mainSpecies !== "bjork") {
-    missing.push(warningItem("missing-regional-curve", "Regional gallringsmall saknas eller är inte inlagd för vald SI/trädslag.", "source"));
+    const candidateClaim = baseRecommendation.sourceCandidate
+      ? "Identifierad gallringsmall saknar verifierade kurvdata i appen."
+      : "Regional gallringsmall saknas eller är inte inlagd för vald SI/trädslag.";
+    missing.push(warningItem("missing-regional-curve", candidateClaim, "source"));
   }
 
   if (!["curve_reference_pilot"].includes(baseRecommendation.actionCode)) {
@@ -682,7 +767,7 @@ function buildEvidenceSummary(baseRecommendation, supportingEvidence, conflictin
 function buildFieldSummary(input, baseRecommendation, supportingEvidence, conflictingEvidence, legalBlocks) {
   const actionCode = baseRecommendation.actionCode;
   const evidence = shortEvidence(input, actionCode, supportingEvidence);
-  const missing = shortMissing(input, actionCode, conflictingEvidence);
+  const missing = shortMissing(input, actionCode, conflictingEvidence, baseRecommendation);
   const legalPrefix = fieldLegalPrefix(input, legalBlocks);
   const regionSuffix = input.region === "okand" ? " Välj region för säkrare regional jämförelse." : "";
 
@@ -703,6 +788,14 @@ function buildFieldSummary(input, baseRecommendation, supportingEvidence, confli
   }
 
   if (actionCode === "curve_missing") {
+    if (baseRecommendation.sourceCandidate) {
+      return {
+        assessment: legalPrefix + "Källa är identifierad, men kurvan är inte digitaliserad i appen." + regionSuffix,
+        evidence,
+        missing
+      };
+    }
+
     return {
       assessment: legalPrefix + "Punkten kan visas, men regional kurva saknas för vald kombination." + regionSuffix,
       evidence,
@@ -761,7 +854,7 @@ function fieldLegalPrefix(input, legalBlocks) {
   return legalBlocks.length ? "Juridisk kontroll krävs. " : "";
 }
 
-function shortMissing(input, actionCode, conflictingEvidence) {
+function shortMissing(input, actionCode, conflictingEvidence, baseRecommendation = {}) {
   if (input.mainSpecies === "bjork") {
     return ["granskad björkkurva", "komplett björkregel"];
   }
@@ -772,7 +865,7 @@ function shortMissing(input, actionCode, conflictingEvidence) {
 
   const missing = [];
   if (actionCode === "curve_missing") {
-    missing.push(input.siteIndex ? sourceMissingLabel(input) : "SI eller kurva");
+    missing.push(input.siteIndex ? sourceMissingLabel(input, baseRecommendation.sourceCandidate) : "SI eller kurva");
   }
   if (conflictingEvidence.some((item) => item.id === "missing-complete-curve")) {
     missing.push("full regional mall");
@@ -780,7 +873,8 @@ function shortMissing(input, actionCode, conflictingEvidence) {
   return [...new Set(missing)].slice(0, 3);
 }
 
-function sourceMissingLabel(input) {
+function sourceMissingLabel(input, sourceCandidate) {
+  if (sourceCandidate) return "Verifierade kurvdata för " + sourceCandidate.speciesCode + sourceCandidate.siteIndex;
   if (input.mainSpecies === "tall" && input.siteIndex) return "T" + Math.round(input.siteIndex) + "-kurva";
   if (input.mainSpecies === "gran" && input.siteIndex) return "G" + Math.round(input.siteIndex) + "-kurva";
   return "regional kurva";

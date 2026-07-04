@@ -1,5 +1,5 @@
 import { estimateSiteIndex } from "./siteIndexCalculator.js";
-import { buildEvidenceAssessment, findGallringZone, sourceNotesForInput } from "./skotselKnowledgeBase.js";
+import { buildEvidenceAssessment, findGallringZone, findThinningSourceCandidate, sourceNotesForInput } from "./skotselKnowledgeBase.js";
 
 const ACTIONS = {
   curve_under: ["Under mall", "Låg"],
@@ -111,6 +111,7 @@ function missingQuickFields(input) {
 
 function assessQuickCurve(input, siteIndexEstimate) {
   const curveReference = findGallringZone(input, siteIndexEstimate);
+  const sourceCandidate = findThinningSourceCandidate(input, siteIndexEstimate);
   const fieldChecks = baseFieldChecks(input);
   const warnings = [];
 
@@ -174,7 +175,8 @@ function assessQuickCurve(input, siteIndexEstimate) {
         "Kontrollera om beståndet är ojämnt, skadat eller påverkat.",
         "Jämför manuellt mot regional gallringsmall innan åtgärd föreslås."
       ],
-      warnings: ["Kurvunderlag saknas för automatisk SI eller gallringszon."]
+      warnings: ["Kurvunderlag saknas för automatisk SI eller gallringszon."],
+      sourceCandidate
     };
   }
 
@@ -182,10 +184,15 @@ function assessQuickCurve(input, siteIndexEstimate) {
     return {
       actionCode: "curve_missing",
       confidence: "low",
-      why: "SI finns, men granskad gallringskurva saknas för vald kombination i appens kunskapsbas.",
+      why: sourceCandidate
+        ? "Källa är identifierad, men kurvan är inte digitaliserad/verifierad i appen."
+        : "SI finns, men granskad gallringskurva saknas för vald kombination i appens kunskapsbas.",
       recommendationDirection: "Använd punkten som fältstöd och jämför mot pappersmall eller annat källstött regionalt underlag.",
       fieldChecks,
-      warnings: ["Gallringskurva saknas i appen för vald kombination."]
+      warnings: [sourceCandidate
+        ? "Kurva identifierad i källbank men saknar verifierade värden i appen."
+        : "Gallringskurva saknas i appen för vald kombination."],
+      sourceCandidate
     };
   }
 
@@ -242,13 +249,15 @@ function buildLegalAssessment(input) {
 function buildResult(input, parts) {
   const [actionLabel, actionPriority] = ACTIONS[parts.actionCode] ?? ACTIONS.insufficient_data;
   const curveReference = parts.curveReference ?? findGallringZone(input, parts.siteIndexEstimate);
+  const sourceCandidate = parts.sourceCandidate ?? findThinningSourceCandidate(input, parts.siteIndexEstimate);
   const regionalReferenceWithUnknownRegion = input.region === "okand" && curveReference?.status;
   const warnings = unique(parts.warnings);
   const fieldChecks = unique(parts.fieldChecks).slice(0, 7);
   const quickChecks = fieldChecks.slice(0, 3);
   const sourceNotes = unique([
     ...parts.sourceNotes,
-    ...curveSourceNotes(curveReference)
+    ...curveSourceNotes(curveReference),
+    ...sourceCandidateNotes(sourceCandidate)
   ]);
   const planText = buildPlanText(parts.actionCode, parts.recommendationDirection);
   const baseResult = {
@@ -273,14 +282,16 @@ function buildResult(input, parts) {
       heightMeters: input.heightMeters,
       basalArea: input.basalArea,
       curveReference,
+      sourceCandidate,
       status: actionLabel,
-      note: chartNote(parts.actionCode, input, parts.siteIndexEstimate, curveReference),
+      note: chartNote(parts.actionCode, input, parts.siteIndexEstimate, curveReference, sourceCandidate),
       regionWarning: regionWarningText(input, curveReference, parts.actionCode)
     },
     debug: {
       normalizedInput: input,
       sourceStatus: "Inga ogranskade numeriska gallringsgränser används."
-    }
+    },
+    sourceCandidate
   };
   const evidenceAssessment = buildEvidenceAssessment(input, baseResult);
   const combinedConfidence = regionalReferenceWithUnknownRegion
@@ -319,6 +330,14 @@ function curveSourceNotes(curveReference) {
   ];
 }
 
+function sourceCandidateNotes(sourceCandidate) {
+  if (!sourceCandidate) return [];
+  return [
+    `${sourceCandidate.title}: identifierad källa, men inga verifierade kurvdata är aktiverade i appen.`,
+    ...sourceCandidate.limitations
+  ];
+}
+
 function groupSourcesByEvidence(evidenceAssessment) {
   const groups = {
     law: [],
@@ -345,7 +364,7 @@ function groupSourcesByEvidence(evidenceAssessment) {
   return groups;
 }
 
-function chartNote(actionCode, input, siteIndexEstimate, curveReference) {
+function chartNote(actionCode, input, siteIndexEstimate, curveReference, sourceCandidate) {
   if (input.mainSpecies === "bjork") {
     return "Björkspår: kurvunderlag saknas eller är ofullständigt. Punkten visas utan tall-/granmall som facit.";
   }
@@ -357,6 +376,9 @@ function chartNote(actionCode, input, siteIndexEstimate, curveReference) {
   }
   if (!siteIndexEstimate.numericSiteIndex) {
     return "Kurvunderlag saknas eller SI saknas. Jämför manuellt mot regional mall.";
+  }
+  if (!curveReference && sourceCandidate) {
+    return "Kurva identifierad i källbank men saknar verifierade värden i appen.";
   }
   if (!curveReference) {
     return "SI finns, men gallringskurva saknas i appens kunskapsbas för vald kombination.";

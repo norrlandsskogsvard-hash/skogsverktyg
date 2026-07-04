@@ -67,6 +67,36 @@ Varje kandidatvärde ska dokumenteras med:
 - `canActivateInLogic`: `true`, men endast som befintligt pilot-/visningsstöd
 - kommentar: T20-värdena är redan inlagda som pilot/exempel. De får inte ändras utan separat källkontroll och test.
 
+### Norra tallmallar, candidate
+
+- id: `norra-tall-t14-candidate`, `norra-tall-t16-candidate`, `norra-tall-t18-candidate`, `norra-tall-t22-candidate`, `norra-tall-t24-candidate`, `norra-tall-t26-candidate`, `norra-tall-t28-candidate`
+- källa: Gallringsriktlinjer & gallringsmallar norra Sverige
+- åtgärdstyp: `gallring`
+- trädslag: tall
+- region: norra Sverige
+- källklass: `regional_curve`
+- status: `candidate`
+- precision: `documentation_only`
+- confidence: `low`
+- `canActivateInLogic`: `false`
+- kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte skapa aktiv kurva.
+
+### Norra granmallar, candidate
+
+- id: `norra-gran-g16-candidate`, `norra-gran-g18-candidate`, `norra-gran-g20-candidate`, `norra-gran-g22-candidate`, `norra-gran-g24-candidate`, `norra-gran-g26-candidate`, `norra-gran-g28-candidate`, `norra-gran-g30-candidate`, `norra-gran-g32-candidate`
+- källa: Gallringsriktlinjer & gallringsmallar norra Sverige
+- åtgärdstyp: `gallring`
+- trädslag: gran
+- region: norra Sverige
+- källklass: `regional_curve`
+- status: `candidate`
+- precision: `documentation_only`
+- confidence: `low`
+- `canActivateInLogic`: `false`
+- kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte räknas som aktivt kurvunderlag.
+
+Diagramdigitalisering av tall- eller granmallar kräver separat källkontroll, dokumenterad metod, enhet, region, SI och testfall.
+
 ### Skogskunskap Gallringsmall barr/löv
 
 - id: `skogskunskap-gallringsmall-barr-lov`

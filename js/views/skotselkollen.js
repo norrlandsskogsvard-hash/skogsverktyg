@@ -284,6 +284,15 @@ function quickProposal(result) {
   }
 
   if (result.actionCode === "curve_missing") {
+    if (result.sourceCandidate) {
+      return {
+        proposal: "Använd punkten som fältstöd, inte som gallringsbeslut.",
+        why: "Källa är identifierad, men verifierade kurvdata saknas i appen.",
+        checks: ["Stabilitet och kronslängd.", "Trädslagsblandning.", "Verifierad regional mall."],
+        nextStep: "Verifiera och digitalisera rätt kurvdata innan åtgärd."
+      };
+    }
+
     return {
       proposal: "Använd punkten som fältstöd, inte som gallringsbeslut.",
       why: "Kurvunderlag saknas för vald kombination.",

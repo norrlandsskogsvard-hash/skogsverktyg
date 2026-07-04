@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.11 - 2026-07-04
+
+### Changed - Norra gallringsvärden
+
+- Första källvärdespaketet för Norra gallringsmallar har strukturerats.
+- T20-exemplet ligger kvar som aktiv pilot.
+- Tall- och granmallar har lagts in som candidate-poster utan aktiva kurvor.
+- Appen skiljer nu tydligare på aktiv pilot, identifierad källa och saknade verifierade kurvdata.
+- PWA-cache höjd till skotselkollen.11.
+
 ## v2.0.0-alpha.1-skotselkollen.10 - 2026-07-04
 
 ### Changed - Källvärden och gallringsgraf

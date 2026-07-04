@@ -130,9 +130,33 @@ test("Skötselkollen visar saknad kurva för tall T22 utan att skapa falsk kurva
   await fillNumber(page, 'input[name="siteIndex"]', "22");
   await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
   await expect(page.locator("body")).toContainText(/Kurvunderlag saknas|kurva saknas/i);
+  await expect(page.locator("body")).toContainText("Källa är identifierad");
+  await expect(page.locator("body")).toContainText("Kurva identifierad i källbank men saknar verifierade värden i appen");
+  await expect(page.locator("body")).toContainText("Verifierade kurvdata för T22");
   await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
-  await expect(page.locator("body")).toContainText("Hämta rätt kurvunderlag innan åtgärd");
+  await expect(page.locator("body")).toContainText("Verifiera och digitalisera rätt kurvdata innan åtgärd");
+  await expect(page.locator(".skotsel-chart__pilot-line")).toHaveCount(0);
   await expectNoHorizontalScroll(page);
+});
+
+test("Skötselkollen visar gran G20 som candidate utan aktiv kurva", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/skotselkollen");
+  await page.locator('select[name="mainSpecies"]').selectOption("gran");
+  await page.locator('select[name="region"]').selectOption("norrland_inland");
+  await fillNumber(page, 'input[name="heightMeters"]', "14.5");
+  await fillNumber(page, 'input[name="basalArea"]', "24.5");
+  const manualSi = page.locator("[data-manual-si]");
+  if (await manualSi.evaluate((node) => node.classList.contains("hidden"))) {
+    await page.getByRole("button", { name: "Ändra SI manuellt" }).click();
+  }
+  await fillNumber(page, 'input[name="siteIndex"]', "20");
+  await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Kurvunderlag saknas");
+  await expect(page.locator("body")).toContainText("Källa är identifierad");
+  await expect(page.locator("body")).toContainText("Verifierade kurvdata för G20");
+  await expect(page.locator(".skotsel-chart__pilot-line")).toHaveCount(0);
+  await expect(page.locator("body")).not.toContainText("Pilotunderlag");
 });
 
 test("Röjningskalkyl visar källstöd utan att ändra kalkylresultat", async ({ page }) => {
