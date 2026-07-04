@@ -60,3 +60,7 @@ När källor pekar åt olika håll ska appen vara försiktig:
 - Om forskning, regional kurva och praktisk mall pekar åt samma håll kan säkerheten höjas, men bara när begränsningarna tillåter det.
 
 Om viktig källtyp saknas ska det visas i “Samlad bedömning” och “Källor och antaganden”.
+
+## Fältpresentation
+
+I snabbvyn visas källviktningen som ett kort fältbesked: bedömning, underlag och saknade delar. Den tekniska källbalansen med antal källtyper visas i en stängd sektion under “Källor och antaganden”, så att fältflödet inte domineras av intern viktning.

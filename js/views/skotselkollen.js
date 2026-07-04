@@ -228,14 +228,16 @@ function resultTemplate(result) {
   const hasWarnings = result.warnings.length > 0;
   return "<section class='result-panel result-panel--strong skotsel-result-card'>" +
     "<div class='skotsel-result-summary'>" +
-      resultMetric("Status", result.actionLabel) +
+      resultMetric("Skogligt", result.forestryStatus || result.actionLabel) +
+      resultMetric("Juridik", result.legalStatus || "Ingen flagga") +
       resultMetric("Säkerhet", confidenceLabel(result.confidence)) +
-      resultMetric("Prioritet", result.actionPriority) +
     "</div>" +
     chartTemplate(result.chartData) +
+    regionWarningTemplate(result.regionWarning) +
     "<section class='skotsel-fast-proposal'>" +
       "<h3>Snabbt förslag</h3>" +
       "<p><strong>Förslag:</strong> " + escapeHtml(result.recommendationDirection) + "</p>" +
+      "<p class='card__text'><strong>Prioritet:</strong> " + escapeHtml(result.actionPriority) + "</p>" +
       listBlock("Nästa kontroll", result.quickChecks || []) +
     "</section>" +
     evidenceSummaryTemplate(result.evidenceAssessment) +
@@ -247,47 +249,84 @@ function resultTemplate(result) {
       advancedDetails("Juridisk kontroll", resultBlock("Juridisk kontroll", result.legalAssessment)) +
       advancedDetails("Varningar", listTemplate(result.warnings), hasWarnings) +
       advancedDetails("Plantext", "<div class='skotsel-plantext'><p>" + escapeHtml(result.planText) + "</p><button class='button button--secondary' type='button' data-copy-plantext>Kopiera plantext</button></div>") +
-      advancedDetails("Källor och antaganden", groupedSourcesTemplate(result.groupedSourceNotes || {}, result.sourceNotes), false, "skotsel-sources") +
+      advancedDetails("Källor och antaganden", groupedSourcesTemplate(result.groupedSourceNotes || {}, result.sourceNotes, result.evidenceAssessment), false, "skotsel-sources") +
     "</div>" +
   "</section>";
 }
 
 function evidenceSummaryTemplate(evidenceAssessment) {
   if (!evidenceAssessment) return "";
+  const summary = evidenceAssessment.fieldSummary || {};
   return "<section class='skotsel-evidence-summary'>" +
     "<h3>Samlad bedömning</h3>" +
-    "<p>" + escapeHtml(evidenceAssessment.evidenceSummary) + "</p>" +
-    "<div class='skotsel-source-balance'>" + SOURCE_GROUPS.map(([type, label]) =>
-      "<span><strong>" + escapeHtml(String(evidenceAssessment.sourceBalance?.[type] || 0)) + "</strong>" + escapeHtml(label) + "</span>"
-    ).join("") + "</div>" +
-    missingTypesTemplate(evidenceAssessment) +
+    "<p><strong>Bedömning:</strong> " + escapeHtml(summary.assessment || evidenceAssessment.evidenceSummary) + "</p>" +
+    compactList("Underlag", summary.evidence || []) +
+    compactList("Saknas", summary.missing || []) +
   "</section>";
 }
 
-function missingTypesTemplate(evidenceAssessment) {
-  const missing = evidenceAssessment.conflictingEvidence
-    .filter((item) => item.area === "source")
-    .map((item) => item.claim);
-  if (!missing.length) return "";
-  return "<p class='card__text'><strong>Saknas:</strong> " + escapeHtml([...new Set(missing)].join(" ")) + "</p>";
+function compactList(title, values) {
+  if (!values.length) return "";
+  return "<div class='skotsel-compact-list'><strong>" + escapeHtml(title) + ":</strong><ul>" +
+    values.slice(0, 4).map((value) => "<li>" + escapeHtml(value) + "</li>").join("") +
+  "</ul></div>";
 }
 
-function groupedSourcesTemplate(groupedSources, fallbackNotes = []) {
+function groupedSourcesTemplate(groupedSources, fallbackNotes = [], evidenceAssessment) {
   const groups = SOURCE_GROUPS.map(([type, label]) => {
     const items = groupedSources[type] || [];
     if (!items.length) return "";
     return "<section class='skotsel-source-group'><h4>" + escapeHtml(label) + "</h4><ul>" + items.map(sourceItemTemplate).join("") + "</ul></section>";
   }).filter(Boolean);
 
-  if (groups.length) return groups.join("");
+  const balance = evidenceAssessment ? sourceBalanceTemplate(evidenceAssessment.sourceBalance) : "";
+  if (groups.length) return groups.join("") + balance;
   return listTemplate(fallbackNotes);
 }
 
 function sourceItemTemplate(item) {
-  return "<li><strong>" + escapeHtml(item.sourceLabel || item.source || item.type) + ":</strong> " +
-    escapeHtml(item.claim || "") +
-    (item.limitations?.length ? "<small>" + escapeHtml(item.limitations.join(" ")) + "</small>" : "") +
+  return "<li><strong>" + escapeHtml(item.sourceLabel || item.source || item.type) + "</strong> &mdash; " +
+    escapeHtml(sourceRoleLabel(item.type)) + " &mdash; " +
+    escapeHtml(sourceLimitation(item)) +
+    (item.claim ? "<small>" + escapeHtml(item.claim) + "</small>" : "") +
   "</li>";
+}
+
+function sourceBalanceTemplate(sourceBalance = {}) {
+  return "<details class='skotsel-source-balance-details'>" +
+    "<summary>Källbalans och teknisk viktning</summary>" +
+    "<div class='skotsel-source-balance'>" + SOURCE_GROUPS.map(([type, label]) =>
+      "<span><strong>" + escapeHtml(String(sourceBalance[type] || 0)) + "</strong>" + escapeHtml(label) + "</span>"
+    ).join("") + "</div>" +
+  "</details>";
+}
+
+function sourceRoleLabel(type) {
+  return {
+    law: "lag",
+    research: "forskning/myndighet",
+    regional_curve: "regional mall",
+    decision_support_reference: "beslutsstöd",
+    scenario_reference: "scenarioverktyg",
+    practice_guide: "praktisk mall",
+    field_observation: "fältvärden",
+    warning: "varning"
+  }[type] || type;
+}
+
+function sourceLimitation(item) {
+  if (item.type === "decision_support_reference") return "referensram, inte facit";
+  if (item.type === "scenario_reference") return "långsiktig analys, inte fältgräns";
+  if (item.type === "practice_guide") return "stöd, inte ensam hög säkerhet";
+  if (item.type === "regional_curve" && item.strength === "pilot") return "pilot, inte full kurva";
+  if (item.type === "law") return "kan kräva kontroll";
+  if (item.type === "warning") return "kräver fältkontroll";
+  return item.limitations?.[0] || "stödjande underlag";
+}
+
+function regionWarningTemplate(text) {
+  if (!text) return "";
+  return "<p class='skotsel-region-warning'>" + escapeHtml(text) + "</p>";
 }
 
 function siTemplate(siteIndexEstimate) {

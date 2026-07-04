@@ -269,7 +269,10 @@ export function findGallringZone(input = {}, siteIndexEstimate = {}) {
 export function buildEvidenceAssessment(input = {}, baseRecommendation = {}) {
   const evidenceItems = buildEvidenceItems(input, baseRecommendation);
   const legalBlocks = evidenceItems.filter((item) => item.type === "law" && item.strength === "blockingWhenFlagged" && isLegalFlagged(input));
-  const fieldWarnings = buildFieldWarnings(input, baseRecommendation);
+  const fieldWarnings = [
+    ...buildFieldWarnings(input, baseRecommendation),
+    ...buildRegionWarnings(input, baseRecommendation)
+  ];
   const supportingEvidence = evidenceItems.filter((item) => supportsRecommendation(item, input, baseRecommendation));
   const conflictingEvidence = [
     ...missingEvidence(input, baseRecommendation),
@@ -286,6 +289,7 @@ export function buildEvidenceAssessment(input = {}, baseRecommendation = {}) {
     fieldWarnings,
     combinedConfidence,
     evidenceSummary: buildEvidenceSummary(baseRecommendation, supportingEvidence, conflictingEvidence, legalBlocks, combinedConfidence),
+    fieldSummary: buildFieldSummary(input, baseRecommendation, supportingEvidence, conflictingEvidence, legalBlocks),
     sourceBalance
   };
 }
@@ -311,7 +315,10 @@ export function sourceNotesForInput(input = {}) {
 
 function buildEvidenceItems(input, baseRecommendation) {
   const baseItems = SKOTSEL_EVIDENCE_ITEMS.filter((item) => evidenceApplies(item, input, baseRecommendation));
-  const warningItems = buildFieldWarnings(input, baseRecommendation);
+  const warningItems = [
+    ...buildFieldWarnings(input, baseRecommendation),
+    ...buildRegionWarnings(input, baseRecommendation)
+  ];
   return [...baseItems, ...warningItems];
 }
 
@@ -368,6 +375,20 @@ function buildFieldWarnings(input, baseRecommendation) {
   return warnings;
 }
 
+function buildRegionWarnings(input, baseRecommendation) {
+  if (input.region !== "okand") return [];
+
+  if (baseRecommendation.actionCode === "curve_reference_pilot") {
+    return [warningItem("unknown-region-regional-reference", "Region är okänd. Regionalt underlag används bara som jämförelse.", "source")];
+  }
+
+  if (baseRecommendation.actionCode === "curve_missing") {
+    return [warningItem("unknown-region-no-curve", "Välj region för att kunna jämföra mot regionala mallar.", "source")];
+  }
+
+  return [];
+}
+
 function missingEvidence(input, baseRecommendation) {
   const missing = [];
 
@@ -422,6 +443,84 @@ function buildEvidenceSummary(baseRecommendation, supportingEvidence, conflictin
     "Samlad säkerhet: " + confidenceLabel(combinedConfidence) + ".";
 }
 
+function buildFieldSummary(input, baseRecommendation, supportingEvidence, conflictingEvidence, legalBlocks) {
+  const actionCode = baseRecommendation.actionCode;
+  const evidence = shortEvidence(input, actionCode, supportingEvidence);
+  const missing = shortMissing(input, actionCode, conflictingEvidence);
+  const legalPrefix = legalBlocks.length ? "Juridisk kontroll krävs. " : "";
+  const regionSuffix = input.region === "okand" ? " Välj region för säkrare regional jämförelse." : "";
+
+  if (actionCode === "curve_reference_pilot") {
+    return {
+      assessment: legalPrefix + "Beståndet kan jämföras mot T20-pilotunderlag, men full gallringskurva saknas." + regionSuffix,
+      evidence,
+      missing
+    };
+  }
+
+  if (input.mainSpecies === "bjork") {
+    return {
+      assessment: legalPrefix + "Björkspåret kräver manuell fältbedömning eftersom björkkurva saknas." + regionSuffix,
+      evidence,
+      missing
+    };
+  }
+
+  if (actionCode === "curve_missing") {
+    return {
+      assessment: legalPrefix + "Punkten kan visas, men regional kurva saknas för vald kombination." + regionSuffix,
+      evidence,
+      missing
+    };
+  }
+
+  return {
+    assessment: legalPrefix + "Bedömningen kräver fortsatt fältkontroll innan åtgärd används." + regionSuffix,
+    evidence,
+    missing
+  };
+}
+
+function shortEvidence(input, actionCode, supportingEvidence) {
+  if (actionCode === "curve_reference_pilot") {
+    return ["T20-exempel", "gallringsbeslutsstöd", "praktiskt fältstöd"];
+  }
+
+  if (input.mainSpecies === "bjork") {
+    return ["fältvärden", "björkspecifika kontrollpunkter"];
+  }
+
+  const hasResearch = supportingEvidence.some((item) => item.type === "research");
+  const values = ["inmatade fältvärden"];
+  if (hasResearch) values.push("generella gallringsprinciper");
+  return values.slice(0, 3);
+}
+
+function shortMissing(input, actionCode, conflictingEvidence) {
+  if (input.mainSpecies === "bjork") {
+    return ["granskad björkkurva", "komplett björkregel"];
+  }
+
+  if (actionCode === "curve_reference_pilot") {
+    return ["full digitaliserad kurva", "komplett regional mall"];
+  }
+
+  const missing = [];
+  if (actionCode === "curve_missing") {
+    missing.push(input.siteIndex ? sourceMissingLabel(input) : "SI eller kurva");
+  }
+  if (conflictingEvidence.some((item) => item.id === "missing-complete-curve")) {
+    missing.push("full regional mall");
+  }
+  return [...new Set(missing)].slice(0, 3);
+}
+
+function sourceMissingLabel(input) {
+  if (input.mainSpecies === "tall" && input.siteIndex) return "T" + Math.round(input.siteIndex) + "-kurva";
+  if (input.mainSpecies === "gran" && input.siteIndex) return "G" + Math.round(input.siteIndex) + "-kurva";
+  return "regional kurva";
+}
+
 function balanceByType(items) {
   return Object.keys(EVIDENCE_TYPE_WEIGHTS).reduce((balance, type) => {
     balance[type] = items.filter((item) => item.type === type).length;
@@ -452,7 +551,9 @@ function isLegalFlagged(input) {
   return input.conservation === "ja" ||
     input.conservation === "osakert" ||
     input.reindeerMountain === "ja" ||
-    input.reindeerMountain === "osakert";
+    input.reindeerMountain === "osakert" ||
+    input.productiveForest === "nej" ||
+    input.productiveForest === "osakert";
 }
 
 function regionMatches(curveRegion, inputRegion) {

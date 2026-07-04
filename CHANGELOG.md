@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.7 - 2026-07-04
+
+### Changed - Fältvänligare källviktning
+
+- Skötselkollen visar nu separat skoglig och juridisk status.
+- Samlad bedömning har förenklats för fältbruk.
+- Detaljerad källbalans flyttad till utfällbar sektion.
+- Region okänd ger tydligare varning.
+- PWA-cache höjd till skotselkollen.7.
+
 ## v2.0.0-alpha.1-skotselkollen.6 - 2026-07-04
 
 ### Changed - Källviktning och samlad bedömning

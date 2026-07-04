@@ -53,10 +53,9 @@ export function calculateSkotselRecommendation(input = {}) {
   const quickAssessment = assessQuickCurve(normalized, siteIndexEstimate);
 
   if (legal.hasConservationFlag) {
-    quickAssessment.actionCode = "legal_check_required";
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
-    quickAssessment.fieldChecks.push("Avgränsa naturvärden och kulturmiljö innan produktionsåtgärd skrivs som huvudförslag.");
-    quickAssessment.warnings.push("Naturvärde/kulturmiljö är markerat eller osäkert.");
+    quickAssessment.fieldChecks.push("Kontrollera juridiska krav och hänsyn innan produktionsåtgärd skrivs som huvudförslag.");
+    quickAssessment.warnings.push("Juridisk kontroll krävs eller bör göras innan åtgärdsförslag används.");
   }
 
   return buildResult(normalized, {
@@ -235,6 +234,7 @@ function buildLegalAssessment(input) {
 function buildResult(input, parts) {
   const [actionLabel, actionPriority] = ACTIONS[parts.actionCode] ?? ACTIONS.insufficient_data;
   const curveReference = parts.curveReference ?? findGallringZone(input, parts.siteIndexEstimate);
+  const regionalReferenceWithUnknownRegion = input.region === "okand" && curveReference?.status;
   const warnings = unique(parts.warnings);
   const fieldChecks = unique(parts.fieldChecks).slice(0, 7);
   const quickChecks = fieldChecks.slice(0, 3);
@@ -248,6 +248,8 @@ function buildResult(input, parts) {
     actionLabel,
     actionPriority,
     confidence: parts.confidence,
+    forestryStatus: actionLabel,
+    legalStatus: legalStatusLabel(input),
     why: parts.why,
     fieldChecks,
     quickChecks,
@@ -272,10 +274,14 @@ function buildResult(input, parts) {
     }
   };
   const evidenceAssessment = buildEvidenceAssessment(input, baseResult);
+  const combinedConfidence = regionalReferenceWithUnknownRegion
+    ? lowerConfidence(evidenceAssessment.combinedConfidence)
+    : evidenceAssessment.combinedConfidence;
 
   return {
     ...baseResult,
-    confidence: evidenceAssessment.combinedConfidence,
+    confidence: combinedConfidence,
+    regionWarning: regionWarningText(input, curveReference, parts.actionCode),
     evidenceAssessment,
     groupedSourceNotes: groupSourcesByEvidence(evidenceAssessment)
   };
@@ -341,6 +347,25 @@ function chartNote(actionCode, input, siteIndexEstimate, curveReference) {
     return "SI finns, men gallringskurva saknas i appens kunskapsbas för vald kombination.";
   }
   return "Kurvstatus visas från källstött underlag.";
+}
+
+function legalStatusLabel(input) {
+  if (input.conservation === "ja" ||
+    input.conservation === "osakert" ||
+    input.reindeerMountain === "ja" ||
+    input.reindeerMountain === "osakert" ||
+    input.productiveForest === "nej" ||
+    input.productiveForest === "osakert") {
+    return "Kontroll krävs";
+  }
+  return "Ingen flagga";
+}
+
+function regionWarningText(input, curveReference, actionCode) {
+  if (input.region !== "okand") return "";
+  if (curveReference?.status) return "Region är okänd. Regionalt underlag används bara som jämförelse.";
+  if (actionCode === "curve_missing") return "Välj region för att kunna jämföra mot regionala mallar.";
+  return "";
 }
 
 function buildPlanText(actionCode, recommendationDirection) {
