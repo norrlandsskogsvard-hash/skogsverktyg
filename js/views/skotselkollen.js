@@ -45,13 +45,12 @@ export function renderSkotselkollenView() {
   const page = document.createElement("div");
   const draft = { ...DEFAULT_DRAFT, ...getStoredValue(STORAGE_KEY, {}) };
 
-  page.append(createPageHeader("Skötselkollen", "Bedöm nästa möjliga åtgärd i beståndet med skoglig rekommendation och separat juridisk kontroll."));
+  page.append(createPageHeader("Skötselkollen", "Röjning, gallring eller slutavverkning baserat på beståndsvärden, källmatris och lagkontroll."));
   page.insertAdjacentHTML("beforeend", viewTemplate(draft));
 
   const form = page.querySelector("[data-skotsel-form]");
-  const result = page.querySelector("[data-skotsel-result]");
+  const resultTargets = page.querySelectorAll("[data-skotsel-result]");
   const feedback = page.querySelector("[data-skotsel-feedback]");
-  const copyButton = page.querySelector("[data-copy-plantext]");
   const resetButton = page.querySelector("[data-reset-skotsel]");
 
   function currentInput() {
@@ -62,9 +61,10 @@ export function renderSkotselkollenView() {
     const input = currentInput();
     setStoredValue(STORAGE_KEY, input);
     const recommendation = calculateSkotselRecommendation(input);
-    result.innerHTML = resultTemplate(recommendation);
+    resultTargets.forEach((target) => {
+      target.innerHTML = resultTemplate(recommendation);
+    });
     feedback.textContent = "Utkast sparat på enheten.";
-    copyButton.disabled = !recommendation.planText;
   }
 
   form.addEventListener("input", renderResult);
@@ -74,7 +74,11 @@ export function renderSkotselkollenView() {
     renderResult();
   });
 
-  copyButton.addEventListener("click", async () => {
+  page.addEventListener("click", async (event) => {
+    const copyButton = event.target.closest("[data-copy-plantext]");
+    if (!copyButton) {
+      return;
+    }
     const recommendation = calculateSkotselRecommendation(currentInput());
     try {
       await navigator.clipboard.writeText(recommendation.planText);
@@ -105,64 +109,80 @@ export function renderSkotselkollenView() {
 function viewTemplate(values) {
   return "<section class='skotsel-layout'>" +
     "<form class='form skotsel-form' data-skotsel-form>" +
-      card("Bestånd", fields([
-        selectField("mainSpecies", "Huvudträdslag", SELECTS.mainSpecies, values.mainSpecies),
-        selectField("region", "Region", SELECTS.region, values.region),
-        selectField("standPhase", "Beståndsfas", SELECTS.standPhase, values.standPhase)
-      ])) +
-      card("Mätvärden", fields([
-        numberField("heightMeters", "Övre höjd eller medelhöjd, meter", values.heightMeters, "0.1"),
-        numberField("stemsPerHa", "Stamantal per ha", values.stemsPerHa, "1"),
-        numberField("basalArea", "Grundyta, m²/ha", values.basalArea, "0.1"),
-        numberField("dgvCm", "DGV, cm", values.dgvCm, "0.1"),
-        numberField("ageYears", "Ålder, år", values.ageYears, "1"),
-        numberField("siteIndex", "Ståndortsindex, om känt", values.siteIndex, "0.1"),
-        numberField("volumeM3", "Virkesförråd, om känt", values.volumeM3, "1")
-      ])) +
-      card("Trädslagsandelar och risk", fields([
-        numberField("birchShare", "Björkandel %", values.birchShare, "1"),
-        numberField("spruceShare", "Granandel %", values.spruceShare, "1"),
-        numberField("pineShare", "Tallandel %", values.pineShare, "1"),
-        selectField("damage", "Skador", SELECTS.damage, values.damage),
-        selectField("gaps", "Luckighet", SELECTS.gaps, values.gaps),
-        selectField("vitality", "Kronor/vitalitet", SELECTS.vitality, values.vitality),
-        selectField("bearing", "Bärighet", SELECTS.bearing, values.bearing),
-        selectField("snowWindRisk", "Snörisk/vindutsatt", SELECTS.yesNo, values.snowWindRisk)
-      ])) +
-      card("Juridisk kontroll", fields([
-        selectField("conservation", "Naturvärden/kulturmiljö", SELECTS.yesNoUnknown, values.conservation),
-        selectField("reindeerMountain", "Rennäring/fjällnära", SELECTS.yesNoUnknown, values.reindeerMountain),
-        selectField("productiveForest", "Produktiv skogsmark", SELECTS.productive, values.productiveForest)
-      ])) +
+      "<div class='skotsel-mobile-title'><strong>Skötselkollen</strong><span>Röjning, gallring eller slutavverkning</span></div>" +
+      card("Snabb bedömning", "skotsel-card skotsel-quick-card", "<div class='skotsel-quick-grid'>" + quickFields(values).join("") + "</div>") +
       "<div class='field-actions skotsel-actions'>" +
         "<button class='button button--large' type='submit'>Uppdatera bedömning</button>" +
         "<button class='button button--secondary' type='button' data-reset-skotsel>Rensa formulär</button>" +
+      "</div>" +
+      "<section class='skotsel-mobile-result' aria-live='polite' data-skotsel-result></section>" +
+      "<div class='skotsel-advanced'>" +
+        advancedDetails("Trädslagsandelar och risk", fields(riskFields(values))) +
+        advancedDetails("Juridisk kontroll", fields(legalFields(values)), shouldOpenLegal(values)) +
       "</div>" +
       "<p class='field-feedback' data-skotsel-feedback></p>" +
     "</form>" +
     "<aside class='skotsel-result' aria-live='polite'>" +
       "<div data-skotsel-result></div>" +
-      "<button class='button button--secondary' type='button' data-copy-plantext>Kopiera plantext</button>" +
     "</aside>" +
   "</section>";
 }
 
+function quickFields(values) {
+  return [
+    selectField("mainSpecies", "Huvudträdslag", SELECTS.mainSpecies, values.mainSpecies),
+    selectField("region", "Region", SELECTS.region, values.region),
+    selectField("standPhase", "Beståndsfas", SELECTS.standPhase, values.standPhase, "field--full"),
+    numberField("heightMeters", "Höjd, m", values.heightMeters, "0.1"),
+    numberField("basalArea", "Grundyta", values.basalArea, "0.1"),
+    numberField("ageYears", "Ålder", values.ageYears, "1"),
+    numberField("dgvCm", "DGV", values.dgvCm, "0.1"),
+    numberField("stemsPerHa", "Stamantal", values.stemsPerHa, "1", "field--full")
+  ];
+}
+
+function riskFields(values) {
+  return [
+    numberField("birchShare", "Björkandel %", values.birchShare, "1"),
+    numberField("spruceShare", "Granandel %", values.spruceShare, "1"),
+    numberField("pineShare", "Tallandel %", values.pineShare, "1"),
+    numberField("siteIndex", "Ståndortsindex, om känt", values.siteIndex, "0.1"),
+    numberField("volumeM3", "Virkesförråd, om känt", values.volumeM3, "1"),
+    selectField("damage", "Skador", SELECTS.damage, values.damage),
+    selectField("gaps", "Luckighet", SELECTS.gaps, values.gaps),
+    selectField("vitality", "Kronor/vitalitet", SELECTS.vitality, values.vitality),
+    selectField("bearing", "Bärighet", SELECTS.bearing, values.bearing),
+    selectField("snowWindRisk", "Snörisk/vindutsatt", SELECTS.yesNo, values.snowWindRisk)
+  ];
+}
+
+function legalFields(values) {
+  return [
+    selectField("conservation", "Naturvärden/kulturmiljö", SELECTS.yesNoUnknown, values.conservation),
+    selectField("reindeerMountain", "Rennäring/fjällnära", SELECTS.yesNoUnknown, values.reindeerMountain),
+    selectField("productiveForest", "Produktiv skogsmark", SELECTS.productive, values.productiveForest)
+  ];
+}
+
 function resultTemplate(result) {
+  const hasWarnings = result.warnings.length > 0;
   return "<section class='result-panel result-panel--strong skotsel-result-card'>" +
-    "<div class='skotsel-result-top'>" +
+    "<div class='skotsel-result-summary'>" +
       resultMetric("Nästa åtgärd", result.actionLabel) +
-      resultMetric("Confidence", confidenceLabel(result.confidence)) +
+      resultMetric("Säkerhet", confidenceLabel(result.confidence)) +
       resultMetric("Prioritet", result.actionPriority) +
     "</div>" +
-    chartTemplate(result.chartData) +
-    resultBlock("Skoglig bedömning", result.forestryAssessment) +
-    resultBlock("Juridisk kontroll", result.legalAssessment) +
-    listBlock("Varningar", result.warnings) +
-    listBlock("Nästa fältkontroller", result.nextChecks) +
-    resultBlock("Plantext", result.planText) +
-    "<details class='skotsel-sources'><summary>Källor och antaganden</summary>" +
-      listTemplate(result.sourceNotes) +
-    "</details>" +
+    "<div class='skotsel-result-core'>" +
+      resultBlock("Skoglig bedömning", result.forestryAssessment) +
+      resultBlock("Juridisk kontroll", result.legalAssessment) +
+    "</div>" +
+    "<div class='skotsel-advanced skotsel-advanced--result'>" +
+      advancedDetails("Graf", chartTemplate(result.chartData)) +
+      advancedDetails("Varningar", listTemplate(result.warnings), hasWarnings) +
+      advancedDetails("Nästa fältkontroller", listTemplate(result.nextChecks)) +
+      advancedDetails("Plantext", "<div class='skotsel-plantext'><p>" + escapeHtml(result.planText) + "</p><button class='button button--secondary' type='button' data-copy-plantext>Kopiera plantext</button></div>") +
+      advancedDetails("Källor och antaganden", listTemplate(result.sourceNotes), false, "skotsel-sources") +
+    "</div>" +
   "</section>";
 }
 
@@ -188,15 +208,11 @@ function chartTemplate(chartData) {
 }
 
 function resultMetric(label, value) {
-  return "<div class='skotsel-metric'><span>" + escapeHtml(label) + "</span><strong>" + escapeHtml(value) + "</strong></div>";
+  return "<div class='result-chip skotsel-metric'><span>" + escapeHtml(label) + "</span><strong>" + escapeHtml(value) + "</strong></div>";
 }
 
 function resultBlock(title, text) {
   return "<section class='skotsel-result-section'><h3>" + escapeHtml(title) + "</h3><p>" + escapeHtml(text) + "</p></section>";
-}
-
-function listBlock(title, values) {
-  return "<section class='skotsel-result-section'><h3>" + escapeHtml(title) + "</h3>" + listTemplate(values) + "</section>";
 }
 
 function listTemplate(values) {
@@ -206,22 +222,30 @@ function listTemplate(values) {
   return "<ul class='skotsel-list'>" + values.map((value) => "<li>" + escapeHtml(value) + "</li>").join("") + "</ul>";
 }
 
-function card(title, body) {
-  return "<article class='card'><div class='card__body'><h3 class='card__title'>" + escapeHtml(title) + "</h3>" + body + "</div></article>";
+function card(title, className, body) {
+  return "<article class='card " + className + "'><div class='card__body'><h3 class='card__title'>" + escapeHtml(title) + "</h3>" + body + "</div></article>";
+}
+
+function advancedDetails(title, body, open = false, className = "") {
+  return "<details class='" + className + "'" + (open ? " open" : "") + "><summary>" + escapeHtml(title) + "</summary><div class='skotsel-details-body'>" + body + "</div></details>";
 }
 
 function fields(items) {
   return "<div class='form-grid'>" + items.join("") + "</div>";
 }
 
-function selectField(name, label, options, value) {
-  return "<label class='field'><span>" + escapeHtml(label) + "</span><select class='select' name='" + name + "'>" +
+function selectField(name, label, options, value, extraClass = "") {
+  return "<label class='field " + extraClass + "'><span>" + escapeHtml(label) + "</span><select class='select' name='" + name + "'>" +
     options.map(([optionValue, optionLabel]) => "<option value='" + optionValue + "'" + (optionValue === value ? " selected" : "") + ">" + escapeHtml(optionLabel) + "</option>").join("") +
   "</select></label>";
 }
 
-function numberField(name, label, value, step) {
-  return "<label class='field'><span>" + escapeHtml(label) + "</span><input class='input' type='number' inputmode='decimal' min='0' step='" + step + "' name='" + name + "' value='" + escapeHtml(value ?? "") + "'></label>";
+function numberField(name, label, value, step, extraClass = "") {
+  return "<label class='field " + extraClass + "'><span>" + escapeHtml(label) + "</span><input class='input' type='number' inputmode='decimal' min='0' step='" + step + "' name='" + name + "' value='" + escapeHtml(value ?? "") + "'></label>";
+}
+
+function shouldOpenLegal(values) {
+  return [values.conservation, values.reindeerMountain, values.productiveForest].some((value) => value === "ja" || value === "osakert" || value === "nej");
 }
 
 function confidenceLabel(value) {

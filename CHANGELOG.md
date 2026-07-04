@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.2 - 2026-07-04
+
+### Changed - Kompakt mobilvy för Skötselkollen
+
+- Skötselkollen mobilvy komprimerad för snabb fältbedömning.
+- Fördjupade uppgifter flyttade till utfällbara sektioner.
+- Resultat visas tidigare i mobilflödet.
+- Confidence bytt till Säkerhet.
+- PWA-cache höjd till skotselkollen.2.
+
 ## v2.0.0-alpha.1-skotselkollen.1 - 2026-07-04
 
 ### Added - Skötselkollen v1
