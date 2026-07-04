@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.6 - 2026-07-04
+
+### Changed - Källviktning och samlad bedömning
+
+- Skötselkollen har fått källviktning och samlad bedömning.
+- Källor delas upp i lag, forskning, regional gallringsmall, beslutsstöd, praktisk mall och fältvarningar.
+- Praktiska skötselmallar används som stöd, inte facit.
+- PWA-cache höjd till skotselkollen.6.
+
 ## v2.0.0-alpha.1-skotselkollen.5 - 2026-07-04
 
 ### Changed - Första källstyrda kurvdata-steget

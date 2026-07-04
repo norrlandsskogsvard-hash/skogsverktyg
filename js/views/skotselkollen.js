@@ -50,6 +50,17 @@ const SELECTS = {
   movingWater: [["okand", "Okänd"], ["nej", "Nej"], ["ja", "Ja"], ["osakert", "Osäkert"]]
 };
 
+const SOURCE_GROUPS = [
+  ["law", "Lag"],
+  ["research", "Forskning/myndighet"],
+  ["regional_curve", "Regional gallringsmall"],
+  ["decision_support_reference", "Beslutsstöd"],
+  ["scenario_reference", "Scenarioverktyg"],
+  ["practice_guide", "Praktisk mall"],
+  ["field_observation", "Fältobservationer"],
+  ["warning", "Fältvarningar"]
+];
+
 export function renderSkotselkollenView() {
   const page = document.createElement("div");
   const draft = { ...DEFAULT_DRAFT, ...getStoredValue(STORAGE_KEY, {}) };
@@ -93,9 +104,7 @@ export function renderSkotselkollenView() {
 
   page.addEventListener("click", async (event) => {
     const copyButton = event.target.closest("[data-copy-plantext]");
-    if (!copyButton) {
-      return;
-    }
+    if (!copyButton) return;
     const recommendation = calculateSkotselRecommendation(currentInput());
     try {
       await navigator.clipboard.writeText(recommendation.planText);
@@ -106,23 +115,17 @@ export function renderSkotselkollenView() {
   });
 
   resetButton.addEventListener("click", () => {
-    if (!window.confirm("Rensa Skötselkollen-utkastet?")) {
-      return;
-    }
+    if (!window.confirm("Rensa Skötselkollen-utkastet?")) return;
     removeStoredValue(STORAGE_KEY);
     form.reset();
     Object.entries(DEFAULT_DRAFT).forEach(([key, value]) => {
-      if (form.elements[key]) {
-        form.elements[key].value = value;
-      }
+      if (form.elements[key]) form.elements[key].value = value;
     });
     manualSi.classList.add("hidden");
     renderResult();
   });
 
-  if (draft.siteIndex) {
-    manualSi.classList.remove("hidden");
-  }
+  if (draft.siteIndex) manualSi.classList.remove("hidden");
 
   renderResult();
   return page;
@@ -200,21 +203,15 @@ function riskFields(values) {
 }
 
 function legalFields(values) {
-  return [
-    selectField("productiveForest", "Produktiv skogsmark", SELECTS.productive, values.productiveForest)
-  ];
+  return [selectField("productiveForest", "Produktiv skogsmark", SELECTS.productive, values.productiveForest)];
 }
 
 function natureFields(values) {
-  return [
-    selectField("conservation", "Naturvärden/kulturmiljö", SELECTS.yesNoUnknown, values.conservation)
-  ];
+  return [selectField("conservation", "Naturvärden/kulturmiljö", SELECTS.yesNoUnknown, values.conservation)];
 }
 
 function reindeerFields(values) {
-  return [
-    selectField("reindeerMountain", "Rennäring/fjällnära", SELECTS.yesNoUnknown, values.reindeerMountain)
-  ];
+  return [selectField("reindeerMountain", "Rennäring/fjällnära", SELECTS.yesNoUnknown, values.reindeerMountain)];
 }
 
 function siteFields(values) {
@@ -241,6 +238,7 @@ function resultTemplate(result) {
       "<p><strong>Förslag:</strong> " + escapeHtml(result.recommendationDirection) + "</p>" +
       listBlock("Nästa kontroll", result.quickChecks || []) +
     "</section>" +
+    evidenceSummaryTemplate(result.evidenceAssessment) +
     "<div class='skotsel-result-core'>" +
       resultBlock("Varför?", result.why) +
       directionBlock(result.recommendationDirection) +
@@ -249,18 +247,56 @@ function resultTemplate(result) {
       advancedDetails("Juridisk kontroll", resultBlock("Juridisk kontroll", result.legalAssessment)) +
       advancedDetails("Varningar", listTemplate(result.warnings), hasWarnings) +
       advancedDetails("Plantext", "<div class='skotsel-plantext'><p>" + escapeHtml(result.planText) + "</p><button class='button button--secondary' type='button' data-copy-plantext>Kopiera plantext</button></div>") +
-      advancedDetails("Källor och antaganden", listTemplate(result.sourceNotes), false, "skotsel-sources") +
+      advancedDetails("Källor och antaganden", groupedSourcesTemplate(result.groupedSourceNotes || {}, result.sourceNotes), false, "skotsel-sources") +
     "</div>" +
   "</section>";
+}
+
+function evidenceSummaryTemplate(evidenceAssessment) {
+  if (!evidenceAssessment) return "";
+  return "<section class='skotsel-evidence-summary'>" +
+    "<h3>Samlad bedömning</h3>" +
+    "<p>" + escapeHtml(evidenceAssessment.evidenceSummary) + "</p>" +
+    "<div class='skotsel-source-balance'>" + SOURCE_GROUPS.map(([type, label]) =>
+      "<span><strong>" + escapeHtml(String(evidenceAssessment.sourceBalance?.[type] || 0)) + "</strong>" + escapeHtml(label) + "</span>"
+    ).join("") + "</div>" +
+    missingTypesTemplate(evidenceAssessment) +
+  "</section>";
+}
+
+function missingTypesTemplate(evidenceAssessment) {
+  const missing = evidenceAssessment.conflictingEvidence
+    .filter((item) => item.area === "source")
+    .map((item) => item.claim);
+  if (!missing.length) return "";
+  return "<p class='card__text'><strong>Saknas:</strong> " + escapeHtml([...new Set(missing)].join(" ")) + "</p>";
+}
+
+function groupedSourcesTemplate(groupedSources, fallbackNotes = []) {
+  const groups = SOURCE_GROUPS.map(([type, label]) => {
+    const items = groupedSources[type] || [];
+    if (!items.length) return "";
+    return "<section class='skotsel-source-group'><h4>" + escapeHtml(label) + "</h4><ul>" + items.map(sourceItemTemplate).join("") + "</ul></section>";
+  }).filter(Boolean);
+
+  if (groups.length) return groups.join("");
+  return listTemplate(fallbackNotes);
+}
+
+function sourceItemTemplate(item) {
+  return "<li><strong>" + escapeHtml(item.sourceLabel || item.source || item.type) + ":</strong> " +
+    escapeHtml(item.claim || "") +
+    (item.limitations?.length ? "<small>" + escapeHtml(item.limitations.join(" ")) + "</small>" : "") +
+  "</li>";
 }
 
 function siTemplate(siteIndexEstimate) {
   const value = siteIndexEstimate.siteIndex || "saknas";
   const method = methodLabel(siteIndexEstimate.method);
   const warning = siteIndexEstimate.missing?.length
-    ? "<small>SI saknas - v?lj manuellt eller g?r f?rdjupad bonitering.</small>"
-    : "<small>S?kerhet: " + escapeHtml(confidenceLabel(siteIndexEstimate.confidence)) + (method ? " ? " + escapeHtml(method) : "") + "</small>";
-  return "<div class='skotsel-si-summary'><span>Ber?knat SI</span><strong>" + escapeHtml(value) + "</strong>" + warning + "</div>";
+    ? "<small>SI saknas - välj manuellt eller gör fördjupad bonitering.</small>"
+    : "<small>Säkerhet: " + escapeHtml(confidenceLabel(siteIndexEstimate.confidence)) + (method ? " · " + escapeHtml(method) : "") + "</small>";
+  return "<div class='skotsel-si-summary'><span>Beräknat SI</span><strong>" + escapeHtml(value) + "</strong>" + warning + "</div>";
 }
 
 function chartTemplate(chartData) {
@@ -270,7 +306,7 @@ function chartTemplate(chartData) {
   const x = hasPoint ? chartX(height) : 44;
   const y = hasPoint ? chartY(basal) : 188;
   const point = hasPoint ? "<circle cx='" + x + "' cy='" + y + "' r='7' class='skotsel-chart__point'></circle>" : "";
-  const label = hasPoint ? escapeHtml(formatNumber(height) + " m / " + formatNumber(basal) + " m?/ha") : "Ange h?jd och grundyta";
+  const label = hasPoint ? escapeHtml(formatNumber(height) + " m / " + formatNumber(basal) + " m²/ha") : "Ange höjd och grundyta";
   const curveReference = chartData.curveReference;
   const hasPilot = curveReference?.status === "pilot";
   const hasComplete = curveReference?.status === "complete";
@@ -278,14 +314,14 @@ function chartTemplate(chartData) {
   const pilot = hasPilot ? pilotCurveTemplate(curveReference.curve) : "";
   const badge = hasPilot ? "<span>Pilot: T20-exempel, ej full kurva</span>" : "<span>" + escapeHtml(chartData.status || "") + "</span>";
 
-  return "<article class='skotsel-chart' role='img' aria-label='Gallringskurva med best?ndets punkt'>" +
+  return "<article class='skotsel-chart' role='img' aria-label='Gallringskurva med beståndets punkt'>" +
     "<div class='skotsel-chart__head'><h3>Gallringskurva</h3>" + badge + "</div>" +
     "<svg viewBox='0 0 330 220' focusable='false'>" +
       zones +
       pilot +
       "<line x1='38' y1='192' x2='305' y2='192'></line>" +
       "<line x1='38' y1='18' x2='38' y2='192'></line>" +
-      "<text x='160' y='214'>H?jd</text>" +
+      "<text x='160' y='214'>Höjd</text>" +
       "<text x='4' y='110' transform='rotate(-90 12 110)'>Grundyta</text>" +
       point +
     "</svg>" +
@@ -322,7 +358,7 @@ function chartY(basalArea) {
 
 function methodLabel(method) {
   if (method === "manual") return "Manuellt angivet";
-  if (method === "height-age") return "H?jd + ?lder";
+  if (method === "height-age") return "Höjd + ålder";
   return "";
 }
 
@@ -343,9 +379,7 @@ function resultBlock(title, text) {
 }
 
 function listTemplate(values) {
-  if (!values.length) {
-    return "<p class='card__text'>Inga särskilda punkter.</p>";
-  }
+  if (!values.length) return "<p class='card__text'>Inga särskilda punkter.</p>";
   return "<ul class='skotsel-list'>" + values.map((value) => "<li>" + escapeHtml(value) + "</li>").join("") + "</ul>";
 }
 

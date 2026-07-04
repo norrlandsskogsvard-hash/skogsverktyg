@@ -1,5 +1,5 @@
 import { estimateSiteIndex } from "./siteIndexCalculator.js";
-import { findGallringZone, sourceNotesForInput } from "./skotselKnowledgeBase.js";
+import { buildEvidenceAssessment, findGallringZone, sourceNotesForInput } from "./skotselKnowledgeBase.js";
 
 const ACTIONS = {
   curve_under: ["Under mall", "Låg"],
@@ -53,7 +53,7 @@ export function calculateSkotselRecommendation(input = {}) {
   const quickAssessment = assessQuickCurve(normalized, siteIndexEstimate);
 
   if (legal.hasConservationFlag) {
-    quickAssessment.actionCode = "conservation_check";
+    quickAssessment.actionCode = "legal_check_required";
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
     quickAssessment.fieldChecks.push("Avgränsa naturvärden och kulturmiljö innan produktionsåtgärd skrivs som huvudförslag.");
     quickAssessment.warnings.push("Naturvärde/kulturmiljö är markerat eller osäkert.");
@@ -220,7 +220,10 @@ function buildLegalAssessment(input) {
   }
 
   return {
-    hasConservationFlag: input.conservation === "ja" || input.conservation === "osakert",
+    hasConservationFlag: input.conservation === "ja" ||
+      input.conservation === "osakert" ||
+      input.reindeerMountain === "ja" ||
+      input.reindeerMountain === "osakert",
     text: warnings.length
       ? "Juridisk kontroll krävs eller bör göras innan åtgärdsförslag används i planering."
       : "Inga särskilda juridiska varningsflaggor är markerade, men lagkrav ska alltid kontrolleras före åtgärd.",
@@ -240,8 +243,7 @@ function buildResult(input, parts) {
     ...curveSourceNotes(curveReference)
   ]);
   const planText = buildPlanText(parts.actionCode, parts.recommendationDirection);
-
-  return {
+  const baseResult = {
     actionCode: parts.actionCode,
     actionLabel,
     actionPriority,
@@ -269,6 +271,14 @@ function buildResult(input, parts) {
       sourceStatus: "Inga ogranskade numeriska gallringsgränser används."
     }
   };
+  const evidenceAssessment = buildEvidenceAssessment(input, baseResult);
+
+  return {
+    ...baseResult,
+    confidence: evidenceAssessment.combinedConfidence,
+    evidenceAssessment,
+    groupedSourceNotes: groupSourcesByEvidence(evidenceAssessment)
+  };
 }
 
 function baseFieldChecks(input) {
@@ -292,6 +302,26 @@ function curveSourceNotes(curveReference) {
     `Kurvstatus: ${curveReference.curve.status}; precision: ${curveReference.curve.precision}.`,
     ...curveReference.curve.limitations
   ];
+}
+
+function groupSourcesByEvidence(evidenceAssessment) {
+  const groups = {
+    law: [],
+    research: [],
+    regional_curve: [],
+    decision_support_reference: [],
+    scenario_reference: [],
+    practice_guide: [],
+    field_observation: [],
+    warning: []
+  };
+
+  evidenceAssessment.evidenceItems.forEach((item) => {
+    if (!groups[item.type]) groups[item.type] = [];
+    groups[item.type].push(item);
+  });
+
+  return groups;
 }
 
 function chartNote(actionCode, input, siteIndexEstimate, curveReference) {
