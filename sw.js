@@ -1,4 +1,4 @@
-const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-skotselkollen.3";
+const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-skotselkollen.4";
 
 const CORE_ASSETS = [
   "./",
@@ -29,6 +29,8 @@ const CORE_ASSETS = [
   "./js/calculators/heightCalculator.js",
   "./js/calculators/skotselCalculator.js",
   "./js/calculators/skotselKnowledgeBase.js",
+  "./js/calculators/siteIndexCalculator.js",
+  "./js/calculators/siteIndexCurves.js",
   "./js/calculators/customerArchive.js",
   "./js/calculators/quoteCalculator.js",
   "./js/calculators/pricingEngine.js"

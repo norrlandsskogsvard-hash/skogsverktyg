@@ -62,7 +62,7 @@ export function sourceNotesForInput(input = {}) {
   }
 
   if (input.mainSpecies === "blandat") {
-    notes.push("Blandbestånd bedöms endast mot dominerande trädslag om andelen är minst 70 %. I annat fall krävs manuell bedömning.");
+    notes.push("Blandbestånd kräver manuell kontroll av trädslagsblandning, skiktning och målbild innan mall används.");
   }
 
   notes.push("Gallringszon visas bara när kunskapsbasen innehåller granskad zondata. För vald v1 saknas sådan zondata.");

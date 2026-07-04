@@ -509,7 +509,7 @@
 
   .skotsel-card .card__body {
     padding: var(--space-3);
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
 
   .skotsel-quick-grid {
@@ -543,7 +543,7 @@
   }
 
   .skotsel-actions .button {
-    min-height: 2.8rem;
+    min-height: 2.9rem;
   }
 
   .skotsel-result {
@@ -557,7 +557,7 @@
 
   .skotsel-result-card {
     padding: var(--space-3);
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
 
   .skotsel-result-summary {
@@ -598,12 +598,47 @@
   }
 
   .skotsel-chart {
-    max-height: 12rem;
-    overflow: hidden;
+    max-height: none;
+    padding: var(--space-2);
+    overflow: visible;
   }
 
   .skotsel-chart svg {
-    max-height: 8.5rem;
+    max-height: 9rem;
+  }
+
+  .skotsel-chart__head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .skotsel-si-box {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .skotsel-si-box .button {
+    min-height: 2.45rem;
+  }
+
+  .skotsel-si-summary strong {
+    font-size: 1.05rem;
+  }
+
+  .skotsel-fast-proposal {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .skotsel-fast-proposal .skotsel-result-section {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .skotsel-advanced-root {
+    padding: var(--space-3);
   }
 
   .skotsel-advanced details,

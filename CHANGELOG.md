@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.4 - 2026-07-04
+
+### Changed - Snabb digital gallringsmall
+
+- Skötselkollen byggd om till snabb digital gallringsmall.
+- Graf och kurvstatus visas tidigare.
+- Fördjupad juridik/riskkontroll flyttad till utfällbara sektioner.
+- Automatisk SI-skattning förberedd och manuellt SI kan anges.
+- Plantext kortad och gjord mer saklig.
+- PWA-cache höjd till skotselkollen.4.
+
 ## v2.0.0-alpha.1-skotselkollen.3 - 2026-07-04
 
 ### Changed - Tydligare fältbeslutsstöd
