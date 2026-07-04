@@ -11,6 +11,8 @@ Källtyper viktas så här i appens evidensmodell:
 | law | 100 | Lagkrav och hänsyn kan kräva kontroll eller stoppa förslag. |
 | research | 80 | Forskning, Skogsskötselserien och myndighetsprinciper väger tungt. |
 | regional_curve | 70 | Regionala gallringsmallar och kurvor när källstödet är spårbart. |
+| skogskunskap_tool | 55 | Skogskunskap-verktyg som forskningsnära praktiskt modellstöd. |
+| skogskunskap_guidance | 50 | Skogskunskap-artiklar och vägledning. |
 | field_observation | 60 | Inmatade fältvärden och markerade fältförhållanden. |
 | warning | 75 | Varningsflaggor som sänker säkerhet och kräver kontroll. |
 | decision_support_reference | 50 | Beslutsstöd som INGVAR, som referensram. |
@@ -26,6 +28,10 @@ Vikterna är inte skogliga gränsvärden. De används bara för att beskriva kä
 `research` används för Skogsskötselserien, forskning och myndighetsunderlag. Denna typ väger tyngre än praktiska mallar men ger inte ensam exakt kurvstatus.
 
 `regional_curve` används för regionala gallringsmallar. T20 Norra Sverige är inlagt som pilot/exempel, inte full kurva.
+
+`skogskunskap_tool` används för Skogskunskap-verktyg. De är praktiska modeller och förenklingar, inte facit.
+
+`skogskunskap_guidance` används för Skogskunskap-artiklar och skötselvägledning. De ska vägas mot lag, forskning, regionala mallar och fältbild.
 
 `decision_support_reference` används för INGVAR. INGVAR är en referens för arbetsgång och variabler, inte facit.
 

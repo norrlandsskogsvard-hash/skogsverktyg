@@ -315,6 +315,9 @@ function groupSourcesByEvidence(evidenceAssessment) {
     law: [],
     research: [],
     regional_curve: [],
+    skogskunskap_tool: [],
+    skogskunskap_guidance: [],
+    skogskunskap: [],
     decision_support_reference: [],
     scenario_reference: [],
     practice_guide: [],
@@ -325,6 +328,9 @@ function groupSourcesByEvidence(evidenceAssessment) {
   evidenceAssessment.evidenceItems.forEach((item) => {
     if (!groups[item.type]) groups[item.type] = [];
     groups[item.type].push(item);
+    if (item.type === "skogskunskap_tool" || item.type === "skogskunskap_guidance") {
+      groups.skogskunskap.push(item);
+    }
   });
 
   return groups;

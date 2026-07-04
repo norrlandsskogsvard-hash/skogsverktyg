@@ -54,6 +54,7 @@ const SOURCE_GROUPS = [
   ["law", "Lag"],
   ["research", "Forskning/myndighet"],
   ["regional_curve", "Regional gallringsmall"],
+  ["skogskunskap", "Skogskunskap"],
   ["decision_support_reference", "Beslutsstöd"],
   ["scenario_reference", "Scenarioverktyg"],
   ["practice_guide", "Praktisk mall"],
@@ -296,9 +297,16 @@ function sourceBalanceTemplate(sourceBalance = {}) {
   return "<details class='skotsel-source-balance-details'>" +
     "<summary>Källbalans och teknisk viktning</summary>" +
     "<div class='skotsel-source-balance'>" + SOURCE_GROUPS.map(([type, label]) =>
-      "<span><strong>" + escapeHtml(String(sourceBalance[type] || 0)) + "</strong>" + escapeHtml(label) + "</span>"
+      "<span><strong>" + escapeHtml(String(sourceBalanceCount(sourceBalance, type))) + "</strong>" + escapeHtml(label) + "</span>"
     ).join("") + "</div>" +
   "</details>";
+}
+
+function sourceBalanceCount(sourceBalance, type) {
+  if (type === "skogskunskap") {
+    return (sourceBalance.skogskunskap_tool || 0) + (sourceBalance.skogskunskap_guidance || 0);
+  }
+  return sourceBalance[type] || 0;
 }
 
 function sourceRoleLabel(type) {
@@ -306,6 +314,8 @@ function sourceRoleLabel(type) {
     law: "lag",
     research: "forskning/myndighet",
     regional_curve: "regional mall",
+    skogskunskap_tool: "verktygsstöd",
+    skogskunskap_guidance: "vägledning",
     decision_support_reference: "beslutsstöd",
     scenario_reference: "scenarioverktyg",
     practice_guide: "praktisk mall",
@@ -318,10 +328,19 @@ function sourceLimitation(item) {
   if (item.type === "decision_support_reference") return "referensram, inte facit";
   if (item.type === "scenario_reference") return "långsiktig analys, inte fältgräns";
   if (item.type === "practice_guide") return "stöd, inte ensam hög säkerhet";
+  if (item.type === "skogskunskap_tool") return skogskunskapToolLimitation(item);
+  if (item.type === "skogskunskap_guidance") return "ska vägas mot lag/forskning/fält";
   if (item.type === "regional_curve" && item.strength === "pilot") return "pilot, inte full kurva";
   if (item.type === "law") return "kan kräva kontroll";
   if (item.type === "warning") return "kräver fältkontroll";
   return item.limitations?.[0] || "stödjande underlag";
+}
+
+function skogskunskapToolLimitation(item) {
+  if (item.role === "boniteringsstod") return "kräver rätt indata";
+  if (item.role === "lovrojningsstod") return "ej gallringsfacit";
+  if (item.role === "sasongsstod") return "ej beståndsmodell";
+  return "modell/förenkling";
 }
 
 function regionWarningTemplate(text) {

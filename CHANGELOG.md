@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.8 - 2026-07-04
+
+### Added - Skogskunskap som källbank
+
+- Skogskunskap tillagd som källbank i Skötselkollen.
+- Skogskunskap-verktyg klassas som praktiskt forskningsnära verktygsstöd, inte facit.
+- Skogskunskap visas separat i Källor och antaganden.
+- PWA-cache höjd till skotselkollen.8.
+
 ## v2.0.0-alpha.1-smoketest.1 - 2026-07-04
 
 ### Added - Automatiska app-smoketester

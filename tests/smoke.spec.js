@@ -66,6 +66,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Pilotunderlag");
   await expect(page.locator("body")).toContainText("Samlad bedömning");
   await expect(page.locator("body")).toContainText("T20");
+  await openSources(page);
+  await expect(page.locator("body")).toContainText("Skogskunskap");
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-desktop.png`, fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -74,6 +76,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Pilotunderlag");
   await expect(page.locator("body")).toContainText("Samlad bedömning");
   await expect(page.locator("body")).toContainText("T20");
+  await openSources(page);
+  await expect(page.locator("body")).toContainText("Skogskunskap");
   await expectNoHorizontalScroll(page);
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-mobile.png`, fullPage: true });
 });
@@ -147,6 +151,17 @@ async function pressKeypadValue(page, keypadSelector, values) {
   for (const value of values) {
     await page.locator(`${keypadSelector} [data-keypad-value="${value}"]`).click();
   }
+}
+
+async function openSources(page) {
+  await page.evaluate(() => {
+    document.querySelectorAll("details").forEach((details) => {
+      const summary = details.querySelector(":scope > summary");
+      if (summary?.textContent?.includes("Källor och antaganden")) {
+        details.open = true;
+      }
+    });
+  });
 }
 
 async function expectNoHorizontalScroll(page) {

@@ -4,13 +4,16 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-lagkontroll.md",
   "docs/skotselkollen-input-output.md",
   "docs/skotselkollen-kurvdata.md",
-  "docs/skotselkollen-kallviktning.md"
+  "docs/skotselkollen-kallviktning.md",
+  "docs/skotselkollen-kallbank-skogskunskap.md"
 ];
 
 export const EVIDENCE_TYPE_WEIGHTS = {
   law: 100,
   research: 80,
   regional_curve: 70,
+  skogskunskap_tool: 55,
+  skogskunskap_guidance: 50,
   decision_support_reference: 50,
   scenario_reference: 45,
   practice_guide: 35,
@@ -164,6 +167,142 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
     notes: ["Ska användas som jämförelse och inte som facit."]
   },
   {
+    id: "skogskunskap-general-guidance",
+    type: "skogskunskap_guidance",
+    source: "https://www.skogskunskap.se/",
+    sourceLabel: "Skogskunskap",
+    area: "skotsel",
+    species: "all",
+    region: "all",
+    appliesTo: ["all"],
+    claim: "Skogskunskap är en digital kunskapsbank och rådgivningskälla för praktisk skogsskötsel.",
+    role: "kunskapsbank",
+    strength: "guidance",
+    weight: EVIDENCE_TYPE_WEIGHTS.skogskunskap_guidance,
+    confidence: "medium",
+    limitations: ["Ska vägas mot lag, forskning, regionala mallar och fältbedömning."],
+    notes: ["Källbank utan inlagda numeriska gränsvärden i detta steg."]
+  },
+  {
+    id: "skogskunskap-tools-bank",
+    type: "skogskunskap_tool",
+    source: "https://www.skogskunskap.se/rakna-med-verktyg/",
+    sourceLabel: "Räkna med verktyg",
+    area: "beslutsstod",
+    species: "all",
+    region: "all",
+    appliesTo: ["all"],
+    claim: "Skogskunskap samlar digitala verktyg för skogliga beräkningar och skogsvård.",
+    role: "verktygsbank",
+    strength: "toolSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.skogskunskap_tool,
+    confidence: "medium",
+    limitations: ["Verktyg bygger på modeller/förenklingar och är inte facit för enskilt bestånd."],
+    notes: ["Får inte ensam ge hög säkerhet."]
+  },
+  {
+    id: "skogskunskap-thinning-template",
+    type: "skogskunskap_tool",
+    source: "https://www.skogskunskap.se/rakna-med-verktyg/skogsvard/gallringsmall/",
+    sourceLabel: "Gallringsmall barr/löv",
+    area: "gallring",
+    species: "all",
+    region: "all",
+    appliesTo: ["curve_reference_pilot", "curve_missing"],
+    claim: "Skogskunskap har verktyg för gallringsmallar för barr och löv.",
+    role: "gallringsstod",
+    strength: "toolSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.skogskunskap_tool,
+    confidence: "medium",
+    limitations: ["Inga kurvor eller gränsvärden läggs in förrän de är källgranskade."],
+    notes: ["Modell/förenkling, inte komplett facit för enskilt bestånd."]
+  },
+  {
+    id: "skogskunskap-site-index",
+    type: "skogskunskap_tool",
+    source: "https://www.skogskunskap.se/rakna-med-verktyg/mata-skogen/standortsindex/",
+    sourceLabel: "Ståndortsindex",
+    area: "bonitering",
+    species: "all",
+    region: "all",
+    appliesTo: ["all"],
+    claim: "Skogskunskap har verktyg och bakgrund för ståndortsindex och höjdutvecklingskurvor.",
+    role: "boniteringsstod",
+    strength: "toolSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.skogskunskap_tool,
+    confidence: "medium",
+    limitations: ["SI kräver rätt indata och rimliga beståndsförutsättningar. Ingen auto-SI aktiveras utan källstödda tabeller."],
+    notes: ["Boniteringsstöd utan inlagda SI-tabeller i detta steg."]
+  },
+  {
+    id: "skogskunskap-clearing-tools",
+    type: "skogskunskap_tool",
+    source: "https://www.skogskunskap.se/rakna-med-verktyg/skogsvard/",
+    sourceLabel: "Röjningsanalys/röjningsmall",
+    area: "rojning",
+    species: "all",
+    region: "all",
+    appliesTo: ["cleaning_plan", "cleaning_now", "curve_missing"],
+    claim: "Skogskunskap har verktyg för röjningsanalys och röjningsbedömning.",
+    role: "rojningsstod",
+    strength: "toolSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.skogskunskap_tool,
+    confidence: "medium",
+    limitations: ["Ska inte ersätta fältbedömning av huvudstammar, skador, trädslagsval och mål."],
+    notes: ["Röjningsstöd, inte gallringsfacit."]
+  },
+  {
+    id: "skogskunskap-broadleaf-clearing",
+    type: "skogskunskap_tool",
+    source: "https://www.skogskunskap.se/rakna-med-verktyg/skogsvard/",
+    sourceLabel: "Röjningsmall björk/al/asp",
+    area: "rojning",
+    species: "bjork",
+    region: "all",
+    appliesTo: ["curve_missing", "cleaning_plan", "cleaning_now"],
+    claim: "Skogskunskap har särskilt verktyg/stöd för röjning i björk, klibbal och asp.",
+    role: "lovrojningsstod",
+    strength: "toolSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.skogskunskap_tool,
+    confidence: "medium",
+    limitations: ["Förenklad modell/stöd. Ska inte användas som komplett gallringsmall."],
+    notes: ["Stödjer björkspecifika kontrollpunkter men ersätter inte källgranskad björkkurva."]
+  },
+  {
+    id: "skogskunskap-clearing-clock",
+    type: "skogskunskap_tool",
+    source: "https://www.skogskunskap.se/rakna-med-verktyg/skogsvard/",
+    sourceLabel: "Röjningsklockan",
+    area: "rojning",
+    species: "all",
+    region: "all",
+    appliesTo: ["cleaning_plan", "cleaning_now"],
+    claim: "Skogskunskap har säsongs-/riskstöd för röjningstidpunkt.",
+    role: "sasongsstod",
+    strength: "toolSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.skogskunskap_tool,
+    confidence: "low",
+    limitations: ["Kalender-/riskstöd, inte komplett beståndsmodell."],
+    notes: ["Ska inte användas som full beståndsbedömning."]
+  },
+  {
+    id: "skogskunskap-silviculture-guidance",
+    type: "skogskunskap_guidance",
+    source: "https://www.skogskunskap.se/",
+    sourceLabel: "Röja/gallra/slutavverka",
+    area: "skotsel",
+    species: "all",
+    region: "all",
+    appliesTo: ["curve_reference_pilot", "curve_missing", "final_felling_check", "legal_check_required"],
+    claim: "Skogskunskap har rådgivningsmaterial om röjning, gallring och slutavverkning.",
+    role: "praktisk skotselvagledning",
+    strength: "guidance",
+    weight: EVIDENCE_TYPE_WEIGHTS.skogskunskap_guidance,
+    confidence: "medium",
+    limitations: ["Rådgivning ska vägas mot lag, fältdata, forskning och regionala mallar."],
+    notes: ["Vägledning, inte ensam facitkälla."]
+  },
+  {
     id: "ingvar-reference",
     type: "decision_support_reference",
     source: "ingvar",
@@ -308,6 +447,7 @@ export function sourceNotesForInput(input = {}) {
   notes.push("Gallringszon visas bara när kunskapsbasen innehåller granskad komplett zondata. T20-underlaget är pilot/exempel, inte full kurva.");
   notes.push("INGVAR används endast som referens för arbetsgång och variabler, inte som direkt facit.");
   notes.push("Heureka används som referens för långsiktigt scenario- och beslutsstöd, inte som direkt fältgräns.");
+  notes.push("Skogskunskap används som forskningsnära verktygs- och vägledningsstöd, inte som ensam facitkälla.");
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
   notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];
@@ -413,9 +553,12 @@ function combineConfidence(baseConfidence, supportingEvidence, conflictingEviden
   const supportingTypes = new Set(supportingEvidence.map((item) => item.type));
   const onlyPracticeGuide = supportingTypes.size === 1 && supportingTypes.has("practice_guide");
   if (onlyPracticeGuide) return capConfidence(baseConfidence, "medium");
+  if (onlyModelSupport(supportingTypes)) return capConfidence(baseConfidence, "medium");
 
   let confidence = baseConfidence || "low";
-  if (supportingTypes.has("research") && supportingTypes.has("regional_curve") && supportingTypes.has("practice_guide")) {
+  if (supportingTypes.has("research") &&
+    supportingTypes.has("regional_curve") &&
+    (supportingTypes.has("practice_guide") || supportingTypes.has("skogskunskap_tool") || supportingTypes.has("skogskunskap_guidance"))) {
     confidence = "medium";
   }
 
@@ -424,6 +567,13 @@ function combineConfidence(baseConfidence, supportingEvidence, conflictingEviden
   }
 
   return confidence;
+}
+
+function onlyModelSupport(supportingTypes) {
+  const ignoredTypes = new Set(["field_observation", "law", "warning"]);
+  const modelTypes = new Set(["practice_guide", "skogskunskap_tool", "skogskunskap_guidance"]);
+  const activeTypes = [...supportingTypes].filter((type) => !ignoredTypes.has(type));
+  return activeTypes.length > 0 && activeTypes.every((type) => modelTypes.has(type));
 }
 
 function buildEvidenceSummary(baseRecommendation, supportingEvidence, conflictingEvidence, legalBlocks, combinedConfidence) {
@@ -482,18 +632,28 @@ function buildFieldSummary(input, baseRecommendation, supportingEvidence, confli
 }
 
 function shortEvidence(input, actionCode, supportingEvidence) {
+  const hasSkogskunskapTool = supportingEvidence.some((item) => item.type === "skogskunskap_tool");
+  const hasSkogskunskapGuidance = supportingEvidence.some((item) => item.type === "skogskunskap_guidance");
+
   if (actionCode === "curve_reference_pilot") {
-    return ["T20-exempel", "gallringsbeslutsstöd", "praktiskt fältstöd"];
+    return withSkogskunskap(["T20-exempel", "gallringsbeslutsstöd", "praktiskt fältstöd"], hasSkogskunskapTool, hasSkogskunskapGuidance);
   }
 
   if (input.mainSpecies === "bjork") {
-    return ["fältvärden", "björkspecifika kontrollpunkter"];
+    return withSkogskunskap(["fältvärden", "björkspecifika kontrollpunkter"], hasSkogskunskapTool, hasSkogskunskapGuidance);
   }
 
   const hasResearch = supportingEvidence.some((item) => item.type === "research");
   const values = ["inmatade fältvärden"];
   if (hasResearch) values.push("generella gallringsprinciper");
-  return values.slice(0, 3);
+  return withSkogskunskap(values, hasSkogskunskapTool, hasSkogskunskapGuidance).slice(0, 4);
+}
+
+function withSkogskunskap(values, hasTool, hasGuidance) {
+  const nextValues = [...values];
+  if (hasTool) nextValues.push("Skogskunskap verktygsstöd");
+  if (!hasTool && hasGuidance) nextValues.push("Skogskunskap vägledning");
+  return [...new Set(nextValues)];
 }
 
 function shortMissing(input, actionCode, conflictingEvidence) {
@@ -585,6 +745,8 @@ function typeLabel(type) {
     law: "lag",
     research: "forskning/myndighet",
     regional_curve: "regional gallringsmall",
+    skogskunskap_tool: "Skogskunskap verktygsstöd",
+    skogskunskap_guidance: "Skogskunskap vägledning",
     decision_support_reference: "beslutsstöd",
     scenario_reference: "scenarioverktyg",
     practice_guide: "praktisk mall",
