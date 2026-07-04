@@ -145,7 +145,7 @@ function assessQuickCurve(input, siteIndexEstimate) {
     };
   }
 
-  if (curveReference?.status === "pilot") {
+  if (isPilotCurveStatus(curveReference?.status)) {
     return {
       actionCode: curveReference.actionCode,
       confidence: curveReference.confidence,
@@ -325,7 +325,7 @@ function curveSourceNotes(curveReference) {
   if (!curveReference?.curve) return [];
   return [
     `${curveReference.curve.source}, ${curveReference.curve.sourcePage}.`,
-    `Kurvstatus: ${curveReference.curve.status}; precision: ${curveReference.curve.precision}.`,
+    `Kurvstatus: ${curveReference.curve.status}; datakvalitet: ${curveReference.curve.dataQuality || "saknas"}; aktiv användning: ${curveReference.curve.activeUse || "saknas"}.`,
     ...curveReference.curve.limitations
   ];
 }
@@ -428,6 +428,10 @@ function lowerConfidence(confidence) {
   if (confidence === "high") return "medium";
   if (confidence === "medium") return "low";
   return "low";
+}
+
+function isPilotCurveStatus(status) {
+  return status === "active_pilot" || status === "pilot";
 }
 
 function toNumber(value) {

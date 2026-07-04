@@ -1,4 +1,5 @@
 import { calculateSkotselRecommendation } from "../calculators/skotselCalculator.js";
+import { isActiveCurveSourceValue, NORRA_THINNING_SOURCE_VALUES } from "../calculators/skotselKnowledgeBase.js";
 import { getStoredValue, setStoredValue, removeStoredValue } from "../storage.js";
 import { createPageHeader, escapeHtml, showToast } from "../ui.js";
 
@@ -247,6 +248,7 @@ function resultTemplate(result) {
       advancedDetails("Varningar", listTemplate(result.warnings), hasWarnings) +
       advancedDetails("Plantext", "<div class='skotsel-plantext'><p>" + escapeHtml(result.planText) + "</p><button class='button button--secondary' type='button' data-copy-plantext>Kopiera plantext</button></div>") +
       advancedDetails("Källor och antaganden", groupedSourcesTemplate(result.groupedSourceNotes || {}, result.sourceNotes, result.evidenceAssessment), false, "skotsel-sources") +
+      advancedDetails("Identifierade kurvor i källbank", curveBankTemplate(), false, "skotsel-curve-bank") +
     "</div>" +
   "</section>";
 }
@@ -401,6 +403,47 @@ function skogskunskapToolLimitation(item) {
   return "modell/förenkling";
 }
 
+function curveBankTemplate() {
+  const active = NORRA_THINNING_SOURCE_VALUES.filter(isActiveCurveSourceValue);
+  const inactive = NORRA_THINNING_SOURCE_VALUES.filter((sourceValue) => !isActiveCurveSourceValue(sourceValue));
+  const tall = inactive.filter((sourceValue) => sourceValue.species === "tall");
+  const gran = inactive.filter((sourceValue) => sourceValue.species === "gran");
+
+  return "<div class='skotsel-curve-bank__intro'>" +
+      "<p>Granskningsläge för Norra gallringsmallar. Endast aktiv pilot eller verifierad kurvdata får visas som kurva i grafen.</p>" +
+    "</div>" +
+    "<div class='skotsel-curve-bank__grid'>" +
+      curveBankGroup("Aktiv pilot/verifierad", active, true) +
+      curveBankGroup("Tall - identifierad men ej aktiv", tall, false) +
+      curveBankGroup("Gran - identifierad men ej aktiv", gran, false) +
+    "</div>";
+}
+
+function curveBankGroup(title, items, activeGroup) {
+  if (!items.length) return "";
+  return "<section class='skotsel-curve-bank__group'>" +
+    "<h4>" + escapeHtml(title) + "</h4>" +
+    "<ul>" + items.map((item) => curveBankItem(item, activeGroup)).join("") + "</ul>" +
+  "</section>";
+}
+
+function curveBankItem(item, activeGroup) {
+  const code = item.speciesCode + item.siteIndex;
+  const status = activeGroup
+    ? "aktiv pilot - " + (item.canCreateFullCurve ? "full kurva" : "T20-exempel, ej full kurva")
+    : inactiveCurveStatusLabel(item);
+  return "<li><strong>" + escapeHtml(code) + "</strong><span>" + escapeHtml(status) + "</span></li>";
+}
+
+function inactiveCurveStatusLabel(item) {
+  if (item.status === "draft_digitized") return "utkast, ej aktiv";
+  return "candidate, ej aktiv";
+}
+
+function isPilotCurveStatus(status) {
+  return status === "active_pilot" || status === "pilot";
+}
+
 function regionWarningTemplate(text) {
   if (!text) return "";
   return "<p class='skotsel-region-warning'>" + escapeHtml(text) + "</p>";
@@ -424,7 +467,7 @@ function chartTemplate(chartData) {
   const point = hasPoint ? pointTemplate(x, y, height, basal) : "";
   const label = hasPoint ? escapeHtml("Bestånd: " + formatNumber(height) + " m / " + formatNumber(basal) + " m²/ha") : "Ange höjd och grundyta";
   const curveReference = chartData.curveReference;
-  const hasPilot = curveReference?.status === "pilot";
+  const hasPilot = isPilotCurveStatus(curveReference?.status);
   const hasComplete = curveReference?.status === "complete";
   const zones = hasComplete ? completeZonesTemplate() : "";
   const pilot = hasPilot ? pilotCurveTemplate(curveReference.curve) : "";

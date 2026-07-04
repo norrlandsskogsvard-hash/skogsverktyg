@@ -10,6 +10,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-kallvarden-backlog.md",
   "docs/skotselkollen-gallringskurva-ui.md",
   "docs/skotselkollen-norra-gallringsvarden.md",
+  "docs/skotselkollen-norra-massimport.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
 
@@ -77,6 +78,9 @@ const NORRA_CANDIDATE_SITE_INDICES = {
   tall: [14, 16, 18, 22, 24, 26, 28],
   gran: [16, 18, 20, 22, 24, 26, 28, 30, 32]
 };
+const ACTIVE_CURVE_STATUSES = new Set(["active_pilot", "verified"]);
+const ACTIVE_CURVE_QUALITIES = new Set(["verified_text", "verified_table", "pilot_example", "chart_digitized_verified"]);
+const ACTIVE_CURVE_USES = new Set(["chart_reference", "full_curve"]);
 
 export const NORRA_THINNING_SOURCE_VALUES = [
   {
@@ -94,12 +98,16 @@ export const NORRA_THINNING_SOURCE_VALUES = [
     actionType: "gallring",
     title: "T20-exempel normalfall",
     description: "Direkta exempelvärden för tall T20 i norra Sverige.",
-    status: "pilot",
+    status: "active_pilot",
     precision: "direct_text_example",
+    dataQuality: "pilot_example",
     confidence: "medium",
     activeUse: "chart_reference",
     canCreateFullCurve: false,
     canAloneGiveHighConfidence: false,
+    reviewNeeded: false,
+    extractionNotes: ["Direkt text-/exempelvärde från angiven källa. Används som pilot, inte full kurva."],
+    draftValues: [],
     limitations: [
       "Exempelvärden, inte komplett digitaliserad kurva.",
       "Gäller T20-exempel för norra Sverige.",
@@ -142,7 +150,7 @@ export const NORRA_THINNING_SOURCE_VALUES = [
 ];
 
 export const THINNING_CURVES = NORRA_THINNING_SOURCE_VALUES
-  .filter((sourceValue) => sourceValue.activeUse === "chart_reference")
+  .filter(isActiveCurveSourceValue)
   .map((sourceValue) => ({
     id: sourceValue.id,
     species: sourceValue.species,
@@ -153,6 +161,7 @@ export const THINNING_CURVES = NORRA_THINNING_SOURCE_VALUES
     sourcePage: sourceValue.sourcePage,
     status: sourceValue.status,
     precision: sourceValue.precision,
+    dataQuality: sourceValue.dataQuality,
     confidence: sourceValue.confidence,
     activeUse: sourceValue.activeUse,
     canCreateFullCurve: sourceValue.canCreateFullCurve,
@@ -160,6 +169,12 @@ export const THINNING_CURVES = NORRA_THINNING_SOURCE_VALUES
     limitations: sourceValue.limitations,
     points: sourceValue.values
   }));
+
+export function isActiveCurveSourceValue(sourceValue = {}) {
+  return ACTIVE_CURVE_STATUSES.has(sourceValue.status) &&
+    ACTIVE_CURVE_QUALITIES.has(sourceValue.dataQuality) &&
+    ACTIVE_CURVE_USES.has(sourceValue.activeUse);
+}
 
 function candidateSourceValuePackages(species, speciesCode, siteIndices) {
   return siteIndices.map((siteIndex) => ({
@@ -171,6 +186,7 @@ function candidateSourceValuePackages(species, speciesCode, siteIndices) {
     sourcePage: "",
     status: "candidate",
     precision: "documentation_only",
+    dataQuality: "candidate_only",
     confidence: "low",
     area: "thinning",
     actionType: "gallring",
@@ -181,10 +197,13 @@ function candidateSourceValuePackages(species, speciesCode, siteIndices) {
     title: speciesCode + siteIndex + " identifierad gallringsmall",
     description: "Gallringsmall identifierad i källmaterial men inte digitaliserad/verifierad i appen.",
     values: [],
+    draftValues: [],
+    extractionNotes: ["Identifierad mall. Inga verifierade punktvärden är inlagda."],
     limitations: ["Kurvan finns i källmaterial men är inte digitaliserad/verifierad i appen."],
     activeUse: "documentation_only",
     canCreateFullCurve: false,
-    canAloneGiveHighConfidence: false
+    canAloneGiveHighConfidence: false,
+    reviewNeeded: true
   }));
 }
 
@@ -519,7 +538,7 @@ export function findGallringZone(input = {}, siteIndexEstimate = {}) {
 
   if (!curve) return null;
 
-  if (curve.status === "pilot") {
+  if (isPilotCurveStatus(curve.status)) {
     return {
       type: "thinningCurve",
       actionCode: "curve_reference_pilot",
@@ -553,12 +572,16 @@ export function findThinningSourceCandidate(input = {}, siteIndexEstimate = {}) 
   if (!numericSiteIndex) return null;
 
   return NORRA_THINNING_SOURCE_VALUES.find((sourceValue) =>
-    sourceValue.activeUse === "documentation_only" &&
-    sourceValue.status === "candidate" &&
+    !isActiveCurveSourceValue(sourceValue) &&
+    ["candidate", "draft_digitized"].includes(sourceValue.status) &&
     sourceValue.species === input.mainSpecies &&
     sourceValue.siteIndex === numericSiteIndex &&
     regionMatches(sourceValue.region, input.region)
   ) || null;
+}
+
+function isPilotCurveStatus(status) {
+  return status === "active_pilot" || status === "pilot";
 }
 
 export function buildEvidenceAssessment(input = {}, baseRecommendation = {}) {

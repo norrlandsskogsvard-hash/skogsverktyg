@@ -44,7 +44,13 @@ Varje kandidatvärde ska dokumenteras med:
 - om värdet är direkt tabellvärde, exempelvärde, diagramvärde, digitaliserat diagram, textregel eller tolkning
 - begränsning
 - källklass: `law`, `research`, `regional_curve`, `skogskunskap_tool`, `skogskunskap_guidance`, `practice_guide`, `decision_support_reference`, `scenario_reference`, `field_observation`
-- status: `candidate`, `verified`, `pilot`, `inactive`, `rejected`
+- status: `candidate`, `draft_digitized`, `active_pilot`, `verified`, `inactive`, `rejected`
+- dataQuality: `candidate_only`, `draft_digitized`, `verified_text`, `verified_table`, `pilot_example`, `chart_digitized_verified`
+- activeUse: `documentation_only`, `field_note`, `chart_reference`, `full_curve`
+- values: verifierade värden som får användas enligt aktiv användning
+- draftValues: utkastvärden som inte får användas i graf eller säkerhet
+- extractionNotes
+- reviewNeeded: `true`/`false`
 - confidence: `low`, `medium`, `high`
 - `canActivateInLogic`: `true`/`false`
 - `requiredTests`
@@ -62,7 +68,10 @@ Varje kandidatvärde ska dokumenteras med:
 - region: norra Sverige
 - SI/bonitet: T20
 - källklass: `regional_curve`
-- status: `pilot`
+- status: `active_pilot`
+- dataQuality: `pilot_example`
+- activeUse: `chart_reference`
+- reviewNeeded: `false`
 - confidence: `medium`
 - `canActivateInLogic`: `true`, men endast som befintligt pilot-/visningsstöd
 - kommentar: T20-värdena är redan inlagda som pilot/exempel. De får inte ändras utan separat källkontroll och test.
@@ -77,6 +86,9 @@ Varje kandidatvärde ska dokumenteras med:
 - källklass: `regional_curve`
 - status: `candidate`
 - precision: `documentation_only`
+- dataQuality: `candidate_only`
+- activeUse: `documentation_only`
+- reviewNeeded: `true`
 - confidence: `low`
 - `canActivateInLogic`: `false`
 - kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte skapa aktiv kurva.
@@ -91,6 +103,9 @@ Varje kandidatvärde ska dokumenteras med:
 - källklass: `regional_curve`
 - status: `candidate`
 - precision: `documentation_only`
+- dataQuality: `candidate_only`
+- activeUse: `documentation_only`
+- reviewNeeded: `true`
 - confidence: `low`
 - `canActivateInLogic`: `false`
 - kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte räknas som aktivt kurvunderlag.
@@ -178,7 +193,7 @@ Diagramdigitalisering av tall- eller granmallar kräver separat källkontroll, d
 
 ## Vad får aktiveras i logik?
 
-Ett värde får bara aktiveras om:
+Ett värde får bara aktiveras som kurva om:
 
 - källan är tydlig
 - värdet är verifierat
@@ -186,6 +201,9 @@ Ett värde får bara aktiveras om:
 - trädslag, region och fas är tydliga
 - begränsning är dokumenterad
 - testfall finns
+- `status` är `active_pilot` eller `verified`
+- `dataQuality` är `verified_text`, `verified_table`, `pilot_example` eller `chart_digitized_verified`
+- `activeUse` är `chart_reference` eller `full_curve`
 - värdet inte används som facit om källtypen bara är praktisk mall eller verktygsstöd
 
 Praktiska mallar, Skogskunskap-verktyg och beslutsstödsreferenser kan stödja bedömningar, men de får inte ensamma skapa hög säkerhet eller ersätta lagkrav, forskning, regionala mallar och fältbild.

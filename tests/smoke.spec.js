@@ -59,6 +59,46 @@ test("mobil routes render utan console errors", async ({ page }) => {
   await page.screenshot({ path: `${SCREENSHOT_DIR}/dashboard-mobile.png`, fullPage: true });
 });
 
+test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/skotselkollen");
+  const summary = await page.evaluate(async () => {
+    const knowledge = await import("/js/calculators/skotselKnowledgeBase.js");
+    const active = knowledge.NORRA_THINNING_SOURCE_VALUES.filter(knowledge.isActiveCurveSourceValue);
+    const t20 = knowledge.NORRA_THINNING_SOURCE_VALUES.find((item) => item.id === "norra-tall-t20-pilot");
+    const t22 = knowledge.NORRA_THINNING_SOURCE_VALUES.find((item) => item.id === "norra-tall-t22-candidate");
+    const g20 = knowledge.NORRA_THINNING_SOURCE_VALUES.find((item) => item.id === "norra-gran-g20-candidate");
+    return {
+      total: knowledge.NORRA_THINNING_SOURCE_VALUES.length,
+      activeCount: active.length,
+      activeCodes: active.map((item) => item.speciesCode + item.siteIndex),
+      curveCount: knowledge.THINNING_CURVES.length,
+      t20Status: t20?.status,
+      t20DataQuality: t20?.dataQuality,
+      t20FirstBasalBefore: t20?.values?.thinningEvents?.[0]?.basalAreaBefore,
+      t22Status: t22?.status,
+      t22ActiveUse: t22?.activeUse,
+      t22Values: t22?.values?.length,
+      g20Status: g20?.status,
+      g20ActiveUse: g20?.activeUse,
+      g20Values: g20?.values?.length
+    };
+  });
+  expect(summary.total).toBe(17);
+  expect(summary.activeCount).toBe(1);
+  expect(summary.activeCodes).toEqual(["T20"]);
+  expect(summary.curveCount).toBe(1);
+  expect(summary.t20Status).toBe("active_pilot");
+  expect(summary.t20DataQuality).toBe("pilot_example");
+  expect(summary.t20FirstBasalBefore).toBe(24.5);
+  expect(summary.t22Status).toBe("candidate");
+  expect(summary.t22ActiveUse).toBe("documentation_only");
+  expect(summary.t22Values).toBe(0);
+  expect(summary.g20Status).toBe("candidate");
+  expect(summary.g20ActiveUse).toBe("documentation_only");
+  expect(summary.g20Values).toBe(0);
+});
+
 test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await gotoRoute(page, "/skotselkollen");
@@ -75,6 +115,13 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
   await expect(page.locator("body")).toContainText("Norra Skog 2024");
   await expect(page.locator(".skotsel-source-balance-details").first()).not.toHaveAttribute("open", "");
+  await openCurveBank(page);
+  const curveBank = page.locator(".skotsel-curve-bank").first();
+  await expect(curveBank).toContainText("T20");
+  await expect(curveBank).toContainText("aktiv pilot");
+  await expect(curveBank).toContainText("T22");
+  await expect(curveBank).toContainText("G20");
+  await expect(curveBank).toContainText("candidate, ej aktiv");
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-desktop.png`, fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -157,6 +204,7 @@ test("Skötselkollen visar gran G20 som candidate utan aktiv kurva", async ({ pa
   await expect(page.locator("body")).toContainText("Verifierade kurvdata för G20");
   await expect(page.locator(".skotsel-chart__pilot-line")).toHaveCount(0);
   await expect(page.locator("body")).not.toContainText("Pilotunderlag");
+  await expect(page.locator(".skotsel-result-summary").first()).not.toContainText("Hög");
 });
 
 test("Röjningskalkyl visar källstöd utan att ändra kalkylresultat", async ({ page }) => {
@@ -243,6 +291,17 @@ async function openSources(page) {
     document.querySelectorAll("details").forEach((details) => {
       const summary = details.querySelector(":scope > summary");
       if (summary?.textContent?.includes("Källor och antaganden")) {
+        details.open = true;
+      }
+    });
+  });
+}
+
+async function openCurveBank(page) {
+  await page.evaluate(() => {
+    document.querySelectorAll("details").forEach((details) => {
+      const summary = details.querySelector(":scope > summary");
+      if (summary?.textContent?.includes("Identifierade kurvor i källbank")) {
         details.open = true;
       }
     });

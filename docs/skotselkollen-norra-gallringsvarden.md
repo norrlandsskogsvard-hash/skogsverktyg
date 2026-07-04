@@ -10,20 +10,25 @@ Norra gallringsmallar används som regionalt kurv- och jämförelseunderlag när
 
 ## Begrepp
 
-- Pilot/exempelvärde: direkt källstött exempel som får visas som pilot, men inte som full kurva.
+- Aktiv pilot/exempelvärde: direkt källstött exempel som får visas som pilot, men inte som full kurva.
 - Full digitaliserad kurva: komplett och verifierad kurvdata som kan visa zoner eller kurvlinjer för vald kombination.
 - Candidate-post: identifierad källa eller mall som ännu saknar verifierade värden i appen.
+- Draft/digitaliseringsutkast: digitaliserade utkastvärden som ännu inte är granskade och därför inte får visas i grafen.
 - Inaktiv källa: dokumenterad referens som inte används i aktiv logik.
 
 Candidate-poster får inte skapa aktiv kurva eller höja säkerhet som om kurvan vore verifierad.
+
+Aktiv kurvanvändning kräver `status: active_pilot` eller `verified`, godkänd `dataQuality` och `activeUse: chart_reference` eller `full_curve`.
 
 ## Aktiv pilot: T20
 
 Källa: Gallringsriktlinjer & gallringsmallar, norra Sverige  
 Sida: s. 36, exempel normalfall T20  
-Status: pilot  
+Status: active_pilot  
 Precision: direct_text_example  
+Data quality: pilot_example  
 Aktiv användning: chart_reference  
+Review needed: false  
 Begränsning: exempelvärden, inte komplett digitaliserad kurva.
 
 | Händelse | Övre höjd, m | Grundyta före, m²/ha | Grundyta efter, m²/ha | Totalålder | Stammar före | Stammar efter |
@@ -58,7 +63,7 @@ Gran:
 - G30
 - G32
 
-Dessa poster har status `candidate`, precision `documentation_only` och aktiv användning `documentation_only`. De ska bara visas som identifierad källa eller saknat verifierat underlag.
+Dessa poster har status `candidate`, precision `documentation_only`, `dataQuality: candidate_only`, `activeUse: documentation_only`, tomma `values`, tomma `draftValues` och `reviewNeeded: true`. De ska bara visas som identifierad källa eller saknat verifierat underlag.
 
 ## Krav innan ny mall får aktiveras
 

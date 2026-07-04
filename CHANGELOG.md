@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.12 - 2026-07-04
+
+### Changed - Norra massimport och granskningsgrund
+
+- Massimportstruktur för Norra gallringsmallar skapad.
+- Datakvalitet och aktiveringsnivå har införts för gallringskurvor.
+- Appen skiljer nu på aktiv pilot, candidate, draft och verifierad kurva.
+- Identifierade kurvor visas i stängd källbankssektion.
+- Osäkra/draftkurvor aktiveras inte i graf eller säkerhet.
+- PWA-cache höjd till skotselkollen.12.
+
 ## v2.0.0-alpha.1-skotselkollen.11 - 2026-07-04
 
 ### Changed - Norra gallringsvärden
