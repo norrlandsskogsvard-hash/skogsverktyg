@@ -834,6 +834,11 @@
     gap: var(--space-2);
   }
 
+  .skotsel-curve-bank__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
   .skotsel-curve-bank__group ul {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.45rem;
@@ -886,6 +891,10 @@
   }
 
   .skotsel-curve-bank__group ul {
+    grid-template-columns: 1fr;
+  }
+
+  .skotsel-curve-bank__summary {
     grid-template-columns: 1fr;
   }
 }

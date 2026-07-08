@@ -1350,6 +1350,30 @@
   font-size: 0.92rem;
 }
 
+.skotsel-curve-bank__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.skotsel-curve-bank__summary span {
+  display: grid;
+  gap: 0.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  padding: var(--space-2);
+}
+
+.skotsel-curve-bank__summary strong {
+  color: var(--color-primary-strong);
+  font-size: 1rem;
+}
+
 .skotsel-curve-bank__grid {
   display: grid;
   min-width: 0;

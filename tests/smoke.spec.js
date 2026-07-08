@@ -130,6 +130,9 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
       g20ActiveUse: g20?.activeUse,
       g20ReviewNeeded: g20?.reviewNeeded,
       g20Values: g20?.values?.length,
+      verifiedCandidateCount: knowledge.getVerifiedCandidateNorraPackages().length,
+      draftCount: knowledge.getDraftDigitizedNorraPackages().length,
+      reviewNeededCount: knowledge.getReviewNeededNorraPackages().length,
       almostActiveBlocked: knowledge.isActiveCurveSourceValue({
         status: "verified",
         dataQuality: "verified_table",
@@ -154,6 +157,9 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.g20ActiveUse).toBe("documentation_only");
   expect(summary.g20ReviewNeeded).toBe(true);
   expect(summary.g20Values).toBe(0);
+  expect(summary.verifiedCandidateCount).toBe(0);
+  expect(summary.draftCount).toBe(0);
+  expect(summary.reviewNeededCount).toBe(16);
   expect(summary.almostActiveBlocked).toBe(true);
 });
 
@@ -181,6 +187,10 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(curveBank).toContainText("G20");
   await expect(curveBank).toContainText("Ej aktiv kandidat");
   await expect(curveBank).toContainText("kräver granskning");
+  await expect(curveBank).toContainText("Aktiv pilot");
+  await expect(curveBank).toContainText("Verifierade kandidater");
+  await expect(curveBank).toContainText("Utkast/digitalisering");
+  await expect(curveBank).toContainText("Kandidater utan värden");
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-desktop.png`, fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });

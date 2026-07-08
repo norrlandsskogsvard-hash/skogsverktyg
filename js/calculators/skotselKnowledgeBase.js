@@ -1,3 +1,13 @@
+import {
+  getActiveNorraPackages,
+  getDraftDigitizedNorraPackages,
+  getNorraPackage,
+  getReviewNeededNorraPackages,
+  getVerifiedCandidateNorraPackages,
+  isActiveNorraPackage,
+  NORRA_THINNING_VALUE_PACKAGES
+} from "./norraThinningValues.js";
+
 export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-kallmatris.md",
   "docs/skotselkollen-beslutsmodell.md",
@@ -11,6 +21,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-gallringskurva-ui.md",
   "docs/skotselkollen-norra-gallringsvarden.md",
   "docs/skotselkollen-norra-massimport.md",
+  "docs/skotselkollen-norra-batchimport.md",
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
@@ -73,82 +84,7 @@ export const SKOTSEL_SOURCE_RULES = [
   }
 ];
 
-const NORRA_SOURCE_NAME = "Gallringsriktlinjer & gallringsmallar, norra Sverige";
-const NORRA_SOURCE_REF = "Gallringsriktlinjer & gallringsmallar norra Sverige";
-const NORRA_CANDIDATE_SITE_INDICES = {
-  tall: [14, 16, 18, 22, 24, 26, 28],
-  gran: [16, 18, 20, 22, 24, 26, 28, 30, 32]
-};
-const ACTIVE_CURVE_STATUSES = new Set(["active_pilot", "verified"]);
-const ACTIVE_CURVE_QUALITIES = new Set(["verified_text", "verified_table", "pilot_example", "chart_digitized_verified"]);
-const ACTIVE_CURVE_USES = new Set(["chart_reference", "full_curve"]);
-
-export const NORRA_THINNING_SOURCE_VALUES = [
-  {
-    id: "norra-tall-t20-pilot",
-    sourceName: NORRA_SOURCE_NAME,
-    sourceType: "regional_curve",
-    sourceYear: null,
-    sourceRef: NORRA_SOURCE_REF,
-    sourcePage: "s. 36, exempel normalfall T20",
-    species: "tall",
-    speciesCode: "T",
-    siteIndex: 20,
-    region: "norra-sverige",
-    area: "thinning",
-    actionType: "gallring",
-    title: "T20-exempel normalfall",
-    description: "Direkta exempelvärden för tall T20 i norra Sverige.",
-    status: "active_pilot",
-    precision: "direct_text_example",
-    dataQuality: "pilot_example",
-    confidence: "medium",
-    activeUse: "chart_reference",
-    canCreateFullCurve: false,
-    canAloneGiveHighConfidence: false,
-    reviewNeeded: false,
-    extractionNotes: ["Direkt text-/exempelvärde från angiven källa. Används som pilot, inte full kurva."],
-    draftValues: [],
-    limitations: [
-      "Exempelvärden, inte komplett digitaliserad kurva.",
-      "Gäller T20-exempel för norra Sverige.",
-      "Ska jämföras mot komplett mall innan åtgärdsbeslut."
-    ],
-    values: {
-      thinningEvents: [
-        {
-          label: "1:a gallring",
-          topHeight: 14.5,
-          basalAreaBefore: 24.5,
-          basalAreaAfter: 18.5,
-          ageTotal: 59,
-          stemsBefore: 1650,
-          stemsAfter: 1100
-        },
-        {
-          label: "2:a gallring",
-          topHeight: 18.0,
-          basalAreaBefore: 28.0,
-          basalAreaAfter: 20.5,
-          ageTotal: 82,
-          stemsBefore: 1100,
-          stemsAfter: 700
-        },
-        {
-          label: "Slutavverkning enligt exempel",
-          topHeight: 22.0,
-          basalAreaBefore: 31.5,
-          basalAreaAfter: 0,
-          ageTotal: 125,
-          stemsBefore: 700,
-          stemsAfter: 0
-        }
-      ]
-    }
-  },
-  ...candidateSourceValuePackages("tall", "T", NORRA_CANDIDATE_SITE_INDICES.tall),
-  ...candidateSourceValuePackages("gran", "G", NORRA_CANDIDATE_SITE_INDICES.gran)
-];
+export const NORRA_THINNING_SOURCE_VALUES = NORRA_THINNING_VALUE_PACKAGES;
 
 export const THINNING_CURVES = NORRA_THINNING_SOURCE_VALUES
   .filter(isActiveCurveSourceValue)
@@ -173,44 +109,18 @@ export const THINNING_CURVES = NORRA_THINNING_SOURCE_VALUES
   }));
 
 export function isActiveCurveSourceValue(sourceValue = {}) {
-  return ACTIVE_CURVE_STATUSES.has(sourceValue.status) &&
-    ACTIVE_CURVE_QUALITIES.has(sourceValue.dataQuality) &&
-    ACTIVE_CURVE_USES.has(sourceValue.activeUse) &&
-    sourceValue.reviewNeeded === false;
+  return isActiveNorraPackage(sourceValue);
 }
 
 export const isActiveCurveSource = isActiveCurveSourceValue;
 
-function candidateSourceValuePackages(species, speciesCode, siteIndices) {
-  return siteIndices.map((siteIndex) => ({
-    id: "norra-" + species + "-" + speciesCode.toLowerCase() + siteIndex + "-candidate",
-    sourceName: NORRA_SOURCE_NAME,
-    sourceType: "regional_curve",
-    sourceYear: null,
-    sourceRef: NORRA_SOURCE_REF,
-    sourcePage: "",
-    status: "candidate",
-    precision: "documentation_only",
-    dataQuality: "candidate_only",
-    confidence: "low",
-    area: "thinning",
-    actionType: "gallring",
-    species,
-    speciesCode,
-    siteIndex,
-    region: "norra-sverige",
-    title: speciesCode + siteIndex + " identifierad gallringsmall",
-    description: "Gallringsmall identifierad i källmaterial men inte digitaliserad/verifierad i appen.",
-    values: [],
-    draftValues: [],
-    extractionNotes: ["Identifierad mall. Inga verifierade punktvärden är inlagda."],
-    limitations: ["Kurvan finns i källmaterial men är inte digitaliserad/verifierad i appen."],
-    activeUse: "documentation_only",
-    canCreateFullCurve: false,
-    canAloneGiveHighConfidence: false,
-    reviewNeeded: true
-  }));
-}
+export {
+  getActiveNorraPackages,
+  getDraftDigitizedNorraPackages,
+  getNorraPackage,
+  getReviewNeededNorraPackages,
+  getVerifiedCandidateNorraPackages
+};
 
 export const PRACTICE_GUIDE_SUPPORT = [
   {
@@ -578,7 +488,7 @@ export function findThinningSourceCandidate(input = {}, siteIndexEstimate = {}) 
 
   return NORRA_THINNING_SOURCE_VALUES.find((sourceValue) =>
     !isActiveCurveSourceValue(sourceValue) &&
-    ["candidate", "draft_digitized"].includes(sourceValue.status) &&
+    ["candidate", "draft_digitized", "verified_candidate"].includes(sourceValue.status) &&
     sourceValue.species === input.mainSpecies &&
     sourceValue.siteIndex === numericSiteIndex &&
     regionMatches(sourceValue.region, input.region)

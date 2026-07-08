@@ -5,6 +5,7 @@
 Detta dokument är arbetslista och datakrav för framtida källvärden i Skötselkollen. Backloggen ska hjälpa appen att växa från pilotstöd till mer komplett beslutsstöd utan att osäkra värden blir aktiva regler.
 
 Aktivering av gallringsmallar ska följa `docs/skotselkollen-aktiveringsprotokoll.md`.
+Batchstatus för Norra gallringsmallar redovisas i `docs/skotselkollen-norra-batchimport.md`.
 
 Backloggen omfattar:
 
@@ -46,8 +47,8 @@ Varje kandidatvärde ska dokumenteras med:
 - om värdet är direkt tabellvärde, exempelvärde, diagramvärde, digitaliserat diagram, textregel eller tolkning
 - begränsning
 - källklass: `law`, `research`, `regional_curve`, `skogskunskap_tool`, `skogskunskap_guidance`, `practice_guide`, `decision_support_reference`, `scenario_reference`, `field_observation`
-- status: `candidate`, `draft_digitized`, `active_pilot`, `verified`, `inactive`, `rejected`
-- dataQuality: `candidate_only`, `draft_digitized`, `verified_text`, `verified_table`, `pilot_example`, `chart_digitized_verified`
+- status: `candidate`, `verified_candidate`, `draft_digitized`, `active_pilot`, `verified`, `inactive`, `rejected`
+- dataQuality: `candidate_only`, `verified_text`, `verified_table`, `pilot_example`, `chart_digitized_unverified`, `chart_digitized_verified`
 - activeUse: `documentation_only`, `field_note`, `chart_reference`, `full_curve`
 - values: verifierade värden som får användas enligt aktiv användning
 - draftValues: utkastvärden som inte får användas i graf eller säkerhet
@@ -95,6 +96,7 @@ Varje kandidatvärde ska dokumenteras med:
 - `canActivateInLogic`: `false`
 - kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte skapa aktiv kurva.
 - möjlig nästa verifiering: T22, men inte aktiverad ännu
+- batchstatus `.14`: T14/T16/T18/T22/T24/T26/T28 är `candidate`
 
 ### Norra granmallar, candidate
 
@@ -113,6 +115,7 @@ Varje kandidatvärde ska dokumenteras med:
 - `canActivateInLogic`: `false`
 - kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte räknas som aktivt kurvunderlag.
 - möjlig nästa verifiering: G20, men inte aktiverad ännu
+- batchstatus `.14`: G16/G18/G20/G22/G24/G26/G28/G30/G32 är `candidate`
 
 Diagramdigitalisering av tall- eller granmallar kräver separat källkontroll, dokumenterad metod, enhet, region, SI och testfall.
 

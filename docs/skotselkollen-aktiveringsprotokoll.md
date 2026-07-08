@@ -7,13 +7,14 @@ Detta protokoll styr hur en identifierad eller digitaliserad gallringsmall får 
 ## Statusnivåer
 
 - `candidate`: källan eller mallen är identifierad men saknar verifierade värden i appen.
+- `verified_candidate`: text- eller tabellvärden finns i källbanken, men separat aktiveringsbeslut saknas.
 - `draft_digitized`: värden finns som digitaliseringsutkast men är inte färdiggranskade.
 - `active_pilot`: begränsat, källstött exempel som får visas som pilot men inte som full kurva.
 - `verified`: källvärden är kontrollerade och får användas enligt `activeUse`.
 - `full_curve`: aktiv användningsnivå för komplett verifierad kurva.
 - `rejected`: posten är granskad och ska inte aktiveras.
 
-Candidate och draft får aldrig användas som aktiv kurva, pilotlinje, full kurva eller säkerhetshöjande underlag.
+Candidate, verified_candidate och draft får aldrig användas som aktiv kurva, pilotlinje, full kurva eller säkerhetshöjande underlag.
 
 ## Obligatoriska krav före aktivering
 
@@ -49,12 +50,13 @@ Om någon del saknas ska posten bara räknas som identifierad källa, candidate,
 ## Aktiveringsflöde
 
 1. Lägg in posten som `candidate` med `activeUse: documentation_only`, `dataQuality: candidate_only`, tomma `values` och `reviewNeeded: true`.
-2. Om diagram digitaliseras, flytta endast till `draft_digitized` och lägg värden i `draftValues`.
-3. Granska källa, enheter, metod, begränsningar och testfall.
-4. Flytta verifierade värden från `draftValues` till `values` först efter granskning.
-5. Sätt `reviewNeeded: false`.
-6. Sätt `status` till `verified` eller `active_pilot`.
-7. Sätt `activeUse` till `chart_reference` eller `full_curve`.
-8. Kör automatiska tester och lägg till testfall för den nya mallen.
+2. Om tydliga text- eller tabellvärden läggs in utan aktiveringsbeslut, använd `verified_candidate`, `activeUse: documentation_only` och `reviewNeeded: true`.
+3. Om diagram digitaliseras, flytta endast till `draft_digitized`, använd `dataQuality: chart_digitized_unverified` och lägg värden i `draftValues`.
+4. Granska källa, enheter, metod, begränsningar och testfall.
+5. Flytta verifierade värden från `draftValues` till `values` först efter granskning.
+6. Sätt `reviewNeeded: false`.
+7. Sätt `status` till `verified` eller `active_pilot`.
+8. Sätt `activeUse` till `chart_reference` eller `full_curve`.
+9. Kör automatiska tester och lägg till testfall för den nya mallen.
 
 Nästa möjliga verifieringsmål kan vara T22 eller G20, men de är inte aktiva i detta steg.

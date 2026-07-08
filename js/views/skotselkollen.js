@@ -289,7 +289,7 @@ function quickProposal(result) {
     if (result.sourceCandidate) {
       return {
         proposal: "Använd punkten som fältstöd, inte som gallringsbeslut.",
-        why: "Källa är identifierad, men verifierade kurvdata saknas i appen.",
+        why: sourceCandidateStatusText(result.sourceCandidate),
         checks: ["Stabilitet och kronslängd.", "Trädslagsblandning.", "Verifierad regional mall."],
         nextStep: "Verifiera och digitalisera rätt kurvdata innan åtgärd."
       };
@@ -406,11 +406,22 @@ function skogskunskapToolLimitation(item) {
 function curveBankTemplate() {
   const active = NORRA_THINNING_SOURCE_VALUES.filter(isActiveCurveSourceValue);
   const inactive = NORRA_THINNING_SOURCE_VALUES.filter((sourceValue) => !isActiveCurveSourceValue(sourceValue));
+  const verifiedCandidates = inactive.filter((sourceValue) => sourceValue.status === "verified_candidate");
+  const drafts = inactive.filter((sourceValue) => sourceValue.status === "draft_digitized");
+  const candidatesWithoutValues = inactive.filter((sourceValue) =>
+    sourceValue.status === "candidate" && !hasNorraValues(sourceValue.values) && !hasNorraValues(sourceValue.draftValues)
+  );
   const tall = inactive.filter((sourceValue) => sourceValue.species === "tall");
   const gran = inactive.filter((sourceValue) => sourceValue.species === "gran");
 
   return "<div class='skotsel-curve-bank__intro'>" +
       "<p>Granskningsläge för Norra gallringsmallar. Candidate och draft är inte beslutsunderlag och får inte visas som aktiv kurva.</p>" +
+      "<div class='skotsel-curve-bank__summary'>" +
+        curveBankStat("Aktiv pilot", active.length) +
+        curveBankStat("Verifierade kandidater", verifiedCandidates.length) +
+        curveBankStat("Utkast/digitalisering", drafts.length) +
+        curveBankStat("Kandidater utan värden", candidatesWithoutValues.length) +
+      "</div>" +
     "</div>" +
     "<div class='skotsel-curve-bank__grid'>" +
       curveBankGroup("Aktiv pilot/verifierad", active, true) +
@@ -442,9 +453,30 @@ function activeCurveStatusLabel(item) {
 }
 
 function inactiveCurveStatusLabel(item) {
+  if (item.status === "verified_candidate") return "Värden finns, kräver aktivering enligt protokoll";
   if (item.status === "draft_digitized") return "Utkast, ej aktiv";
   if (item.status === "rejected") return "Avvisad, ej aktiv";
   return "Ej aktiv kandidat, kräver granskning";
+}
+
+function curveBankStat(label, value) {
+  return "<span><strong>" + escapeHtml(String(value)) + "</strong>" + escapeHtml(label) + "</span>";
+}
+
+function hasNorraValues(values) {
+  if (Array.isArray(values)) return values.length > 0;
+  if (!values || typeof values !== "object") return false;
+  return Object.values(values).some((value) => Array.isArray(value) ? value.length > 0 : Boolean(value));
+}
+
+function sourceCandidateStatusText(sourceCandidate) {
+  if (sourceCandidate?.status === "verified_candidate") {
+    return "Värden finns i källbank men kräver aktivering enligt protokoll.";
+  }
+  if (sourceCandidate?.status === "draft_digitized") {
+    return "Utkast/digitaliserat underlag finns men är inte verifierat.";
+  }
+  return "Källa identifierad men värden saknas i appen.";
 }
 
 function isPilotCurveStatus(status) {

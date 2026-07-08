@@ -8,8 +8,8 @@ Detta dokument beskriver massimportstrukturen för Norra gallringsmallar i Sköt
 
 Varje källvärdespost kan innehålla:
 
-- `status`: `candidate`, `draft_digitized`, `active_pilot`, `verified`, `inactive`, `rejected`
-- `dataQuality`: `candidate_only`, `draft_digitized`, `verified_text`, `verified_table`, `pilot_example`, `chart_digitized_verified`
+- `status`: `candidate`, `verified_candidate`, `draft_digitized`, `active_pilot`, `verified`, `inactive`, `rejected`
+- `dataQuality`: `candidate_only`, `verified_text`, `verified_table`, `pilot_example`, `chart_digitized_unverified`, `chart_digitized_verified`
 - `activeUse`: `documentation_only`, `field_note`, `chart_reference`, `full_curve`
 - `values`: verifierade och aktiva värden
 - `draftValues`: utkastvärden som inte får användas i graf eller säkerhet
@@ -27,7 +27,7 @@ En post får bara bli aktiv gallringskurva i appen när alla fyra villkor är up
 
 Allt annat ska visas som dokumentation, kandidat eller utkast. Kandidater och utkast får inte skapa kurvlinje, inte höja säkerhet och inte användas som facit.
 
-Fullständig checklista finns i `docs/skotselkollen-aktiveringsprotokoll.md`. `activeUse` får inte ändras till aktiv nivå innan protokollets krav är uppfyllda.
+Fullständig checklista finns i `docs/skotselkollen-aktiveringsprotokoll.md`. Batchrapport finns i `docs/skotselkollen-norra-batchimport.md`. `activeUse` får inte ändras till aktiv nivå innan protokollets krav är uppfyllda.
 
 ## Aktiv pilot
 
@@ -46,7 +46,7 @@ Alla dessa har `status: candidate`, `dataQuality: candidate_only`, `activeUse: d
 
 ## Draft/digitalisering
 
-Om en kurva senare digitaliseras från diagram ska den först ligga som `draft_digitized` med `draftValues`. Den får då visas som utkast i källbanken, men inte i grafen och inte i säkerhetsbedömningen.
+Om en kurva senare digitaliseras från diagram ska den först ligga som `draft_digitized`, `dataQuality: chart_digitized_unverified`, `activeUse: documentation_only`, `reviewNeeded: true` och med värden i `draftValues`. Den får då visas som utkast i källbanken, men inte i grafen och inte i säkerhetsbedömningen.
 
 För aktivering krävs kontrollerad källa, sida, metod, enhet, region, trädslag, SI, testfall och dokumenterad begränsning.
 

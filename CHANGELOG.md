@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.14 - 2026-07-08
+
+### Changed - Batchimport Norra gallringsvärden
+
+- Batchimportstruktur för Norra gallringsvärden har införts.
+- Gallringsdata har separerats tydligare från aktiveringslogik.
+- Valideringsscript skyddar mot oavsiktlig aktivering av osäkra kurvor.
+- Källbanksvyn visar antal aktiva, verifierade kandidater, utkast och kandidater.
+- PWA-cache höjd till skotselkollen.14.
+
 ## v2.0.0-alpha.1-skotselkollen.13 - 2026-07-08
 
 ### Changed - Aktiveringsprotokoll gallringsmallar
