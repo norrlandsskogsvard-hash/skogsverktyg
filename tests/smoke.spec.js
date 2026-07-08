@@ -191,6 +191,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(curveBank).toContainText("Verifierade kandidater");
   await expect(curveBank).toContainText("Utkast/digitalisering");
   await expect(curveBank).toContainText("Kandidater utan värden");
+  await expect(curveBank).toContainText("Importflöde");
+  await expect(curveBank).toContainText("CSV/granskning");
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-desktop.png`, fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });

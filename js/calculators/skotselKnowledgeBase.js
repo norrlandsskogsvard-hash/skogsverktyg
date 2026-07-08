@@ -22,6 +22,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-norra-gallringsvarden.md",
   "docs/skotselkollen-norra-massimport.md",
   "docs/skotselkollen-norra-batchimport.md",
+  "docs/skotselkollen-norra-importflode.md",
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];

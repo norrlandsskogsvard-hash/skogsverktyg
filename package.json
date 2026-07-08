@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "import:norra-thinning": "node scripts/import-norra-thinning-values.mjs",
     "validate:thinning-data": "node scripts/validate-thinning-data.mjs",
     "test": "npm run validate:thinning-data && playwright test",
     "test:headed": "playwright test --headed",

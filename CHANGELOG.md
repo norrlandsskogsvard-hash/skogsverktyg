@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.15 - 2026-07-08
+
+### Added - Importflöde Norra gallringsvärden
+
+- Importmall för Norra gallringsvärden har lagts till.
+- Importscript och granskningsrapport har lagts till.
+- Norra-data kan nu batchgranskas utan att aktiveras.
+- Validering stoppar fortsatt oavsiktlig aktivering av osäkra kurvor.
+- PWA-cache höjd till skotselkollen.15.
+
 ## v2.0.0-alpha.1-skotselkollen.14 - 2026-07-08
 
 ### Changed - Batchimport Norra gallringsvärden

@@ -6,6 +6,7 @@ Detta dokument är arbetslista och datakrav för framtida källvärden i Skötse
 
 Aktivering av gallringsmallar ska följa `docs/skotselkollen-aktiveringsprotokoll.md`.
 Batchstatus för Norra gallringsmallar redovisas i `docs/skotselkollen-norra-batchimport.md`.
+Importmall och granskningsflöde för nya Norra-värden beskrivs i `docs/skotselkollen-norra-importflode.md`.
 
 Backloggen omfattar:
 

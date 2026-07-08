@@ -6,6 +6,8 @@ Batchimporten samlar Norra gallringsmallar i en separat datamodul: `js/calculato
 
 Batchimport betyder inte att kurvorna är aktiva. Endast T20 är aktiv pilot. Alla andra mallar är spärrade från aktiv kurvvisning tills de uppfyller aktiveringsprotokollet och godkänns separat.
 
+I `.15` har importmall och granskningsflöde lagts till. Se `docs/skotselkollen-norra-importflode.md`.
+
 ## Importerade mallar
 
 | SI | Trädslag | Status | Datakvalitet | Värden finns | Aktiv | Nästa kontroll |

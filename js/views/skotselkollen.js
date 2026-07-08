@@ -421,6 +421,7 @@ function curveBankTemplate() {
         curveBankStat("Verifierade kandidater", verifiedCandidates.length) +
         curveBankStat("Utkast/digitalisering", drafts.length) +
         curveBankStat("Kandidater utan värden", candidatesWithoutValues.length) +
+        curveBankStat("Importflöde", "CSV/granskning") +
       "</div>" +
     "</div>" +
     "<div class='skotsel-curve-bank__grid'>" +
@@ -471,10 +472,10 @@ function hasNorraValues(values) {
 
 function sourceCandidateStatusText(sourceCandidate) {
   if (sourceCandidate?.status === "verified_candidate") {
-    return "Värden finns i källbank men kräver aktivering enligt protokoll.";
+    return "Värden finns i källbank men är inte aktiverade.";
   }
   if (sourceCandidate?.status === "draft_digitized") {
-    return "Utkast/digitaliserat underlag finns men är inte verifierat.";
+    return "Utkast finns men är inte verifierat.";
   }
   return "Källa identifierad men värden saknas i appen.";
 }

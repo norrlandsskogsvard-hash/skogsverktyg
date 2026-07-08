@@ -1,0 +1,171 @@
+[
+  {
+    "id": "norra-tall-t20-pilot",
+    "sourceName": "Gallringsriktlinjer & gallringsmallar, norra Sverige",
+    "sourceType": "regional_curve",
+    "sourceRef": "Gallringsriktlinjer & gallringsmallar norra Sverige",
+    "sourcePage": "s. 36, exempel normalfall T20",
+    "species": "tall",
+    "speciesCode": "T",
+    "siteIndex": 20,
+    "region": "norra-sverige",
+    "area": "thinning",
+    "actionType": "gallring",
+    "title": "T20 importgranskning",
+    "description": "Importerat granskningspaket från CSV. Inte aktivt utan separat beslut.",
+    "status": "active_pilot",
+    "precision": "direct_text_example",
+    "dataQuality": "pilot_example",
+    "confidence": "medium",
+    "activeUse": "chart_reference",
+    "canCreateFullCurve": false,
+    "canAloneGiveHighConfidence": false,
+    "reviewNeeded": false,
+    "extractionNotes": [
+      "text",
+      "Referensrad - ändrar inte aktiv kod"
+    ],
+    "limitations": [
+      "Exempelvärden, inte komplett digitaliserad kurva."
+    ],
+    "validation": {
+      "hasExactSource": true,
+      "hasUnits": true,
+      "valueSchema": [
+        {
+          "parameter": "topHeight",
+          "unit": "m"
+        },
+        {
+          "parameter": "basalAreaBefore",
+          "unit": "m2/ha"
+        },
+        {
+          "parameter": "basalAreaAfter",
+          "unit": "m2/ha"
+        },
+        {
+          "parameter": "ageTotal",
+          "unit": "ar"
+        },
+        {
+          "parameter": "stemsBefore",
+          "unit": "st/ha"
+        },
+        {
+          "parameter": "stemsAfter",
+          "unit": "st/ha"
+        }
+      ],
+      "notes": []
+    },
+    "values": {
+      "thinningEvents": [
+        {
+          "label": "1:a gallring",
+          "topHeight": 14.5,
+          "basalAreaBefore": 24.5,
+          "basalAreaAfter": 18.5,
+          "ageTotal": 59,
+          "stemsBefore": 1650,
+          "stemsAfter": 1100
+        },
+        {
+          "label": "2:a gallring",
+          "topHeight": 18,
+          "basalAreaBefore": 28,
+          "basalAreaAfter": 20.5,
+          "ageTotal": 82,
+          "stemsBefore": 1100,
+          "stemsAfter": 700
+        },
+        {
+          "label": "Slutavverkning enligt exempel",
+          "topHeight": 22,
+          "basalAreaBefore": 31.5,
+          "basalAreaAfter": 0,
+          "ageTotal": 125,
+          "stemsBefore": 700,
+          "stemsAfter": 0
+        }
+      ]
+    },
+    "draftValues": []
+  },
+  {
+    "id": "norra-tall-t22-candidate",
+    "sourceName": "Gallringsriktlinjer & gallringsmallar, norra Sverige",
+    "sourceType": "regional_curve",
+    "sourceRef": "Gallringsriktlinjer & gallringsmallar norra Sverige",
+    "sourcePage": "",
+    "species": "tall",
+    "speciesCode": "T",
+    "siteIndex": 22,
+    "region": "norra-sverige",
+    "area": "thinning",
+    "actionType": "gallring",
+    "title": "T22 importgranskning",
+    "description": "Importerat granskningspaket från CSV. Inte aktivt utan separat beslut.",
+    "status": "candidate",
+    "precision": "documentation_only",
+    "dataQuality": "candidate_only",
+    "confidence": "low",
+    "activeUse": "documentation_only",
+    "canCreateFullCurve": false,
+    "canAloneGiveHighConfidence": false,
+    "reviewNeeded": true,
+    "extractionNotes": [
+      "placeholder",
+      "T22 är inte aktiv"
+    ],
+    "limitations": [
+      "Källa identifierad men värden saknas."
+    ],
+    "validation": {
+      "hasExactSource": false,
+      "hasUnits": false,
+      "valueSchema": [],
+      "notes": []
+    },
+    "values": [],
+    "draftValues": []
+  },
+  {
+    "id": "norra-gran-g20-candidate",
+    "sourceName": "Gallringsriktlinjer & gallringsmallar, norra Sverige",
+    "sourceType": "regional_curve",
+    "sourceRef": "Gallringsriktlinjer & gallringsmallar norra Sverige",
+    "sourcePage": "",
+    "species": "gran",
+    "speciesCode": "G",
+    "siteIndex": 20,
+    "region": "norra-sverige",
+    "area": "thinning",
+    "actionType": "gallring",
+    "title": "G20 importgranskning",
+    "description": "Importerat granskningspaket från CSV. Inte aktivt utan separat beslut.",
+    "status": "candidate",
+    "precision": "documentation_only",
+    "dataQuality": "candidate_only",
+    "confidence": "low",
+    "activeUse": "documentation_only",
+    "canCreateFullCurve": false,
+    "canAloneGiveHighConfidence": false,
+    "reviewNeeded": true,
+    "extractionNotes": [
+      "placeholder",
+      "G20 är inte aktiv"
+    ],
+    "limitations": [
+      "Källa identifierad men värden saknas."
+    ],
+    "validation": {
+      "hasExactSource": false,
+      "hasUnits": false,
+      "valueSchema": [],
+      "notes": []
+    },
+    "values": [],
+    "draftValues": []
+  }
+]
