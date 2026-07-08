@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.13 - 2026-07-08
+
+### Changed - Aktiveringsprotokoll gallringsmallar
+
+- Aktiveringsprotokoll för gallringsmallar har lagts till.
+- Skydd mot oavsiktlig aktivering av candidate/draft har förstärkts.
+- Candidate-mallar måste uppfylla dokumenterade krav innan de kan bli aktiva.
+- Källbanksvyn visar tydligare status för aktiv pilot, kandidat och utkast.
+- PWA-cache höjd till skotselkollen.13.
+
 ## v2.0.0-alpha.1-mobile-ux.1 - 2026-07-04
 
 ### Changed - Kompakt mobil-UX

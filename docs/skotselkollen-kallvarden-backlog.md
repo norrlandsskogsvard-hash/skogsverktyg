@@ -4,6 +4,8 @@
 
 Detta dokument är arbetslista och datakrav för framtida källvärden i Skötselkollen. Backloggen ska hjälpa appen att växa från pilotstöd till mer komplett beslutsstöd utan att osäkra värden blir aktiva regler.
 
+Aktivering av gallringsmallar ska följa `docs/skotselkollen-aktiveringsprotokoll.md`.
+
 Backloggen omfattar:
 
 - röjning
@@ -92,6 +94,7 @@ Varje kandidatvärde ska dokumenteras med:
 - confidence: `low`
 - `canActivateInLogic`: `false`
 - kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte skapa aktiv kurva.
+- möjlig nästa verifiering: T22, men inte aktiverad ännu
 
 ### Norra granmallar, candidate
 
@@ -109,6 +112,7 @@ Varje kandidatvärde ska dokumenteras med:
 - confidence: `low`
 - `canActivateInLogic`: `false`
 - kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte räknas som aktivt kurvunderlag.
+- möjlig nästa verifiering: G20, men inte aktiverad ännu
 
 Diagramdigitalisering av tall- eller granmallar kräver separat källkontroll, dokumenterad metod, enhet, region, SI och testfall.
 
@@ -204,6 +208,7 @@ Ett värde får bara aktiveras som kurva om:
 - `status` är `active_pilot` eller `verified`
 - `dataQuality` är `verified_text`, `verified_table`, `pilot_example` eller `chart_digitized_verified`
 - `activeUse` är `chart_reference` eller `full_curve`
+- `reviewNeeded` är `false`
 - värdet inte används som facit om källtypen bara är praktisk mall eller verktygsstöd
 
 Praktiska mallar, Skogskunskap-verktyg och beslutsstödsreferenser kan stödja bedömningar, men de får inte ensamma skapa hög säkerhet eller ersätta lagkrav, forskning, regionala mallar och fältbild.

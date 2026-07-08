@@ -11,6 +11,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-gallringskurva-ui.md",
   "docs/skotselkollen-norra-gallringsvarden.md",
   "docs/skotselkollen-norra-massimport.md",
+  "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
 
@@ -166,6 +167,7 @@ export const THINNING_CURVES = NORRA_THINNING_SOURCE_VALUES
     activeUse: sourceValue.activeUse,
     canCreateFullCurve: sourceValue.canCreateFullCurve,
     canAloneGiveHighConfidence: sourceValue.canAloneGiveHighConfidence,
+    reviewNeeded: sourceValue.reviewNeeded,
     limitations: sourceValue.limitations,
     points: sourceValue.values
   }));
@@ -173,8 +175,11 @@ export const THINNING_CURVES = NORRA_THINNING_SOURCE_VALUES
 export function isActiveCurveSourceValue(sourceValue = {}) {
   return ACTIVE_CURVE_STATUSES.has(sourceValue.status) &&
     ACTIVE_CURVE_QUALITIES.has(sourceValue.dataQuality) &&
-    ACTIVE_CURVE_USES.has(sourceValue.activeUse);
+    ACTIVE_CURVE_USES.has(sourceValue.activeUse) &&
+    sourceValue.reviewNeeded === false;
 }
+
+export const isActiveCurveSource = isActiveCurveSourceValue;
 
 function candidateSourceValuePackages(species, speciesCode, siteIndices) {
   return siteIndices.map((siteIndex) => ({

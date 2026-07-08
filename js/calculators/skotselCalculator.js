@@ -325,7 +325,7 @@ function curveSourceNotes(curveReference) {
   if (!curveReference?.curve) return [];
   return [
     `${curveReference.curve.source}, ${curveReference.curve.sourcePage}.`,
-    `Kurvstatus: ${curveReference.curve.status}; datakvalitet: ${curveReference.curve.dataQuality || "saknas"}; aktiv användning: ${curveReference.curve.activeUse || "saknas"}.`,
+    `Kurvstatus: ${curveReference.curve.status}; datakvalitet: ${curveReference.curve.dataQuality || "saknas"}; aktiv användning: ${curveReference.curve.activeUse || "saknas"}; reviewNeeded: ${curveReference.curve.reviewNeeded === false ? "false" : "true"}.`,
     ...curveReference.curve.limitations
   ];
 }

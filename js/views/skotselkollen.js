@@ -410,7 +410,7 @@ function curveBankTemplate() {
   const gran = inactive.filter((sourceValue) => sourceValue.species === "gran");
 
   return "<div class='skotsel-curve-bank__intro'>" +
-      "<p>Granskningsläge för Norra gallringsmallar. Endast aktiv pilot eller verifierad kurvdata får visas som kurva i grafen.</p>" +
+      "<p>Granskningsläge för Norra gallringsmallar. Candidate och draft är inte beslutsunderlag och får inte visas som aktiv kurva.</p>" +
     "</div>" +
     "<div class='skotsel-curve-bank__grid'>" +
       curveBankGroup("Aktiv pilot/verifierad", active, true) +
@@ -430,14 +430,21 @@ function curveBankGroup(title, items, activeGroup) {
 function curveBankItem(item, activeGroup) {
   const code = item.speciesCode + item.siteIndex;
   const status = activeGroup
-    ? "aktiv pilot - " + (item.canCreateFullCurve ? "full kurva" : "T20-exempel, ej full kurva")
+    ? activeCurveStatusLabel(item)
     : inactiveCurveStatusLabel(item);
   return "<li><strong>" + escapeHtml(code) + "</strong><span>" + escapeHtml(status) + "</span></li>";
 }
 
+function activeCurveStatusLabel(item) {
+  if (item.status === "active_pilot") return "Aktiv pilot - T20-exempel, ej full kurva";
+  if (item.activeUse === "full_curve") return "Verifierad full kurva";
+  return "Verifierad kurvreferens";
+}
+
 function inactiveCurveStatusLabel(item) {
-  if (item.status === "draft_digitized") return "utkast, ej aktiv";
-  return "candidate, ej aktiv";
+  if (item.status === "draft_digitized") return "Utkast, ej aktiv";
+  if (item.status === "rejected") return "Avvisad, ej aktiv";
+  return "Ej aktiv kandidat, kräver granskning";
 }
 
 function isPilotCurveStatus(status) {

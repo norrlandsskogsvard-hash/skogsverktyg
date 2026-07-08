@@ -18,13 +18,16 @@ Varje källvärdespost kan innehålla:
 
 ## Aktiveringsregel
 
-En post får bara bli aktiv gallringskurva i appen när alla tre villkor är uppfyllda:
+En post får bara bli aktiv gallringskurva i appen när alla fyra villkor är uppfyllda:
 
 - `status` är `active_pilot` eller `verified`
 - `dataQuality` är `verified_text`, `verified_table`, `pilot_example` eller `chart_digitized_verified`
 - `activeUse` är `chart_reference` eller `full_curve`
+- `reviewNeeded` är `false`
 
 Allt annat ska visas som dokumentation, kandidat eller utkast. Kandidater och utkast får inte skapa kurvlinje, inte höja säkerhet och inte användas som facit.
+
+Fullständig checklista finns i `docs/skotselkollen-aktiveringsprotokoll.md`. `activeUse` får inte ändras till aktiv nivå innan protokollets krav är uppfyllda.
 
 ## Aktiv pilot
 
@@ -46,3 +49,5 @@ Alla dessa har `status: candidate`, `dataQuality: candidate_only`, `activeUse: d
 Om en kurva senare digitaliseras från diagram ska den först ligga som `draft_digitized` med `draftValues`. Den får då visas som utkast i källbanken, men inte i grafen och inte i säkerhetsbedömningen.
 
 För aktivering krävs kontrollerad källa, sida, metod, enhet, region, trädslag, SI, testfall och dokumenterad begränsning.
+
+Nästa möjliga verifieringsmål kan vara T22 eller G20. De är fortfarande `candidate` och ska inte aktiveras i detta steg.

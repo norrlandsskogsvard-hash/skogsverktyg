@@ -18,7 +18,7 @@ Norra gallringsmallar används som regionalt kurv- och jämförelseunderlag när
 
 Candidate-poster får inte skapa aktiv kurva eller höja säkerhet som om kurvan vore verifierad.
 
-Aktiv kurvanvändning kräver `status: active_pilot` eller `verified`, godkänd `dataQuality` och `activeUse: chart_reference` eller `full_curve`.
+Aktiv kurvanvändning kräver `status: active_pilot` eller `verified`, godkänd `dataQuality`, `activeUse: chart_reference` eller `full_curve` och `reviewNeeded: false`. Se även `docs/skotselkollen-aktiveringsprotokoll.md`.
 
 ## Aktiv pilot: T20
 
@@ -65,6 +65,8 @@ Gran:
 
 Dessa poster har status `candidate`, precision `documentation_only`, `dataQuality: candidate_only`, `activeUse: documentation_only`, tomma `values`, tomma `draftValues` och `reviewNeeded: true`. De ska bara visas som identifierad källa eller saknat verifierat underlag.
 
+Nästa möjliga verifieringsmål kan vara T22 eller G20, men de är inte aktiverade och får inte skapa kurvlinje eller höja säkerhet.
+
 ## Krav innan ny mall får aktiveras
 
 En ny mall eller kurva får bara aktiveras när följande är klart:
@@ -80,3 +82,5 @@ En ny mall eller kurva får bara aktiveras när följande är klart:
 - begränsning
 
 Diagramdigitalisering kräver separat kontroll och dokumentation. Inga värden får gissas från bilder eller grafer.
+
+Aktivering ska följa `docs/skotselkollen-aktiveringsprotokoll.md`.

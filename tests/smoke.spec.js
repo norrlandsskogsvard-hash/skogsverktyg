@@ -120,13 +120,22 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
       curveCount: knowledge.THINNING_CURVES.length,
       t20Status: t20?.status,
       t20DataQuality: t20?.dataQuality,
+      t20ReviewNeeded: t20?.reviewNeeded,
       t20FirstBasalBefore: t20?.values?.thinningEvents?.[0]?.basalAreaBefore,
       t22Status: t22?.status,
       t22ActiveUse: t22?.activeUse,
+      t22ReviewNeeded: t22?.reviewNeeded,
       t22Values: t22?.values?.length,
       g20Status: g20?.status,
       g20ActiveUse: g20?.activeUse,
-      g20Values: g20?.values?.length
+      g20ReviewNeeded: g20?.reviewNeeded,
+      g20Values: g20?.values?.length,
+      almostActiveBlocked: knowledge.isActiveCurveSourceValue({
+        status: "verified",
+        dataQuality: "verified_table",
+        activeUse: "full_curve",
+        reviewNeeded: true
+      }) === false
     };
   });
   expect(summary.total).toBe(17);
@@ -135,13 +144,17 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.curveCount).toBe(1);
   expect(summary.t20Status).toBe("active_pilot");
   expect(summary.t20DataQuality).toBe("pilot_example");
+  expect(summary.t20ReviewNeeded).toBe(false);
   expect(summary.t20FirstBasalBefore).toBe(24.5);
   expect(summary.t22Status).toBe("candidate");
   expect(summary.t22ActiveUse).toBe("documentation_only");
+  expect(summary.t22ReviewNeeded).toBe(true);
   expect(summary.t22Values).toBe(0);
   expect(summary.g20Status).toBe("candidate");
   expect(summary.g20ActiveUse).toBe("documentation_only");
+  expect(summary.g20ReviewNeeded).toBe(true);
   expect(summary.g20Values).toBe(0);
+  expect(summary.almostActiveBlocked).toBe(true);
 });
 
 test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) => {
@@ -163,10 +176,11 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await openCurveBank(page);
   const curveBank = page.locator(".skotsel-curve-bank").first();
   await expect(curveBank).toContainText("T20");
-  await expect(curveBank).toContainText("aktiv pilot");
+  await expect(curveBank).toContainText(/Aktiv pilot/i);
   await expect(curveBank).toContainText("T22");
   await expect(curveBank).toContainText("G20");
-  await expect(curveBank).toContainText("candidate, ej aktiv");
+  await expect(curveBank).toContainText("Ej aktiv kandidat");
+  await expect(curveBank).toContainText("kräver granskning");
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-desktop.png`, fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });
