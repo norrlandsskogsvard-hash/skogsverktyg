@@ -7,6 +7,7 @@ Detta dokument är arbetslista och datakrav för framtida källvärden i Skötse
 Aktivering av gallringsmallar ska följa `docs/skotselkollen-aktiveringsprotokoll.md`.
 Batchstatus för Norra gallringsmallar redovisas i `docs/skotselkollen-norra-batchimport.md`.
 Importmall och granskningsflöde för nya Norra-värden beskrivs i `docs/skotselkollen-norra-importflode.md`.
+Batch 01 redovisas i `docs/skotselkollen-norra-batch-01.md`.
 
 Backloggen omfattar:
 
@@ -98,6 +99,7 @@ Varje kandidatvärde ska dokumenteras med:
 - kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte skapa aktiv kurva.
 - möjlig nästa verifiering: T22, men inte aktiverad ännu
 - batchstatus `.14`: T14/T16/T18/T22/T24/T26/T28 är `candidate`
+- batch 01: T22, T18 och T24 försöktes som första batch men saknar verifierade värden och ligger kvar som `candidate`
 
 ### Norra granmallar, candidate
 
@@ -117,6 +119,7 @@ Varje kandidatvärde ska dokumenteras med:
 - kommentar: Identifierade mallar utan verifierade/digitaliserade värden i appen. De får inte räknas som aktivt kurvunderlag.
 - möjlig nästa verifiering: G20, men inte aktiverad ännu
 - batchstatus `.14`: G16/G18/G20/G22/G24/G26/G28/G30/G32 är `candidate`
+- batch 01: G20 och G22 försöktes som första batch men saknar verifierade värden och ligger kvar som `candidate`
 
 Diagramdigitalisering av tall- eller granmallar kräver separat källkontroll, dokumenterad metod, enhet, region, SI och testfall.
 

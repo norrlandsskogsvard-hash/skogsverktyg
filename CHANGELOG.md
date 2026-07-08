@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-skotselkollen.16 - 2026-07-08
+
+### Added - Norra batch 01
+
+- Första batchfilen för Norra gallringsvärden har skapats.
+- Importflödet kan nu användas med verkliga batchfiler.
+- Batch 01 aktiverar inga nya kurvor.
+- Validering stoppar fortsatt oavsiktlig aktivering.
+- PWA-cache höjd till skotselkollen.16.
+
 ## v2.0.0-alpha.1-skotselkollen.15 - 2026-07-08
 
 ### Added - Importflöde Norra gallringsvärden

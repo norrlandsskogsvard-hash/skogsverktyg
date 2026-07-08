@@ -8,6 +8,7 @@ CSV-import används för att flera Norra gallringsvärden ska kunna läggas in, 
 
 - `data/norra-thinning-import-template.csv`: tom importmall med rätt kolumner.
 - `data/norra-thinning-import-example.csv`: exempel med T20-referensrader samt T22/G20 som tomma kandidater.
+- `data/norra-thinning-import-batch-01.csv`: första riktiga batchfilen med T22, G20, T18, G22 och T24 som granskade kandidater/TODO.
 - `scripts/import-norra-thinning-values.mjs`: läser CSV och skriver preview/rapport.
 - `data/generated/norra-thinning-import-preview.json`: maskinläsbar preview.
 - `docs/generated/norra-thinning-import-report.md`: granskningsrapport.
@@ -54,3 +55,13 @@ Scriptet skriver bara preview och rapport. Det skriver inte över `js/calculator
 Använd rapporten i `docs/generated/norra-thinning-import-report.md` för att se antal rader, antal mallar, statusfördelning, saknade värden och varningar.
 
 Import betyder inte aktivering. Aktivering kräver separat beslut enligt `docs/skotselkollen-aktiveringsprotokoll.md`, testfall och `reviewNeeded: false`.
+
+## Batch 01
+
+Batch 01 körs med:
+
+```bash
+npm run import:norra-thinning -- data/norra-thinning-import-batch-01.csv
+```
+
+Batch 01 innehåller T22, G20, T18, G22 och T24. Eftersom verifierbara källvärden saknas i arbetsunderlaget ligger alla fem kvar som `candidate` med `activeUse: documentation_only`.
