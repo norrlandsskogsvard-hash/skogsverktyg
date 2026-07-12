@@ -232,7 +232,7 @@ function resultTemplate(result) {
   return "<section class='result-panel result-panel--strong skotsel-result-card'>" +
     "<div class='skotsel-result-summary'>" +
       resultMetric("Skogligt", result.forestryStatus || result.actionLabel) +
-      resultMetric("Juridik", result.legalStatus || "Ingen flagga") +
+      resultMetric("Juridik", result.legalStatus || "OK") +
       resultMetric("Säkerhet", confidenceLabel(result.confidence)) +
     "</div>" +
     chartTemplate(result.chartData) +
@@ -245,12 +245,29 @@ function resultTemplate(result) {
     "</div>" +
     "<div class='skotsel-advanced skotsel-advanced--result'>" +
       advancedDetails("Juridisk kontroll", resultBlock("Juridisk kontroll", result.legalAssessment)) +
+      advancedDetails("Juridiska kontrollflaggor", legalChecksTemplate(result.legalChecks || []), Boolean(result.legalChecks?.length), "skotsel-legal-flags") +
       advancedDetails("Varningar", listTemplate(result.warnings), hasWarnings) +
       advancedDetails("Plantext", "<div class='skotsel-plantext'><p>" + escapeHtml(result.planText) + "</p><button class='button button--secondary' type='button' data-copy-plantext>Kopiera plantext</button></div>") +
       advancedDetails("Källor och antaganden", groupedSourcesTemplate(result.groupedSourceNotes || {}, result.sourceNotes, result.evidenceAssessment), false, "skotsel-sources") +
       advancedDetails("Identifierade kurvor i källbank", curveBankTemplate(), false, "skotsel-curve-bank") +
     "</div>" +
   "</section>";
+}
+
+function legalChecksTemplate(checks) {
+  const disclaimer = "<p class='card__text'><strong>Detta är kontrollstöd, inte juridiskt besked.</strong></p>";
+  if (!checks.length) {
+    return disclaimer + "<p class='card__text'>Inga särskilda juridiska kontrollflaggor är markerade i snabbkontrollen.</p>";
+  }
+  return disclaimer + "<ul class='skotsel-list'>" + checks.map((check) =>
+    "<li><strong>" + escapeHtml(legalSeverityLabel(check.severity)) + "</strong> - " + escapeHtml(check.userText) + "</li>"
+  ).join("") + "</ul>";
+}
+
+function legalSeverityLabel(severity) {
+  if (severity === "critical") return "Kontroll krävs";
+  if (severity === "warning") return "Kontroll rekommenderas";
+  return "Info";
 }
 
 function quickProposalTemplate(result) {

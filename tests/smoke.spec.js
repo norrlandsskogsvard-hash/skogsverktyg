@@ -173,7 +173,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("T20-exempel, ej full kurva");
   await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
   await expect(page.locator("body")).toContainText("Jämför mot komplett mall innan åtgärd");
-  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Ingen flagga");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("OK");
+  await expect(page.locator("body")).toContainText("Juridiska kontrollflaggor");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
   await expect(page.locator("body")).toContainText("Norra textregler");
@@ -204,7 +205,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("T20");
   await expect(page.locator("body")).toContainText("T20-exempel, ej full kurva");
   await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
-  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Ingen flagga");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("OK");
+  await expect(page.locator("body")).toContainText("Juridiska kontrollflaggor");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
   await expect(page.locator("body")).toContainText("Norra textregler");
@@ -224,12 +226,13 @@ test("Skötselkollen markförutsättning styr juridisk status utan att dölja sk
   await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Pilotunderlag");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Kontroll rekommenderas");
-  await expect(page.locator("body")).toContainText("Markklass är osäker");
+  await expect(page.locator("body")).toContainText("Kontrollera markklass");
 
   await page.locator('select[name="productiveForestLandAssumption"]').selectOption("non_productive");
   await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Pilotunderlag");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Kontroll krävs");
+  await expect(page.locator("body")).toContainText("Detta är kontrollstöd, inte juridiskt besked");
 });
 
 test("Skötselkollen håller björk som eget spår", async ({ page }) => {

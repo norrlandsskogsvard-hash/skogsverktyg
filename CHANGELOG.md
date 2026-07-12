@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-legal-flags.1 - 2026-07-12
+
+### Added - Juridiska kontrollflaggor
+
+- Juridiska kontrollflaggor har lagts till i Skötselkollen.
+- Skoglig rekommendation och juridisk kontroll visas separat.
+- Appen ger kontrollstöd, inte juridiskt besked.
+- Juridiska regler kan inte aktivera kurvor eller ändra T20.
+- Validering för juridiska kontrollregler har lagts till.
+- PWA-cache höjd till legal-flags.1.
+
 ## v2.0.0-alpha.1-norra-text-rules.1 - 2026-07-12
 
 ### Added - Norra textregler

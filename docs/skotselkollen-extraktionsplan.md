@@ -21,7 +21,9 @@ Extraktion ska ske stegvis. Varje värde ska ha källa, sida/tabell/diagram, enh
    - Spegel får inte ensam skapa verified_candidate.
 
 Kommande steg:
-- .20 kan bygga vidare med juridiska kontrollflaggor, utan juridiskt bindande besked.
+- .20 lägger in juridiska kontrollflaggor och separerar juridik från skoglig rekommendation.
+- Lagkällor måste kontrolleras online innan juridiska regler uppdateras.
+- Juridiska kontrollflaggor får sänka säkerhet och visa kontrollkrav, men inte aktivera juridiska beslut.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD

@@ -27,6 +27,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-norra-batchimport.md",
   "docs/skotselkollen-norra-importflode.md",
   "docs/skotselkollen-norra-textregler.md",
+  "docs/skotselkollen-juridiska-kontrollflaggor.md",
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
@@ -51,6 +52,17 @@ export const NORRA_TEXT_RULES_SUMMARY = {
   activeUse: "control_flags_only",
   canActivateCurves: false,
   note: "Norra textregler: användningsvillkor och kontrollflaggor inlästa."
+};
+
+export const LEGAL_CONTROL_RULES_SUMMARY = {
+  primarySourceId: "law-skogsvardslag-1979-429-riksdagen",
+  guidanceSourceIds: ["agency-skogsstyrelsen-skogsvardslagen"],
+  dataFile: "data/legal-control-rules.json",
+  ruleCount: 10,
+  status: "reviewed_control_flags",
+  activeUse: "legal_control_flags_only",
+  canMakeLegalDecision: false,
+  note: "Juridiska kontrollflaggor är inlästa som kontrollstöd, inte juridiskt besked."
 };
 
 export const EVIDENCE_TYPE_WEIGHTS = {
@@ -590,6 +602,7 @@ export function sourceNotesForInput(input = {}) {
   notes.push(SOURCE_LIBRARY_SUMMARY.legalNote);
   notes.push(NORRA_TEXT_RULES_SUMMARY.note);
   notes.push("Norra textregler används endast som kontrollflaggor och fältstöd, inte som nya kurvor.");
+  notes.push(LEGAL_CONTROL_RULES_SUMMARY.note);
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
   notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];

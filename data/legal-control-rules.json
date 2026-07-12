@@ -1,0 +1,238 @@
+{
+  "title": "Juridiska kontrollflaggor för Skötselkollen",
+  "status": "reviewed_control_flags",
+  "activeUse": "legal_control_flags_only",
+  "canMakeLegalDecision": false,
+  "primarySourceId": "law-skogsvardslag-1979-429-riksdagen",
+  "guidanceSourceIds": [
+    "agency-skogsstyrelsen-skogsvardslagen"
+  ],
+  "lastChecked": "2026-07-12",
+  "rules": [
+    {
+      "id": "legal-final-felling-notification-check",
+      "area": "slutavverkning",
+      "phase": "final_felling_check",
+      "action": "foryngringsavverkning",
+      "triggerFields": ["standPhase", "actionCode"],
+      "severity": "critical",
+      "effect": "legal_check_required",
+      "message": "Föryngringsavverkning/slutavverkning kan kräva anmälan och juridisk kontroll före åtgärd.",
+      "userText": "Kontroll krävs före åtgärd: anmälan till Skogsstyrelsen och aktuell lagtext/myndighetskrav behöver kontrolleras för föryngringsavverkning.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "14 §",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Skogsmarkens ägare ska enligt föreskrifter underrätta Skogsstyrelsen om avverkning och bland annat redovisa hänsyn och återväxtåtgärder."
+        },
+        {
+          "sourceId": "agency-skogsstyrelsen-skogsvardslagen",
+          "url": "https://www.skogsstyrelsen.se/lag-och-tillsyn/skogsvardslagen/",
+          "sourceSummary": "Skogsstyrelsens vägledning anger att föryngringsavverkning från angiven omfattning ska anmälas i förväg och att röjning/gallring behandlas separat."
+        }
+      ],
+      "canBlockAction": true,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": false
+    },
+    {
+      "id": "legal-regeneration-check",
+      "area": "foryngring",
+      "phase": "final_felling_check",
+      "action": "foryngringsavverkning",
+      "triggerFields": ["standPhase", "actionCode"],
+      "severity": "warning",
+      "effect": "regeneration_check_required",
+      "message": "Återväxt och föryngring behöver planeras och kontrolleras vid föryngringsavverkning.",
+      "userText": "Kontrollera återväxtplan: föryngringsåtgärder och platsanpassad metod behöver bedömas mot aktuell lagtext och vägledning.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "5-6 §§",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Lagen anger krav på anläggning av ny skog och föryngringsåtgärder för att trygga återväxten."
+        }
+      ],
+      "canBlockAction": false,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": false
+    },
+    {
+      "id": "legal-mountain-forest-permit-check",
+      "area": "fjallnara_skog",
+      "phase": "all",
+      "action": "avverkning",
+      "triggerFields": ["region", "reindeerMountain"],
+      "severity": "critical",
+      "effect": "permit_check_required",
+      "message": "Fjällnära skog är markerad eller kan vara aktuell. Tillstånd och myndighetskontroll kan krävas före avverkning.",
+      "userText": "Kontroll krävs före åtgärd: fjällnära skog är markerad eller möjlig. Kontrollera tillståndskrav, aktuell lagtext och Skogsstyrelsens krav innan åtgärd.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "15-16 §§",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Lagen anger tillståndskrav för avverkning i fjällnära skog och att ansökan ska redovisa hänsyn och återväxt."
+        }
+      ],
+      "canBlockAction": true,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": false
+    },
+    {
+      "id": "legal-reindeer-consultation-check",
+      "area": "rennaring",
+      "phase": "all",
+      "action": "avverkning",
+      "triggerFields": ["reindeerMountain"],
+      "severity": "warning",
+      "effect": "legal_check_required",
+      "message": "Rennäring/renbetesområde är markerat eller osäkert. Samråd, hänsyn och myndighetskontroll behöver kontrolleras.",
+      "userText": "Juridisk kontroll rekommenderas: rennäring eller renbetesområde är markerat/osäkert. Kontrollera samråd, hänsyn och aktuella myndighetskrav.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "14 §, 20 §, 31 §",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Lagen innehåller krav på redovisning av hänsyn till rennäringen, samråd inom året-runt-marker och anpassning med hänsyn till rennäringen."
+        }
+      ],
+      "canBlockAction": false,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": false
+    },
+    {
+      "id": "legal-nature-values-check",
+      "area": "naturhansyn",
+      "phase": "all",
+      "action": "all",
+      "triggerFields": ["conservation"],
+      "severity": "warning",
+      "effect": "nature_check_required",
+      "message": "Naturvärden eller hänsyn är markerade/osäkra. Naturhänsyn och myndighetskontroll behöver kontrolleras.",
+      "userText": "Kontrollera naturhänsyn: naturvärden, kantzoner, vattennära miljöer, död ved eller skyddsvärda miljöer behöver bedömas innan åtgärd.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "1 §, 14 §, 30 §",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Lagen anger att skogen ska skötas med hänsyn till biologisk mångfald och andra allmänna intressen samt ger stöd för föreskrifter om natur- och kulturmiljöhänsyn."
+        }
+      ],
+      "canBlockAction": false,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": false
+    },
+    {
+      "id": "legal-cultural-heritage-check",
+      "area": "kulturmiljo",
+      "phase": "all",
+      "action": "all",
+      "triggerFields": ["conservation"],
+      "severity": "warning",
+      "effect": "cultural_heritage_check_required",
+      "message": "Kulturmiljö/fornlämning kan vara berörd. Särskild hänsyn och kontroll behöver göras.",
+      "userText": "Kontrollera kulturmiljö: fornlämningar och andra kulturmiljövärden behöver bedömas mot aktuell lagtext, kartunderlag och myndighetskrav.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "14 §, 30 §",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Lagen anger redovisning och hänsyn kopplat till kulturmiljövårdens intressen vid skötsel och avverkning."
+        }
+      ],
+      "canBlockAction": false,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": false
+    },
+    {
+      "id": "legal-land-class-check",
+      "area": "juridik",
+      "phase": "all",
+      "action": "all",
+      "triggerFields": ["productiveForestLandAssumption"],
+      "severity": "warning",
+      "effect": "land_class_check_required",
+      "message": "Markklass är osäker eller specialfall är markerat. Juridisk kontroll av markklass och tillämpliga krav behövs.",
+      "userText": "Kontrollera markklass: produktiv skogsmark, impediment eller specialfall påverkar vilka regler och kontrollpunkter som behöver användas.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "2-4 §§",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Lagen definierar skogsmark, produktiv skogsmark, impediment och förhållandet till annan lagstiftning."
+        }
+      ],
+      "canBlockAction": false,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": false
+    },
+    {
+      "id": "legal-thinning-context-notice",
+      "area": "gallring",
+      "phase": "gallring",
+      "action": "gallring",
+      "triggerFields": ["actionCode", "mainSpecies"],
+      "severity": "info",
+      "effect": "legal_context_notice",
+      "message": "Gallring bedöms skogligt i appen, men hänsyn, skador, rennäring, naturvärden och områdesskydd behöver fortsatt kontrolleras.",
+      "userText": "Juridisk kontext: gallringsförslag är skogligt underlag. Kontrollera hänsyn, rennäring, naturvärden, skador och eventuella områdesskydd innan åtgärd.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "10 §, 30-31 §§",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Lagen anger att avverkning ska främja skogens utveckling eller återväxt och att hänsyn till natur, kultur och rennäring ska beaktas."
+        }
+      ],
+      "canBlockAction": false,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": false
+    },
+    {
+      "id": "legal-clearing-context-notice",
+      "area": "rojning",
+      "phase": "rojning",
+      "action": "rojning",
+      "triggerFields": ["actionCode"],
+      "severity": "info",
+      "effect": "legal_context_notice",
+      "message": "Röjning är skogsvårdande i appen, men natur-, kultur- och rennäringshänsyn behöver fortsatt kontrolleras.",
+      "userText": "Juridisk kontext: röjning är skogsvårdande underlag. Kontrollera hänsyn till natur, kulturmiljö och rennäring vid fältplanering.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "1 §, 10 §, 30-31 §§",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Lagen anger skogens produktions- och hänsynsmål samt att skogsbruksåtgärder ska hanteras med relevanta hänsyn."
+        }
+      ],
+      "canBlockAction": false,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": false
+    },
+    {
+      "id": "legal-protected-area-unknown-restriction-check",
+      "area": "juridik",
+      "phase": "all",
+      "action": "all",
+      "triggerFields": ["conservation", "productiveForestLandAssumption"],
+      "severity": "warning",
+      "effect": "legal_check_required",
+      "message": "Områdesskydd eller okända restriktioner kan finnas. Kontroll krävs eller rekommenderas innan åtgärd.",
+      "userText": "Kontrollera områdesskydd och restriktioner: okända eller markerade specialfall behöver kontrolleras mot aktuell lagtext, kartunderlag och myndighetskrav.",
+      "sourceRefs": [
+        {
+          "sourceId": "law-skogsvardslag-1979-429-riksdagen",
+          "paragraph": "4 §",
+          "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+          "sourceSummary": "Lagen anger att bestämmelser i annan lagstiftning och områdesskydd kan påverka vilka krav som gäller."
+        }
+      ],
+      "canBlockAction": false,
+      "canMakeLegalDecision": false,
+      "reviewNeeded": true
+    }
+  ]
+}

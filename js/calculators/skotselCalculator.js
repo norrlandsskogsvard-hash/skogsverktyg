@@ -3,6 +3,7 @@ import {
   buildEvidenceAssessment,
   findGallringZone,
   findThinningSourceCandidate,
+  LEGAL_CONTROL_RULES_SUMMARY,
   NORRA_TEXT_RULES_SUMMARY,
   sourceNotesForInput
 } from "./skotselKnowledgeBase.js";
@@ -57,6 +58,7 @@ export function calculateSkotselRecommendation(input = {}) {
   }
 
   const quickAssessment = assessQuickCurve(normalized, siteIndexEstimate);
+  mergeLegalChecks(legal, buildActionLegalChecks(quickAssessment));
   const norraTextRules = buildNorraTextRuleAssessment(normalized, quickAssessment);
   quickAssessment.fieldChecks.push(...norraTextRules.fieldChecks);
   quickAssessment.warnings.push(...norraTextRules.warnings);
@@ -72,7 +74,7 @@ export function calculateSkotselRecommendation(input = {}) {
   if (legal.hasConservationFlag) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
     quickAssessment.fieldChecks.push("Kontrollera juridiska krav och hänsyn innan produktionsåtgärd skrivs som huvudförslag.");
-    quickAssessment.warnings.push("Juridisk kontroll krävs eller bör göras innan åtgärdsförslag används.");
+    quickAssessment.warnings.push("Juridisk kontroll krävs eller rekommenderas innan åtgärdsförslag används.");
   }
 
   return buildResult(normalized, {
@@ -81,6 +83,8 @@ export function calculateSkotselRecommendation(input = {}) {
     warnings: [...warnings, ...quickAssessment.warnings],
     fieldChecks: [...quickAssessment.fieldChecks, ...legal.nextChecks],
     sourceNotes: unique([...sourceNotes, ...(quickAssessment.sourceNotes || [])]),
+    legalChecks: legal.checks,
+    legalStatus: legal.statusLabel,
     siteIndexEstimate
   });
 }
@@ -225,42 +229,160 @@ function assessQuickCurve(input, siteIndexEstimate) {
 }
 
 function buildLegalAssessment(input) {
-  const warnings = [];
-  const nextChecks = [];
+  const checks = [];
 
   if (input.productiveForestLandAssumption === "uncertain") {
-    warnings.push("Markklass är osäker. Kontrollera innan åtgärdsbeslut.");
-    nextChecks.push("Kontrollera markslag och om Skogsvårdslagens krav är tillämpliga.");
+    checks.push(legalCheck({
+      id: "legal-land-class-check",
+      severity: "warning",
+      effect: "land_class_check_required",
+      userText: "Kontrollera markklass: produktiv skogsmark, impediment eller specialfall påverkar vilka regler och kontrollpunkter som behöver användas.",
+      canBlockAction: false
+    }));
   }
 
   if (input.productiveForestLandAssumption === "non_productive") {
-    warnings.push("Ej produktiv/impediment/specialfall är markerat.");
-    nextChecks.push("Kontrollera markklass, impediment/specialfall och juridiska krav innan åtgärdsförslag används.");
+    checks.push(legalCheck({
+      id: "legal-land-class-check",
+      severity: "critical",
+      effect: "land_class_check_required",
+      userText: "Markklass/specialfall är markerat. Kontrollera markklass och aktuella krav innan åtgärdsförslag används.",
+      canBlockAction: true
+    }));
   }
 
   if (input.reindeerMountain === "ja" || input.reindeerMountain === "osakert") {
-    warnings.push("Rennäring/fjällnära läge kräver juridisk kontroll.");
-    nextChecks.push("Kontrollera tillstånd, samråd och lokala restriktioner för rennäring/fjällnära skog.");
+    checks.push(legalCheck({
+      id: "legal-reindeer-consultation-check",
+      severity: "warning",
+      effect: "legal_check_required",
+      userText: "Juridisk kontroll rekommenderas: rennäring eller renbetesområde är markerat/osäkert. Kontrollera samråd, hänsyn och aktuella myndighetskrav.",
+      canBlockAction: false
+    }));
   }
 
   if (input.conservation === "ja" || input.conservation === "osakert") {
-    warnings.push("Naturvärden/kulturmiljö är markerade eller osäkra.");
-    nextChecks.push("Kontrollera naturvärden, kulturmiljö, hänsynsytor och dokumentationskrav.");
+    checks.push(legalCheck({
+      id: "legal-nature-values-check",
+      severity: "warning",
+      effect: "nature_check_required",
+      userText: "Kontrollera naturhänsyn: naturvärden, kantzoner, vattennära miljöer, död ved eller skyddsvärda miljöer behöver bedömas innan åtgärd.",
+      canBlockAction: false
+    }));
+    checks.push(legalCheck({
+      id: "legal-cultural-heritage-check",
+      severity: "warning",
+      effect: "cultural_heritage_check_required",
+      userText: "Kontrollera kulturmiljö: fornlämningar och andra kulturmiljövärden behöver bedömas mot aktuell lagtext, kartunderlag och myndighetskrav.",
+      canBlockAction: false
+    }));
   }
 
+  if (input.region === "hoglage_fjallnara") {
+    checks.push(legalCheck({
+      id: "legal-mountain-forest-permit-check",
+      severity: "critical",
+      effect: "permit_check_required",
+      userText: "Kontroll krävs före åtgärd: fjällnära läge är markerat. Kontrollera tillståndskrav, aktuell lagtext och Skogsstyrelsens krav innan åtgärd.",
+      canBlockAction: true
+    }));
+  }
+
+  if (input.conservation === "osakert" || input.productiveForestLandAssumption === "uncertain") {
+    checks.push(legalCheck({
+      id: "legal-protected-area-unknown-restriction-check",
+      severity: "warning",
+      effect: "legal_check_required",
+      userText: "Kontrollera områdesskydd och restriktioner: okända eller markerade specialfall behöver kontrolleras mot aktuell lagtext, kartunderlag och myndighetskrav.",
+      canBlockAction: false,
+      reviewNeeded: true
+    }));
+  }
+
+  const warnings = checks
+    .filter((check) => check.severity !== "info")
+    .map((check) => check.userText);
+  const nextChecks = checks.map((check) => check.userText);
+  const hasBlockingCheck = checks.some((check) => check.canBlockAction);
+  const hasWarning = checks.some((check) => check.severity === "warning" || check.severity === "critical");
+  const statusLabel = hasBlockingCheck ? "Kontroll krävs" : hasWarning ? "Kontroll rekommenderas" : "OK";
+
   return {
-    hasConservationFlag: input.conservation === "ja" ||
-      input.conservation === "osakert" ||
-      input.reindeerMountain === "ja" ||
-      input.reindeerMountain === "osakert" ||
-      input.productiveForestLandAssumption === "uncertain" ||
-      input.productiveForestLandAssumption === "non_productive",
-    text: warnings.length
-      ? "Juridisk kontroll krävs eller bör göras innan åtgärdsförslag används i planering."
-      : "Inga särskilda juridiska varningsflaggor är markerade, men lagkrav ska alltid kontrolleras före åtgärd.",
+    hasConservationFlag: hasWarning,
+    text: legalText(warnings),
     warnings,
-    nextChecks
+    nextChecks,
+    checks,
+    statusLabel
   };
+}
+
+function buildActionLegalChecks(assessment) {
+  if (!assessment?.actionCode) return [];
+
+  if (assessment.actionCode === "final_felling_check") {
+    return [
+      legalCheck({
+        id: "legal-final-felling-notification-check",
+        severity: "critical",
+        effect: "legal_check_required",
+        userText: "Kontroll krävs före åtgärd: anmälan till Skogsstyrelsen och aktuell lagtext/myndighetskrav behöver kontrolleras för föryngringsavverkning.",
+        canBlockAction: true
+      }),
+      legalCheck({
+        id: "legal-regeneration-check",
+        severity: "warning",
+        effect: "regeneration_check_required",
+        userText: "Kontrollera återväxtplan: föryngringsåtgärder och platsanpassad metod behöver bedömas mot aktuell lagtext och vägledning.",
+        canBlockAction: false
+      })
+    ];
+  }
+
+  if (["curve_reference_pilot", "curve_missing", "curve_monitor", "thinning_soon", "thinning_now", "late_thinning_risk"].includes(assessment.actionCode)) {
+    return [legalCheck({
+      id: "legal-thinning-context-notice",
+      severity: "info",
+      effect: "legal_context_notice",
+      userText: "Juridisk kontext: gallringsförslag är skogligt underlag. Kontrollera hänsyn, rennäring, naturvärden, skador och eventuella områdesskydd innan åtgärd.",
+      canBlockAction: false
+    })];
+  }
+
+  if (["cleaning_plan", "cleaning_now", "delayed_cleaning"].includes(assessment.actionCode)) {
+    return [legalCheck({
+      id: "legal-clearing-context-notice",
+      severity: "info",
+      effect: "legal_context_notice",
+      userText: "Juridisk kontext: röjning är skogsvårdande underlag. Kontrollera hänsyn till natur, kulturmiljö och rennäring vid fältplanering.",
+      canBlockAction: false
+    })];
+  }
+
+  return [];
+}
+
+function mergeLegalChecks(legal, extraChecks) {
+  if (!extraChecks.length) return legal;
+  const byId = new Map(legal.checks.map((check) => [check.id, check]));
+  extraChecks.forEach((check) => byId.set(check.id, check));
+  legal.checks = [...byId.values()];
+  legal.warnings = legal.checks
+    .filter((check) => check.severity !== "info")
+    .map((check) => check.userText);
+  legal.nextChecks = legal.checks.map((check) => check.userText);
+  const hasBlockingCheck = legal.checks.some((check) => check.canBlockAction);
+  const hasWarning = legal.checks.some((check) => check.severity === "warning" || check.severity === "critical");
+  legal.statusLabel = hasBlockingCheck ? "Kontroll krävs" : hasWarning ? "Kontroll rekommenderas" : "OK";
+  legal.hasConservationFlag = hasWarning;
+  legal.text = legalText(legal.warnings);
+  return legal;
+}
+
+function legalText(warnings) {
+  return warnings.length
+    ? "Juridiskt kontrollstöd, inte besked: " + warnings.join(" ")
+    : "Juridik: OK i snabbkontrollen. Detta är kontrollstöd, inte juridiskt besked.";
 }
 
 function buildResult(input, parts) {
@@ -283,13 +405,14 @@ function buildResult(input, parts) {
     actionPriority,
     confidence: parts.confidence,
     forestryStatus: actionLabel,
-    legalStatus: legalStatusLabel(input),
+    legalStatus: parts.legalStatus || legalStatusLabel(input),
     why: parts.why,
     fieldChecks,
     quickChecks,
     recommendationDirection: parts.recommendationDirection,
     forestryAssessment: parts.why,
     legalAssessment: parts.legalAssessment,
+    legalChecks: parts.legalChecks || [],
     warnings,
     nextChecks: fieldChecks,
     planText,
@@ -306,7 +429,8 @@ function buildResult(input, parts) {
     },
     debug: {
       normalizedInput: input,
-      sourceStatus: "Inga ogranskade numeriska gallringsgränser används."
+      sourceStatus: "Inga ogranskade numeriska gallringsgränser används.",
+      legalStatus: "Juridiska kontrollflaggor kan inte aktivera kurvor eller ändra T20."
     },
     sourceCandidate
   };
@@ -426,6 +550,19 @@ function sourceCandidateNotes(sourceCandidate) {
   ];
 }
 
+function legalCheck({ id, severity, effect, userText, canBlockAction, reviewNeeded = false }) {
+  return {
+    id,
+    severity,
+    effect,
+    userText,
+    canBlockAction,
+    canMakeLegalDecision: false,
+    reviewNeeded,
+    source: LEGAL_CONTROL_RULES_SUMMARY.primarySourceId
+  };
+}
+
 function groupSourcesByEvidence(evidenceAssessment) {
   const groups = {
     law: [],
@@ -475,6 +612,10 @@ function chartNote(actionCode, input, siteIndexEstimate, curveReference, sourceC
 }
 
 function legalStatusLabel(input) {
+  if (input.region === "hoglage_fjallnara") {
+    return "Kontroll krävs";
+  }
+
   if (input.productiveForestLandAssumption === "uncertain") {
     return "Kontroll rekommenderas";
   }
