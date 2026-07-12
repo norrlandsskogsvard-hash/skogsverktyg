@@ -120,6 +120,8 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
       curveCount: knowledge.THINNING_CURVES.length,
       researchRuleCount: knowledge.GALLRING_RESEARCH_SUPPORT_SUMMARY.ruleCount,
       researchCanActivateCurves: knowledge.GALLRING_RESEARCH_SUPPORT_SUMMARY.canActivateCurves,
+      clearingResearchRuleCount: knowledge.ROJNING_RESEARCH_SUPPORT_SUMMARY.ruleCount,
+      clearingResearchCanChangePricing: knowledge.ROJNING_RESEARCH_SUPPORT_SUMMARY.canChangePricing,
       t20Status: t20?.status,
       t20DataQuality: t20?.dataQuality,
       t20ReviewNeeded: t20?.reviewNeeded,
@@ -149,6 +151,8 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.curveCount).toBe(1);
   expect(summary.researchRuleCount).toBe(12);
   expect(summary.researchCanActivateCurves).toBe(false);
+  expect(summary.clearingResearchRuleCount).toBe(12);
+  expect(summary.clearingResearchCanChangePricing).toBe(false);
   expect(summary.t20Status).toBe("active_pilot");
   expect(summary.t20DataQuality).toBe("pilot_example");
   expect(summary.t20ReviewNeeded).toBe(false);
@@ -249,6 +253,44 @@ test("Skötselkollen visar forskningsrisker utan att skapa ny kurva", async ({ p
   });
   expect(curveCount).toBe(1);
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Låg");
+});
+
+test("Skötselkollen visar röjningsforskning för ungskog utan pris- eller kurvaktivering", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/skotselkollen");
+  await page.locator('select[name="mainSpecies"]').selectOption("tall");
+  await page.locator('select[name="region"]').selectOption("norrland_inland");
+  await fillNumber(page, 'input[name="heightMeters"]', "3");
+  await fillNumber(page, 'input[name="basalArea"]', "5");
+  await openSkotselAdvanced(page);
+  await page.evaluate(() => {
+    document.querySelectorAll(".skotsel-advanced-root details").forEach((details) => {
+      details.open = true;
+    });
+  });
+  await page.locator('select[name="standPhase"]').selectOption("ungskog");
+  await fillNumber(page, 'input[name="birchShare"]', "45");
+  await page.locator('select[name="damage"]').selectOption("tydliga");
+  await page.locator('select[name="snowWindRisk"]').selectOption("ja");
+  await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
+
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Röjning bör planeras");
+  await expect(page.locator("body")).toContainText("Forskningsstöd: röjning påverkar diameterutveckling");
+  await expect(page.locator("body")).toContainText("Röjningsstöd: blandbestånd eller högt lövinslag");
+  await expect(page.locator("body")).toContainText("Kontrollera snö-/vindrisk");
+  await expect(page.locator("body")).toContainText("ändrar inte prisberäkning");
+  await openSources(page);
+  await expect(page.locator("body")).toContainText("Skogsskötselserien 6 Röjning");
+
+  const summary = await page.evaluate(async () => {
+    const knowledge = await import("/js/calculators/skotselKnowledgeBase.js");
+    return {
+      curveCount: knowledge.THINNING_CURVES.length,
+      canChangePricing: knowledge.ROJNING_RESEARCH_SUPPORT_SUMMARY.canChangePricing
+    };
+  });
+  expect(summary.curveCount).toBe(1);
+  expect(summary.canChangePricing).toBe(false);
 });
 
 test("Skötselkollen markförutsättning styr juridisk status utan att dölja skoglig status", async ({ page }) => {

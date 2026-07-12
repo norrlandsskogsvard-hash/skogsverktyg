@@ -6,6 +6,7 @@ import {
   GALLRING_RESEARCH_SUPPORT_SUMMARY,
   LEGAL_CONTROL_RULES_SUMMARY,
   NORRA_TEXT_RULES_SUMMARY,
+  ROJNING_RESEARCH_SUPPORT_SUMMARY,
   sourceNotesForInput
 } from "./skotselKnowledgeBase.js";
 
@@ -91,6 +92,25 @@ export function calculateSkotselRecommendation(input = {}) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
   }
 
+  const rojningResearch = buildRojningResearchAssessment(normalized, quickAssessment);
+  quickAssessment.fieldChecks = unique([
+    ...rojningResearch.fieldChecks,
+    ...quickAssessment.fieldChecks
+  ]);
+  quickAssessment.warnings.push(...rojningResearch.warnings);
+  quickAssessment.sourceNotes = unique([
+    ...(quickAssessment.sourceNotes || []),
+    ...rojningResearch.sourceNotes
+  ]);
+
+  if (rojningResearch.explanation) {
+    quickAssessment.why = quickAssessment.why + " " + rojningResearch.explanation;
+  }
+
+  if (rojningResearch.lowersConfidence) {
+    quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
+  }
+
   if (legal.hasConservationFlag) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
     quickAssessment.fieldChecks.push("Kontrollera juridiska krav och hänsyn innan produktionsåtgärd skrivs som huvudförslag.");
@@ -168,6 +188,22 @@ function assessQuickCurve(input, siteIndexEstimate) {
         "Kontrollera bärighet, väg, hänsynsytor och föryngringsförutsättningar."
       ],
       warnings: ["Slutavverkning är endast en juridisk och skoglig kontrollpunkt i appen."]
+    };
+  }
+
+  if (input.standPhase === "ungskog") {
+    return {
+      actionCode: "cleaning_plan",
+      confidence: "medium",
+      why: "Beståndet är markerat som ungskog. Appen visar därför röjning som skötselspår, inte som pris- eller stamantalsfacit.",
+      recommendationDirection: "Kontrollera stamval, trädslag, skador, lövkonkurrens och målbild innan röjning förs in i plan.",
+      fieldChecks: [
+        "Välj utvecklingsbara huvudstammar och kontrollera trädslag mot målbild.",
+        "Kontrollera om löv ska gynnas, hållas tillbaka eller sparas för hänsyn/vilt.",
+        "Kontrollera skador, vitalitet, snö-/viltbetesrisk och hänsyn innan åtgärd."
+      ],
+      warnings: ["Röjningsspåret är fältstöd och ändrar inte röjningskalkylens priser."],
+      sourceCandidate
     };
   }
 
@@ -407,8 +443,8 @@ function legalText(warnings) {
 
 function buildResult(input, parts) {
   const [actionLabel, actionPriority] = ACTIONS[parts.actionCode] ?? ACTIONS.insufficient_data;
-  const curveReference = parts.curveReference ?? findGallringZone(input, parts.siteIndexEstimate);
-  const sourceCandidate = parts.sourceCandidate ?? findThinningSourceCandidate(input, parts.siteIndexEstimate);
+  const curveReference = isClearingAction(parts.actionCode) ? null : (parts.curveReference ?? findGallringZone(input, parts.siteIndexEstimate));
+  const sourceCandidate = isClearingAction(parts.actionCode) ? null : (parts.sourceCandidate ?? findThinningSourceCandidate(input, parts.siteIndexEstimate));
   const regionalReferenceWithUnknownRegion = input.region === "okand" && curveReference?.status;
   const warnings = unique(parts.warnings);
   const fieldChecks = unique(parts.fieldChecks).slice(0, 7);
@@ -548,6 +584,10 @@ function buildNorraTextRuleAssessment(input, assessment) {
 }
 
 function buildGallringResearchAssessment(input, assessment) {
+  if (!isGallringResearchRelevant(assessment)) {
+    return emptyResearchAssessment();
+  }
+
   const warnings = [];
   const priorityFieldChecks = [];
   const fieldChecks = [
@@ -618,6 +658,101 @@ function buildGallringResearchAssessment(input, assessment) {
   };
 }
 
+function buildRojningResearchAssessment(input, assessment) {
+  if (!isRojningResearchRelevant(input, assessment)) {
+    return emptyResearchAssessment();
+  }
+
+  const warnings = [];
+  const priorityFieldChecks = [];
+  const fieldChecks = [
+    "Röjningsstöd: kontrollera stamval, trädslagsfördelning, skador och målbild i ungskogen.",
+    "Röjning är fältstöd för framtida kvalitet och stabilitet, inte en prisregel eller hård stamantalsgräns."
+  ];
+  const sourceNotes = [
+    ROJNING_RESEARCH_SUPPORT_SUMMARY.note,
+    "Röjningsstödet används för förklaring och fältkontroll. Det ändrar inte priser, aktiverar inga kurvor och skapar inga hårda gränser."
+  ];
+  let lowersConfidence = false;
+
+  if (assessment.actionCode === "cleaning_plan" || assessment.actionCode === "cleaning_now") {
+    priorityFieldChecks.push("Välj huvudstammar efter kvalitet, vitalitet, skador, trädslag och beståndets mål.");
+  }
+
+  if (input.mainSpecies === "tall") {
+    fieldChecks.push("Tallungskog: kontrollera lövkonkurrens, överskärmning, framtidsträd och viltbetesrisk.");
+  }
+
+  if (input.mainSpecies === "gran") {
+    fieldChecks.push("Granungskog: bedöm lövuppslag och självföryngrade barrplantor separat från tallspåret.");
+    fieldChecks.push("Granungskog: kontrollera röta, rotrisk och skador innan åtgärd planeras.");
+  }
+
+  if (input.mainSpecies === "bjork") {
+    warnings.push("Röjningsstöd: björk/löv kräver egen målbild och ska inte styras av tall- eller granmall som facit.");
+    priorityFieldChecks.push("Björk/löv: bestäm om målet är lövproduktion, barrföryngring, naturhänsyn eller blandning.");
+    lowersConfidence = true;
+  }
+
+  if (input.mainSpecies === "blandat" || (input.birchShare !== null && input.birchShare > 30)) {
+    warnings.push("Röjningsstöd: blandbestånd eller högt lövinslag kräver tydlig målbild innan röjning föreslås.");
+    priorityFieldChecks.push("Blandbestånd: väg trädslag, kvalitet, produktion, naturhänsyn och viltfoder innan uttag.");
+    lowersConfidence = true;
+  }
+
+  if (input.snowWindRisk === "ja") {
+    warnings.push("Röjningsstöd: markerad snö-/vindrisk kräver kontroll av stabilitet, täthet och stamform.");
+    priorityFieldChecks.push("Kontrollera snö-/vindrisk och lämna inte ett onödigt vekt bestånd efter åtgärden.");
+    lowersConfidence = true;
+  }
+
+  if (input.damage === "tydliga" || input.damage === "svara") {
+    warnings.push("Röjningsstöd: tydliga skador gör att stamval, vitalitet, svamp/insekter och ersättningsstammar måste kontrolleras.");
+    priorityFieldChecks.push("Kontrollera skador, vitalitet, svamp, insekter och ersättningsstammar innan röjning.");
+    lowersConfidence = true;
+  }
+
+  if (input.vitality === "svag") {
+    warnings.push("Röjningsstöd: svag vitalitet kräver försiktig stamvalskontroll och tydlig målbild.");
+    fieldChecks.push("Kontrollera kronstatus och vitalitet innan huvudstammar väljs.");
+    lowersConfidence = true;
+  }
+
+  if (input.conservation === "ja" || input.conservation === "osakert") {
+    fieldChecks.push("Hänsyn: kontrollera kantzoner, lövträd, naturvärdesträd och kulturmiljö separat från produktionsmålet.");
+  }
+
+  if (input.reindeerMountain === "ja" || input.reindeerMountain === "osakert") {
+    fieldChecks.push("Rennäring: kontrollera lavbärande marker, hänglav och flyttleder som separat hänsynsfråga.");
+  }
+
+  return {
+    explanation: "Röjningsforskningen används som förklarings- och fältstöd, inte som prisregel eller hård gräns.",
+    warnings,
+    fieldChecks: unique([...priorityFieldChecks, ...fieldChecks]),
+    sourceNotes,
+    lowersConfidence
+  };
+}
+
+function isGallringResearchRelevant(assessment) {
+  return ["curve_reference_pilot", "curve_missing", "final_felling_check", "curve_monitor", "thinning_soon", "thinning_now", "late_thinning_risk"].includes(assessment.actionCode);
+}
+
+function isRojningResearchRelevant(input, assessment) {
+  return input.standPhase === "ungskog" || ["cleaning_plan", "cleaning_now", "delayed_cleaning"].includes(assessment.actionCode);
+}
+
+function emptyResearchAssessment() {
+  return {
+    explanation: "",
+    warnings: [],
+    fieldChecks: [],
+    sourceNotes: [],
+    lowersConfidence: false
+  };
+}
+
 function isLikelyFirstThinning(input, assessment) {
   if (input.standPhase === "ungskog") return true;
   if (assessment.actionCode === "curve_reference_pilot" && input.heightMeters !== null && input.heightMeters <= 15.5) return true;
@@ -681,6 +816,9 @@ function groupSourcesByEvidence(evidenceAssessment) {
 }
 
 function chartNote(actionCode, input, siteIndexEstimate, curveReference, sourceCandidate) {
+  if (isClearingAction(actionCode)) {
+    return "Röjningsspår: forskningsstödet visas som fältkontroll. Ingen gallringskurva används som röjningsfacit.";
+  }
   if (input.mainSpecies === "bjork") {
     return "Björkspår: kurvunderlag saknas eller är ofullständigt. Punkten visas utan tall-/granmall som facit.";
   }
@@ -729,6 +867,10 @@ function regionWarningText(input, curveReference, actionCode) {
 }
 
 function buildPlanText(actionCode, recommendationDirection) {
+  if (isClearingAction(actionCode)) {
+    return "Beståndet är markerat som ungskog/röjningsspår. Använd underlaget för fältkontroll av stamval, trädslag, skador, hänsyn och målbild. Röjningsforskningen ändrar inte prisberäkning eller skapar hårda stamantalsgränser.";
+  }
+
   if (actionCode === "curve_reference_pilot") {
     return "Beståndet har jämförts mot källstött T20-exempel för norra Sverige. Underlaget är ett pilotstöd och bör kontrolleras mot full gallringsmall innan åtgärd skrivs in i planen.";
   }
@@ -752,6 +894,10 @@ function lowerConfidence(confidence) {
 
 function isPilotCurveStatus(status) {
   return status === "active_pilot" || status === "pilot";
+}
+
+function isClearingAction(actionCode) {
+  return ["cleaning_plan", "cleaning_now", "delayed_cleaning"].includes(actionCode);
 }
 
 function toNumber(value) {

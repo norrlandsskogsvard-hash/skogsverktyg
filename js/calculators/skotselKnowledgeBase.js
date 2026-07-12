@@ -29,6 +29,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-norra-textregler.md",
   "docs/skotselkollen-juridiska-kontrollflaggor.md",
   "docs/skotselkollen-gallring-forskningsstod.md",
+  "docs/skotselkollen-rojning-forskningsstod.md",
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
@@ -75,6 +76,17 @@ export const GALLRING_RESEARCH_SUPPORT_SUMMARY = {
   canActivateCurves: false,
   canCreateHardThresholds: false,
   note: "Forskningsstöd: gallring påverkar dimensionsutveckling, risker och beståndets framtida struktur."
+};
+
+export const ROJNING_RESEARCH_SUPPORT_SUMMARY = {
+  sourceId: "skogsskotselserien-6-rojning",
+  dataFile: "data/rojning-research-rules.json",
+  ruleCount: 12,
+  status: "reviewed_research_support",
+  activeUse: "explanation_and_field_support_only",
+  canCreateHardThresholds: false,
+  canChangePricing: false,
+  note: "Forskningsstöd: röjning påverkar diameterutveckling, stamval, trädslagsfördelning och framtida kvalitet."
 };
 
 export const EVIDENCE_TYPE_WEIGHTS = {
@@ -290,6 +302,22 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
     confidence: "medium",
     limitations: ["Aktiverar inga kurvor, diagramvärden, juridiska beslut eller hårda produktionsgränser."],
     notes: ["Används som förklaring och risk-/fältstöd, inte som facit."]
+  },
+  {
+    id: "research-skotselserien-6-rojning",
+    type: "research",
+    source: "skogsskotselserien-6-rojning",
+    sourceLabel: "Skogsskötselserien 6 Röjning",
+    area: "clearing",
+    species: "all",
+    region: "all",
+    appliesTo: ["cleaning_plan", "cleaning_now", "delayed_cleaning"],
+    claim: "Forskningsstödet används för röjningens syfte, stamval, trädslagsfördelning, risker och långsiktig kvalitet.",
+    strength: "researchSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.research,
+    confidence: "medium",
+    limitations: ["Ändrar inte röjningskalkylens priser och skapar inga hårda stamantal- eller höjdgränser."],
+    notes: ["Används som förklaring och fältstöd, inte som prisfacit."]
   },
   {
     id: "regional-t20-pilot",
@@ -633,6 +661,8 @@ export function sourceNotesForInput(input = {}) {
   notes.push(LEGAL_CONTROL_RULES_SUMMARY.note);
   notes.push(GALLRING_RESEARCH_SUPPORT_SUMMARY.note);
   notes.push("Skogsskötselserien 7 Gallring används som förklarings- och riskstöd, inte som ny gallringskurva.");
+  notes.push(ROJNING_RESEARCH_SUPPORT_SUMMARY.note);
+  notes.push("Skogsskötselserien 6 Röjning används som förklarings- och fältstöd, inte som prisregel eller hård stamantalsgräns.");
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
   notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];

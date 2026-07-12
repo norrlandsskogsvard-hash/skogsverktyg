@@ -11,7 +11,8 @@
     "validate:norra-text-rules": "node scripts/validate-norra-text-rules.mjs",
     "validate:legal-rules": "node scripts/validate-legal-control-rules.mjs",
     "validate:gallring-research": "node scripts/validate-gallring-research-rules.mjs",
-    "test": "npm run validate:sources && npm run validate:thinning-data && npm run validate:norra-text-rules && npm run validate:legal-rules && npm run validate:gallring-research && playwright test",
+    "validate:rojning-research": "node scripts/validate-rojning-research-rules.mjs",
+    "test": "npm run validate:sources && npm run validate:thinning-data && npm run validate:norra-text-rules && npm run validate:legal-rules && npm run validate:gallring-research && npm run validate:rojning-research && playwright test",
     "test:headed": "playwright test --headed",
     "test:update": "playwright test --update-snapshots"
   },

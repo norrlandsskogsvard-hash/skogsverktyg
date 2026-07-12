@@ -244,7 +244,7 @@ function resultTemplate(result) {
       directionBlock(result.recommendationDirection) +
     "</div>" +
     "<div class='skotsel-advanced skotsel-advanced--result'>" +
-      advancedDetails("Forskningsstöd", researchSupportTemplate()) +
+      advancedDetails("Forskningsstöd", researchSupportTemplate(result)) +
       advancedDetails("Juridisk kontroll", resultBlock("Juridisk kontroll", result.legalAssessment)) +
       advancedDetails("Juridiska kontrollflaggor", legalChecksTemplate(result.legalChecks || []), Boolean(result.legalChecks?.length), "skotsel-legal-flags") +
       advancedDetails("Varningar", listTemplate(result.warnings), hasWarnings) +
@@ -344,7 +344,12 @@ function evidenceSummaryTemplate(evidenceAssessment) {
   "</section>";
 }
 
-function researchSupportTemplate() {
+function researchSupportTemplate(result) {
+  if (isClearingAction(result.actionCode)) {
+    return "<p class='card__text'>Forskningsstöd: röjning påverkar diameterutveckling, stamval, trädslagsfördelning och framtida kvalitet.</p>" +
+      "<p class='card__text'>Används för förklaringar och fältkontroller. Det ändrar inte priser, aktiverar inga kurvor och skapar inga hårda stamantal-/höjdgränser.</p>";
+  }
+
   return "<p class='card__text'>Forskningsstöd: gallring påverkar dimensionsutveckling, risker och beståndets framtida struktur.</p>" +
     "<p class='card__text'>Används för förklaringar, risker och fältkontroller. Det aktiverar inga kurvor, diagramvärden, juridiska beslut eller hårda produktionsgränser.</p>";
 }
@@ -505,6 +510,10 @@ function sourceCandidateStatusText(sourceCandidate) {
 
 function isPilotCurveStatus(status) {
   return status === "active_pilot" || status === "pilot";
+}
+
+function isClearingAction(actionCode) {
+  return ["cleaning_plan", "cleaning_now", "delayed_cleaning"].includes(actionCode);
 }
 
 function regionWarningTemplate(text) {

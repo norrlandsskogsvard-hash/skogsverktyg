@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-rojning-research.1 - 2026-07-12
+
+### Added - Forskningsstöd för röjning
+
+- Forskningsstöd för röjning från Skogsskötselserien 6 har lagts till.
+- Stödet används för förklaringar, risker och fältkontroller.
+- Röjningsstödet kan inte ändra priser eller skapa hårda gränsvärden.
+- Validering för röjningsforskning har lagts till.
+- PWA-cache höjd till rojning-research.1.
+
 ## v2.0.0-alpha.1-gallring-research.1 - 2026-07-12
 
 ### Added - Forskningsstöd för gallring
