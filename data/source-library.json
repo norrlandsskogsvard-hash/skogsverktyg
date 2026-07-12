@@ -6,10 +6,23 @@
     "organization": "Norra Skog",
     "year": "",
     "sourceType": "regional_curve",
-    "areas": ["gallring"],
-    "species": ["tall", "gran"],
-    "regions": ["norra_sverige"],
-    "valueTypes": ["direct_text", "direct_table", "chart", "diagram", "advisory_text"],
+    "areas": [
+      "gallring"
+    ],
+    "species": [
+      "tall",
+      "gran"
+    ],
+    "regions": [
+      "norra_sverige"
+    ],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "chart",
+      "diagram",
+      "advisory_text"
+    ],
     "extractionPriority": "high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
@@ -19,7 +32,13 @@
       "Diagram och kurvor kräver verifiering innan värden kan användas.",
       "Endast T20-exemplet är aktiv pilot sedan tidigare."
     ],
-    "notes": "Norra gallringsmallar. Diagram/kurvor kräver verifiering. T20-exempel finns redan som pilot."
+    "notes": "Norra gallringsmallar. Diagram/kurvor kräver verifiering. T20-exempel finns redan som pilot.",
+    "url": null,
+    "accessType": "local_file",
+    "primarySource": true,
+    "onlineMirrorUrls": [
+      "https://www.yumpu.com/sv/document/view/38774543/gallringsmallar-norra-skogsagarna"
+    ]
   },
   {
     "id": "manual-gallringsprogram-ingvar",
@@ -28,16 +47,26 @@
     "organization": "INGVAR",
     "year": "",
     "sourceType": "decision_support_reference",
-    "areas": ["gallring"],
-    "species": ["tall", "gran"],
+    "areas": [
+      "gallring"
+    ],
+    "species": [
+      "tall",
+      "gran"
+    ],
     "regions": [],
-    "valueTypes": ["advisory_text", "checklist"],
+    "valueTypes": [
+      "advisory_text",
+      "checklist"
+    ],
     "extractionPriority": "medium",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Beslutsstöd och referens, inte facit eller direkt aktiv regel."],
+    "limitations": [
+      "Beslutsstöd och referens, inte facit eller direkt aktiv regel."
+    ],
     "notes": "INGVAR, beslutsstöd/referens, inte facit."
   },
   {
@@ -47,16 +76,30 @@
     "organization": "Skogsstyrelsen",
     "year": "",
     "sourceType": "research",
-    "areas": ["gallring"],
-    "species": ["tall", "gran", "blandbestand"],
+    "areas": [
+      "gallring"
+    ],
+    "species": [
+      "tall",
+      "gran",
+      "blandbestand"
+    ],
     "regions": [],
-    "valueTypes": ["direct_text", "direct_table", "chart", "diagram", "advisory_text"],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "chart",
+      "diagram",
+      "advisory_text"
+    ],
     "extractionPriority": "high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Forskningsnära principer måste översättas försiktigt till appstöd."],
+    "limitations": [
+      "Forskningsnära principer måste översättas försiktigt till appstöd."
+    ],
     "notes": "Forskningsnära huvudkälla för gallringsprinciper."
   },
   {
@@ -66,16 +109,25 @@
     "organization": "Skogsstyrelsen",
     "year": "",
     "sourceType": "research",
-    "areas": ["rojning"],
+    "areas": [
+      "rojning"
+    ],
     "species": [],
     "regions": [],
-    "valueTypes": ["direct_text", "direct_table", "advisory_text", "checklist"],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "advisory_text",
+      "checklist"
+    ],
     "extractionPriority": "high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Får inte ändra röjningskalkylens prislogik utan separat beslut."],
+    "limitations": [
+      "Får inte ändra röjningskalkylens prislogik utan separat beslut."
+    ],
     "notes": "Huvudkälla för röjningsprinciper."
   },
   {
@@ -85,16 +137,32 @@
     "organization": "Skogsstyrelsen",
     "year": "",
     "sourceType": "research",
-    "areas": ["bjork_lov", "rojning", "gallring"],
-    "species": ["bjork", "al", "asp"],
+    "areas": [
+      "bjork_lov",
+      "rojning",
+      "gallring"
+    ],
+    "species": [
+      "bjork",
+      "al",
+      "asp"
+    ],
     "regions": [],
-    "valueTypes": ["direct_text", "direct_table", "chart", "diagram", "advisory_text"],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "chart",
+      "diagram",
+      "advisory_text"
+    ],
     "extractionPriority": "high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Lövspår får inte blandas med tall- och granmallar."],
+    "limitations": [
+      "Lövspår får inte blandas med tall- och granmallar."
+    ],
     "notes": "Huvudkälla för björk/lövspår."
   },
   {
@@ -104,16 +172,34 @@
     "organization": "",
     "year": "",
     "sourceType": "field_method",
-    "areas": ["bonitering"],
-    "species": ["tall", "gran", "bjork", "contorta"],
-    "regions": ["AC", "Vasterbotten"],
-    "valueTypes": ["direct_text", "direct_table", "chart", "diagram", "field_method"],
+    "areas": [
+      "bonitering"
+    ],
+    "species": [
+      "tall",
+      "gran",
+      "bjork",
+      "contorta"
+    ],
+    "regions": [
+      "AC",
+      "Vasterbotten"
+    ],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "chart",
+      "diagram",
+      "field_method"
+    ],
     "extractionPriority": "high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["SI-regler och höjdutveckling kräver manuell kontroll före auto-SI."],
+    "limitations": [
+      "SI-regler och höjdutveckling kräver manuell kontroll före auto-SI."
+    ],
     "notes": "Fältmetod och tabell-/diagramunderlag för bonitering i AC/Västerbotten."
   },
   {
@@ -123,16 +209,34 @@
     "organization": "",
     "year": "",
     "sourceType": "field_method",
-    "areas": ["bonitering"],
-    "species": ["tall", "gran", "bjork", "contorta"],
-    "regions": ["BD", "Norrbotten"],
-    "valueTypes": ["direct_text", "direct_table", "chart", "diagram", "field_method"],
+    "areas": [
+      "bonitering"
+    ],
+    "species": [
+      "tall",
+      "gran",
+      "bjork",
+      "contorta"
+    ],
+    "regions": [
+      "BD",
+      "Norrbotten"
+    ],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "chart",
+      "diagram",
+      "field_method"
+    ],
     "extractionPriority": "high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["SI-regler och höjdutveckling kräver manuell kontroll före auto-SI."],
+    "limitations": [
+      "SI-regler och höjdutveckling kräver manuell kontroll före auto-SI."
+    ],
     "notes": "Fältmetod och tabell-/diagramunderlag för bonitering i BD/Norrbotten."
   },
   {
@@ -142,16 +246,28 @@
     "organization": "",
     "year": "",
     "sourceType": "field_method",
-    "areas": ["bonitering"],
-    "species": ["tall", "gran"],
+    "areas": [
+      "bonitering"
+    ],
+    "species": [
+      "tall",
+      "gran"
+    ],
     "regions": [],
-    "valueTypes": ["direct_table", "chart", "diagram", "field_method"],
+    "valueTypes": [
+      "direct_table",
+      "chart",
+      "diagram",
+      "field_method"
+    ],
     "extractionPriority": "medium_high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Tabeller och diagram måste knytas till rätt art, SI och metod innan användning."],
+    "limitations": [
+      "Tabeller och diagram måste knytas till rätt art, SI och metod innan användning."
+    ],
     "notes": "SI/höjdutvecklingskurvor och tabell-/diagramunderlag."
   },
   {
@@ -161,16 +277,25 @@
     "organization": "Skogsstyrelsen",
     "year": "",
     "sourceType": "research",
-    "areas": ["skador"],
+    "areas": [
+      "skador"
+    ],
     "species": [],
     "regions": [],
-    "valueTypes": ["direct_text", "direct_table", "advisory_text", "checklist"],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "advisory_text",
+      "checklist"
+    ],
     "extractionPriority": "medium_high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Risk- och skadeunderlag, inte produktionskurva."],
+    "limitations": [
+      "Risk- och skadeunderlag, inte produktionskurva."
+    ],
     "notes": "Skogsskador i skogens olika utvecklingsstadier."
   },
   {
@@ -180,16 +305,25 @@
     "organization": "Skogsstyrelsen",
     "year": "",
     "sourceType": "research",
-    "areas": ["skador"],
+    "areas": [
+      "skador"
+    ],
     "species": [],
     "regions": [],
-    "valueTypes": ["direct_text", "direct_table", "advisory_text", "checklist"],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "advisory_text",
+      "checklist"
+    ],
     "extractionPriority": "medium_high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Risk- och skadeunderlag, inte produktionskurva."],
+    "limitations": [
+      "Risk- och skadeunderlag, inte produktionskurva."
+    ],
     "notes": "Gamla och nya epidemier och utbrott på skog."
   },
   {
@@ -199,16 +333,24 @@
     "organization": "Skogsstyrelsen",
     "year": "",
     "sourceType": "research",
-    "areas": ["naturhansyn"],
+    "areas": [
+      "naturhansyn"
+    ],
     "species": [],
     "regions": [],
-    "valueTypes": ["direct_text", "advisory_text", "checklist"],
+    "valueTypes": [
+      "direct_text",
+      "advisory_text",
+      "checklist"
+    ],
     "extractionPriority": "high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": false,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Hänsyns- och kontrollflaggor, inte produktionskurva."],
+    "limitations": [
+      "Hänsyns- och kontrollflaggor, inte produktionskurva."
+    ],
     "notes": "Naturhänsyn som stöd för risk- och kontrollpunkter."
   },
   {
@@ -218,16 +360,25 @@
     "organization": "",
     "year": "2016",
     "sourceType": "legal_or_habitat_guidance",
-    "areas": ["kulturmiljo", "naturhansyn"],
+    "areas": [
+      "kulturmiljo",
+      "naturhansyn"
+    ],
     "species": [],
     "regions": [],
-    "valueTypes": ["direct_text", "advisory_text", "checklist"],
+    "valueTypes": [
+      "direct_text",
+      "advisory_text",
+      "checklist"
+    ],
     "extractionPriority": "high",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": false,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Juridiskt/hänsynsmässigt stöd, inte skoglig produktionsregel."],
+    "limitations": [
+      "Juridiskt/hänsynsmässigt stöd, inte skoglig produktionsregel."
+    ],
     "notes": "Kulturmiljö- och hänsynsvägledning."
   },
   {
@@ -237,16 +388,25 @@
     "organization": "",
     "year": "",
     "sourceType": "practice_guide",
-    "areas": ["rojning", "naturhansyn"],
+    "areas": [
+      "rojning",
+      "naturhansyn"
+    ],
     "species": [],
     "regions": [],
-    "valueTypes": ["direct_text", "advisory_text", "checklist"],
+    "valueTypes": [
+      "direct_text",
+      "advisory_text",
+      "checklist"
+    ],
     "extractionPriority": "medium",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Praktisk instruktion, inte facit eller prislogik."],
+    "limitations": [
+      "Praktisk instruktion, inte facit eller prislogik."
+    ],
     "notes": "Praktisk instruktion/certifieringsanpassad röjning, inte facit."
   },
   {
@@ -256,16 +416,27 @@
     "organization": "",
     "year": "",
     "sourceType": "practice_guide",
-    "areas": ["vilt", "rojning", "gallring"],
+    "areas": [
+      "vilt",
+      "rojning",
+      "gallring"
+    ],
     "species": [],
     "regions": [],
-    "valueTypes": ["direct_text", "direct_table", "advisory_text", "checklist"],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "advisory_text",
+      "checklist"
+    ],
     "extractionPriority": "medium",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Vilt- och skötselstöd, inte produktionskurva."],
+    "limitations": [
+      "Vilt- och skötselstöd, inte produktionskurva."
+    ],
     "notes": "Kombinerad forsknings-/praktiknära vägledning för viltanpassad skogsskötsel."
   },
   {
@@ -275,16 +446,26 @@
     "organization": "",
     "year": "",
     "sourceType": "terrain_cost_support",
-    "areas": ["terrang", "ekonomi", "rojning"],
+    "areas": [
+      "terrang",
+      "ekonomi",
+      "rojning"
+    ],
     "species": [],
     "regions": [],
-    "valueTypes": ["direct_table", "field_method", "cost_support"],
+    "valueTypes": [
+      "direct_table",
+      "field_method",
+      "cost_support"
+    ],
     "extractionPriority": "medium",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Kan stödja svårighet/kostnad men inte skoglig åtgärdsregel."],
+    "limitations": [
+      "Kan stödja svårighet/kostnad men inte skoglig åtgärdsregel."
+    ],
     "notes": "Kan vara relevant för svårighet/kostnad men inte skoglig åtgärdsregel."
   },
   {
@@ -294,16 +475,29 @@
     "organization": "Norra Skog",
     "year": "2024",
     "sourceType": "practice_guide",
-    "areas": ["rojning", "gallring", "bonitering"],
+    "areas": [
+      "rojning",
+      "gallring",
+      "bonitering"
+    ],
     "species": [],
-    "regions": ["norra_sverige"],
-    "valueTypes": ["direct_text", "direct_table", "advisory_text", "checklist"],
+    "regions": [
+      "norra_sverige"
+    ],
+    "valueTypes": [
+      "direct_text",
+      "direct_table",
+      "advisory_text",
+      "checklist"
+    ],
     "extractionPriority": "medium",
     "extractionStatus": "indexed_not_extracted",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Praktisk skogsägarmall, inte facit."],
+    "limitations": [
+      "Praktisk skogsägarmall, inte facit."
+    ],
     "notes": "Praktisk skogsägarmall, inte facit."
   },
   {
@@ -313,16 +507,22 @@
     "organization": "",
     "year": "",
     "sourceType": "decision_support_reference",
-    "areas": ["gallring"],
+    "areas": [
+      "gallring"
+    ],
     "species": [],
     "regions": [],
-    "valueTypes": ["no_numeric_values"],
+    "valueTypes": [
+      "no_numeric_values"
+    ],
     "extractionPriority": "low_technical",
     "extractionStatus": "technical_index_only",
     "canContainNumericValues": true,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Databasfil kräver separat teknisk extraktion och manuell granskning."],
+    "limitations": [
+      "Databasfil kräver separat teknisk extraktion och manuell granskning."
+    ],
     "notes": "Databasfil, kräver separat teknisk extraktion om möjligt."
   },
   {
@@ -335,13 +535,17 @@
     "areas": [],
     "species": [],
     "regions": [],
-    "valueTypes": ["no_numeric_values"],
+    "valueTypes": [
+      "no_numeric_values"
+    ],
     "extractionPriority": "low",
     "extractionStatus": "technical_index_only",
     "canContainNumericValues": false,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Teknisk mall, används inte utan granskning."],
+    "limitations": [
+      "Teknisk mall, används inte utan granskning."
+    ],
     "notes": "Teknisk mall, indexeras men används inte utan granskning."
   },
   {
@@ -354,13 +558,159 @@
     "areas": [],
     "species": [],
     "regions": [],
-    "valueTypes": ["no_numeric_values"],
+    "valueTypes": [
+      "no_numeric_values"
+    ],
     "extractionPriority": "low",
     "extractionStatus": "technical_index_only",
     "canContainNumericValues": false,
     "canActivateDirectly": false,
     "requiresManualReview": true,
-    "limitations": ["Ikonfil, inte skoglig källa."],
+    "limitations": [
+      "Ikonfil, inte skoglig källa."
+    ],
     "notes": "Teknisk fil från källmappen. Indexeras endast för spårbarhet."
+  },
+  {
+    "id": "law-skogsvardslag-1979-429-riksdagen",
+    "filename": null,
+    "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/skogsvardslag-1979429_sfs-1979-429/",
+    "title": "Skogsvårdslag (1979:429)",
+    "organization": "Sveriges riksdag / Svensk författningssamling",
+    "year": "1979",
+    "sourceType": "law",
+    "accessType": "online_source",
+    "primarySource": true,
+    "areas": [
+      "juridik",
+      "foryngring",
+      "gallring",
+      "rojning",
+      "slutavverkning",
+      "naturhansyn",
+      "kulturmiljo",
+      "rennaring",
+      "fjallnara_skog"
+    ],
+    "species": [],
+    "regions": [
+      "sverige"
+    ],
+    "valueTypes": [
+      "legal_text",
+      "direct_text",
+      "numeric_legal_thresholds"
+    ],
+    "extractionPriority": "high",
+    "extractionStatus": "online_indexed",
+    "canContainNumericValues": true,
+    "canActivateDirectly": false,
+    "requiresManualReview": true,
+    "onlineCheckFrequency": "before_legal_update",
+    "lastChecked": "2026-07-12",
+    "versionNote": "Riksdagen/SFS onlineversion kontrollerad som metadata för källindex.",
+    "limitations": [
+      "Ska alltid kontrolleras mot aktuell onlineversion före juridisk uppdatering.",
+      "Ska användas som juridisk kontroll/spärr/varning, inte som skoglig produktionsmall.",
+      "Appen får inte ge juridiskt bindande besked."
+    ],
+    "notes": [
+      "Primär juridisk källa för Skogsvårdslagen."
+    ]
+  },
+  {
+    "id": "agency-skogsstyrelsen-skogsvardslagen",
+    "filename": null,
+    "url": "https://www.skogsstyrelsen.se/lag-och-tillsyn/skogsvardslagen/",
+    "title": "Skogsvårdslagen i kortversion",
+    "organization": "Skogsstyrelsen",
+    "year": "",
+    "sourceType": "legal_or_agency_guidance",
+    "accessType": "online_source",
+    "primarySource": false,
+    "areas": [
+      "juridik",
+      "tillsyn",
+      "foryngring",
+      "avverkning",
+      "gallring",
+      "rojning",
+      "slutavverkning",
+      "naturhansyn",
+      "kulturmiljo",
+      "rennaring",
+      "fjallnara_skog"
+    ],
+    "species": [],
+    "regions": [
+      "sverige"
+    ],
+    "valueTypes": [
+      "advisory_text",
+      "legal_guidance",
+      "checklist",
+      "numeric_legal_thresholds"
+    ],
+    "extractionPriority": "high",
+    "extractionStatus": "online_indexed",
+    "canContainNumericValues": true,
+    "canActivateDirectly": false,
+    "requiresManualReview": true,
+    "onlineCheckFrequency": "before_legal_update",
+    "lastChecked": "2026-07-12",
+    "versionNote": "Myndighetsvägledning kontrollerad som metadata för källindex.",
+    "limitations": [
+      "Myndighetsvägledning och praktisk förklaring.",
+      "Ska inte ersätta aktuell lagtext från Riksdagen/SFS.",
+      "Appen får inte ge juridiskt bindande besked."
+    ],
+    "notes": [
+      "Används som förklarande myndighetsstöd för juridiska kontroller."
+    ]
+  },
+  {
+    "id": "mirror-yumpu-norra-gallringsmallar",
+    "filename": null,
+    "url": "https://www.yumpu.com/sv/document/view/38774543/gallringsmallar-norra-skogsagarna",
+    "title": "Gallringsmallar - Norra Skogsägarna",
+    "organization": "Yumpu / Norra Skogsägarna mirror",
+    "year": "2007",
+    "sourceType": "regional_curve",
+    "accessType": "online_mirror",
+    "primarySource": false,
+    "mirrorForSourceId": "norra-gallringsriktlinjer-gallringsmallar",
+    "areas": [
+      "gallring"
+    ],
+    "species": [
+      "tall",
+      "gran"
+    ],
+    "regions": [
+      "norra_sverige"
+    ],
+    "valueTypes": [
+      "chart",
+      "diagram",
+      "advisory_text",
+      "direct_text"
+    ],
+    "extractionPriority": "medium",
+    "extractionStatus": "mirror_indexed",
+    "canContainNumericValues": true,
+    "canActivateDirectly": false,
+    "requiresManualReview": true,
+    "onlineCheckFrequency": "manual",
+    "lastChecked": "2026-07-12",
+    "versionNote": "Online-spegel kontrollerad som metadata. Publiceringsdatum på Yumpu tolkas inte som ny mallversion.",
+    "limitations": [
+      "Endast spegel/textstöd.",
+      "Får inte ersätta lokal PDF som primär källa.",
+      "Värden får inte aktiveras utan kontroll mot lokal PDF och granskningsprotokoll.",
+      "Publiceringsdatum på Yumpu ska inte tolkas som ny mallversion."
+    ],
+    "notes": [
+      "Online-spegel som kan hjälpa text/OCR-läsning. Lokal PDF är primär."
+    ]
   }
 ]

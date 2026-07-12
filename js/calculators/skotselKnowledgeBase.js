@@ -32,10 +32,14 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
 
 export const SOURCE_LIBRARY_SUMMARY = {
   status: "indexed_local_library",
-  indexedSources: 19,
+  indexedSources: 22,
+  localSources: 19,
+  onlineSources: 2,
+  onlineMirrors: 1,
   dataFile: "data/source-library.json",
   canActivateDirectly: false,
-  note: "Lokalt källbibliotek finns, värden aktiveras först efter granskning."
+  note: "Lokalt källbibliotek och onlinekällor finns, värden aktiveras först efter granskning.",
+  legalNote: "Riksdagen/SFS är primär lagkälla och Skogsstyrelsen är vägledning. Appens juridiska del är kontrollstöd, inte juridiskt besked."
 };
 
 export const EVIDENCE_TYPE_WEIGHTS = {
@@ -556,6 +560,7 @@ export function sourceNotesForInput(input = {}) {
   notes.push("Skogskunskap används som forskningsnära verktygs- och vägledningsstöd, inte som ensam facitkälla.");
   notes.push("Norra Skog 2024 används som praktisk skötselmall och skogsägarstöd, inte som facit eller regional kurva.");
   notes.push(SOURCE_LIBRARY_SUMMARY.note);
+  notes.push(SOURCE_LIBRARY_SUMMARY.legalNote);
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
   notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];

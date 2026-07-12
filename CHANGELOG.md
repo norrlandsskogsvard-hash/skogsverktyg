@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-source-library.2 - 2026-07-12
+
+### Added - Onlinekällor och speglar
+
+- Onlinekällor för Skogsvårdslag och Skogsstyrelsens vägledning har indexerats.
+- Yumpu har lagts till som spegelkälla för Norra gallringsmallar.
+- Källvalideringen tillåter nu onlinekällor med URL utan lokal fil.
+- Spegelkällor kan inte vara primärkälla eller aktivera värden.
+- Juridiska källor kan inte aktiveras direkt som skoglig regel.
+- PWA-cache höjd till source-library.2.
+
 ## v2.0.0-alpha.1-source-library.1 - 2026-07-12
 
 ### Added - Lokalt källbibliotek

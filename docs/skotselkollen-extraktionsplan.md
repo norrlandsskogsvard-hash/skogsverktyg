@@ -4,11 +4,20 @@ Extraktion ska ske stegvis. Varje värde ska ha källa, sida/tabell/diagram, enh
 
 ## Prioriterad ordning
 
+0. Juridik online
+   - Skogsvårdslag (1979:429) från Riksdagen/SFS är primär juridisk källa.
+   - Skogsstyrelsens vägledning används som myndighetsstöd och kortversion.
+   - Juridiska källor används först som kontrollflaggor, spärrar och hänvisningar.
+   - Ingen juridisk regel aktiveras utan separat granskningssteg.
+
 1. Norra gallringsmallar
    - Tydliga text- och tabellvärden först.
    - Diagramdigitalisering hanteras separat.
    - T20 är aktiv pilot.
    - Övriga mallar är candidates tills de är verifierade.
+   - Yumpu-spegeln kan användas för text/OCR-stöd.
+   - Lokal Norra-PDF är primär källa.
+   - Spegel får inte ensam skapa verified_candidate.
 
 2. Bonitering AC/BD
    - SI-regler och begränsningar extraheras först.

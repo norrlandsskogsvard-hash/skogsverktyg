@@ -10,22 +10,31 @@ const reportPath = path.join(projectRoot, "docs", "generated", "source-library-r
 
 const files = await readSourceFiles();
 const library = JSON.parse(await readFile(libraryPath, "utf8"));
-const indexedFilenames = new Set(library.map((source) => source.filename));
+const localSources = library.filter((source) => accessType(source) === "local_file");
+const onlineSources = library.filter((source) => accessType(source) === "online_source");
+const onlineMirrors = library.filter((source) => accessType(source) === "online_mirror");
+const indexedFilenames = new Set(localSources.map((source) => source.filename).filter(Boolean));
 const sourceFilenames = new Set(files.map((file) => file.name));
 
 const missingInIndex = files.filter((file) => !indexedFilenames.has(file.name));
-const missingFiles = library.filter((source) => !sourceFilenames.has(source.filename));
+const missingFiles = localSources.filter((source) => !sourceFilenames.has(source.filename));
+const missingFileOrUrl = library.filter((source) =>
+  accessType(source) === "local_file" ? !source.filename : !source.url
+);
 
 await mkdir(path.dirname(reportPath), { recursive: true });
-await writeFile(reportPath, buildReport(files, library, missingInIndex, missingFiles), "utf8");
+await writeFile(reportPath, buildReport(files, library, missingInIndex, missingFiles, missingFileOrUrl), "utf8");
 
-console.log(`Källindex klart: ${library.length} indexposter, ${files.length} filer i sources/.`);
+console.log(`Källindex klart: ${library.length} indexposter, ${localSources.length} lokala, ${onlineSources.length} onlinekällor, ${onlineMirrors.length} online-speglar.`);
 console.log(`Rapport skapad: ${path.relative(projectRoot, reportPath)}`);
 if (missingInIndex.length) {
   console.warn(`Filer saknas i index: ${missingInIndex.map((file) => file.name).join(", ")}`);
 }
 if (missingFiles.length) {
   console.warn(`Indexposter saknar fil: ${missingFiles.map((source) => source.filename).join(", ")}`);
+}
+if (missingFileOrUrl.length) {
+  console.warn(`Indexposter saknar fil/url: ${missingFileOrUrl.map((source) => source.id).join(", ")}`);
 }
 
 async function readSourceFiles() {
@@ -39,16 +48,20 @@ async function readSourceFiles() {
     .sort((a, b) => a.name.localeCompare(b.name, "sv"));
 }
 
-function buildReport(files, library, missingInIndex, missingFiles) {
+function buildReport(files, library, missingInIndex, missingFiles, missingFileOrUrl) {
   const now = new Date().toISOString().slice(0, 10);
   const byType = countBy(library, (source) => source.sourceType);
   const byStatus = countBy(library, (source) => source.extractionStatus);
+  const local = library.filter((source) => accessType(source) === "local_file");
+  const online = library.filter((source) => accessType(source) === "online_source");
+  const mirrors = library.filter((source) => accessType(source) === "online_mirror");
   const rows = library
     .slice()
-    .sort((a, b) => a.filename.localeCompare(b.filename, "sv"))
+    .sort((a, b) => sourceLabel(a).localeCompare(sourceLabel(b), "sv"))
     .map((source) => [
       source.id,
-      source.filename,
+      accessType(source),
+      source.filename || source.url || "-",
       source.sourceType,
       source.areas.join(", ") || "-",
       source.extractionPriority,
@@ -66,8 +79,12 @@ function buildReport(files, library, missingInIndex, missingFiles) {
     "",
     `- Filer i sources/: ${files.length}`,
     `- Indexposter: ${library.length}`,
+    `- Lokala källor: ${local.length}`,
+    `- Onlinekällor: ${online.length}`,
+    `- Online-speglar: ${mirrors.length}`,
     `- Filer som saknas i index: ${missingInIndex.length}`,
     `- Indexposter vars fil saknas: ${missingFiles.length}`,
+    `- Indexposter utan fil/url: ${missingFileOrUrl.length}`,
     "",
     "## Per sourceType",
     "",
@@ -85,10 +102,22 @@ function buildReport(files, library, missingInIndex, missingFiles) {
     "",
     ...(missingFiles.length ? missingFiles.map((source) => `- ${source.id}: ${source.filename}`) : ["- Inga."]),
     "",
+    "## Indexposter utan fil/url",
+    "",
+    ...(missingFileOrUrl.length ? missingFileOrUrl.map((source) => `- ${source.id}`) : ["- Inga."]),
+    "",
+    "## Onlinekällor",
+    "",
+    ...(online.length ? online.map((source) => `- ${source.id}: ${source.title} (${source.url})`) : ["- Inga."]),
+    "",
+    "## Online-speglar",
+    "",
+    ...(mirrors.length ? mirrors.map((source) => `- ${source.id}: ${source.title} -> ${source.mirrorForSourceId}`) : ["- Inga."]),
+    "",
     "## Index",
     "",
-    "| id | fil | sourceType | områden | prioritet | status | numeriska värden | direkt aktiv |",
-    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| id | accessType | fil/url | sourceType | områden | prioritet | status | numeriska värden | direkt aktiv |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ...rows.map((row) => `| ${row.map(escapeMd).join(" | ")} |`),
     ""
   ].join("\n");
@@ -110,4 +139,13 @@ function mapCounts(counts) {
 
 function escapeMd(value) {
   return String(value ?? "").replaceAll("|", "\\|");
+}
+
+function accessType(source) {
+  if (source.accessType) return source.accessType;
+  return source.url ? "online_source" : "local_file";
+}
+
+function sourceLabel(source) {
+  return source.filename || source.url || source.id || "";
 }

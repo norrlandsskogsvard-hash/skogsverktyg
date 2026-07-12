@@ -1,6 +1,8 @@
 # Skötselkollen källindex
 
-Detta index sammanfattar alla lokala filer i `sources/`. Alla poster är dokumentation eller kandidater för framtida extraktion. Ingen post får aktiveras direkt som appregel.
+Detta index sammanfattar lokala filer i `sources/` samt onlinekällor som ska versionskontrolleras vid behov. Alla poster är dokumentation eller kandidater för framtida extraktion. Ingen post får aktiveras direkt som appregel.
+
+## Lokala källor
 
 | Källa | Område | sourceType | Prioritet | Extraktionsstatus | Risk/begränsning |
 | --- | --- | --- | --- | --- | --- |
@@ -23,5 +25,18 @@ Detta index sammanfattar alla lokala filer i `sources/`. Alla poster är dokumen
 | Silvassist databas | gallring | decision_support_reference | low_technical | technical_index_only | Databasfil kräver separat teknisk extraktion. |
 | Basdata template | - | source_index_only | low | technical_index_only | Teknisk mall, används inte utan granskning. |
 | Document icon | - | source_index_only | low | technical_index_only | Ikonfil, inte skoglig källa. |
+
+## Online juridik
+
+| Källa | Område | sourceType | Prioritet | Extraktionsstatus | Risk/begränsning |
+| --- | --- | --- | --- | --- | --- |
+| Skogsvårdslag (1979:429), Riksdagen/SFS | juridik, föryngring, gallring, röjning, slutavverkning, hänsyn | law | high | online_indexed | Primär lagkälla. Ska kontrolleras online före juridisk uppdatering. Appen får inte ge juridiskt bindande besked. |
+| Skogsvårdslagen i kortversion, Skogsstyrelsen | juridik, tillsyn, föryngring, avverkning, hänsyn | legal_or_agency_guidance | high | online_indexed | Myndighetsvägledning. Ersätter inte aktuell lagtext från Riksdagen/SFS. |
+
+## Online speglar
+
+| Källa | Speglar | sourceType | Prioritet | Extraktionsstatus | Risk/begränsning |
+| --- | --- | --- | --- | --- | --- |
+| Yumpu - Gallringsmallar Norra Skogsägarna | norra-gallringsriktlinjer-gallringsmallar | regional_curve | medium | mirror_indexed | Endast spegel/textstöd. Lokal PDF är primär och spegeln får inte ensam aktivera eller verifiera värden. |
 
 Detaljerad maskinläsbar klassning finns i `data/source-library.json`. Genererad rapport skapas med `npm run index:sources` i `docs/generated/source-library-report.md`.
