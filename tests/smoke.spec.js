@@ -122,6 +122,9 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
       researchCanActivateCurves: knowledge.GALLRING_RESEARCH_SUPPORT_SUMMARY.canActivateCurves,
       clearingResearchRuleCount: knowledge.ROJNING_RESEARCH_SUPPORT_SUMMARY.ruleCount,
       clearingResearchCanChangePricing: knowledge.ROJNING_RESEARCH_SUPPORT_SUMMARY.canChangePricing,
+      bjorkLovRuleCount: knowledge.BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.ruleCount,
+      bjorkLovCanActivateCurves: knowledge.BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.canActivateCurves,
+      bjorkLovCanUseConiferTemplatesAsTruth: knowledge.BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.canUseConiferTemplatesAsTruth,
       t20Status: t20?.status,
       t20DataQuality: t20?.dataQuality,
       t20ReviewNeeded: t20?.reviewNeeded,
@@ -153,6 +156,9 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.researchCanActivateCurves).toBe(false);
   expect(summary.clearingResearchRuleCount).toBe(12);
   expect(summary.clearingResearchCanChangePricing).toBe(false);
+  expect(summary.bjorkLovRuleCount).toBe(12);
+  expect(summary.bjorkLovCanActivateCurves).toBe(false);
+  expect(summary.bjorkLovCanUseConiferTemplatesAsTruth).toBe(false);
   expect(summary.t20Status).toBe("active_pilot");
   expect(summary.t20DataQuality).toBe("pilot_example");
   expect(summary.t20ReviewNeeded).toBe(false);
@@ -277,7 +283,7 @@ test("Skötselkollen visar röjningsforskning för ungskog utan pris- eller kurv
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Röjning bör planeras");
   await expect(page.locator("body")).toContainText("Forskningsstöd: röjning påverkar diameterutveckling");
   await expect(page.locator("body")).toContainText("Röjningsstöd: blandbestånd eller högt lövinslag");
-  await expect(page.locator("body")).toContainText("Kontrollera snö-/vindrisk");
+  await expect(page.locator("body")).toContainText("markerad snö-/vindrisk");
   await expect(page.locator("body")).toContainText("ändrar inte prisberäkning");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogsskötselserien 6 Röjning");
@@ -317,9 +323,13 @@ test("Skötselkollen håller björk som eget spår", async ({ page }) => {
   await gotoRoute(page, "/skotselkollen");
   await fillSkotselkollenPilot(page);
   await page.locator('select[name="mainSpecies"]').selectOption("bjork");
-  await expect(page.locator("body")).toContainText(/Björkspår|Björkspåret/i);
+  await expect(page.locator("body")).toContainText(/LÃ¶vspÃ¥r|Lövspår/i);
+  await expect(page.locator("body")).toContainText(/eget kunskapsstÃ¶d|eget kunskapsstöd/i);
   await expect(page.locator("body")).toContainText(/Tall- eller granmall används inte som facit/i);
   await expect(page.locator("body")).toContainText(/Punkten visas utan tall-\/granmall som facit/i);
+  await expect(page.locator(".skotsel-chart__pilot-line")).toHaveCount(0);
+  await openSources(page);
+  await expect(page.locator("body")).toContainText(/SkogsskÃ¶tselserien 9|Skogsskötselserien 9/i);
   await expect(page.locator("body")).not.toContainText(/Tall- eller granmall används som facit för björk/i);
 });
 

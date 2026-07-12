@@ -30,6 +30,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-juridiska-kontrollflaggor.md",
   "docs/skotselkollen-gallring-forskningsstod.md",
   "docs/skotselkollen-rojning-forskningsstod.md",
+  "docs/skotselkollen-bjork-lov-forskningsstod.md",
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
@@ -89,6 +90,18 @@ export const ROJNING_RESEARCH_SUPPORT_SUMMARY = {
   note: "Forskningsstöd: röjning påverkar diameterutveckling, stamval, trädslagsfördelning och framtida kvalitet."
 };
 
+export const BJORK_LOV_RESEARCH_SUPPORT_SUMMARY = {
+  sourceId: "skogsskotselserien-9-bjork-al-asp",
+  dataFile: "data/bjork-lov-research-rules.json",
+  ruleCount: 12,
+  status: "reviewed_research_support",
+  activeUse: "explanation_and_field_support_only",
+  canActivateCurves: false,
+  canCreateHardThresholds: false,
+  canUseConiferTemplatesAsTruth: false,
+  note: "Forskningsstöd: björk, al och asp hanteras som eget lövspår med målbild, ljuskonkurrens, stamval, risker och hänsyn."
+};
+
 export const EVIDENCE_TYPE_WEIGHTS = {
   law: 100,
   research: 80,
@@ -135,7 +148,7 @@ export const SKOTSEL_SOURCE_RULES = [
     id: "birch-separate-track",
     type: "documentationOnly",
     area: "species",
-    species: "bjork",
+    species: ["bjork", "asp", "al"],
     region: "all",
     variable: "speciesTrack",
     valueRange: null,
@@ -143,7 +156,7 @@ export const SKOTSEL_SOURCE_RULES = [
     source: "Användarkrav för Skötselkollen v1",
     page: "",
     confidence: "medium",
-    note: "Björk hanteras som eget spår. Tall- eller granmall används inte som ersättning."
+    note: "Björk, asp och al hanteras som eget lövspår. Tall- eller granmall används inte som ersättning."
   }
 ];
 
@@ -318,6 +331,38 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
     confidence: "medium",
     limitations: ["Ändrar inte röjningskalkylens priser och skapar inga hårda stamantal- eller höjdgränser."],
     notes: ["Används som förklaring och fältstöd, inte som prisfacit."]
+  },
+  {
+    id: "research-skotselserien-9-bjork-lov",
+    type: "research",
+    source: "skogsskotselserien-9-bjork-al-asp",
+    sourceLabel: "Skogsskötselserien 9 Skötsel av björk, al och asp",
+    area: "broadleaf",
+    species: ["bjork", "asp", "al"],
+    region: "all",
+    appliesTo: ["curve_missing", "cleaning_plan", "cleaning_now", "delayed_cleaning"],
+    claim: "Björk, al och asp hanteras som eget lövspår med målbild, ljuskonkurrens, stamval, risker, naturhänsyn och fältkontroller.",
+    strength: "researchSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.research,
+    confidence: "medium",
+    limitations: ["Aktiverar inga lövkurvor, barrmallar, diagramvärden, juridiska beslut eller hårda produktionsgränser."],
+    notes: ["Tall- och granmallar används inte som facit för lövspåret."]
+  },
+  {
+    id: "research-skotselserien-9-blandbestand-lov",
+    type: "research",
+    source: "skogsskotselserien-9-bjork-al-asp",
+    sourceLabel: "Skogsskötselserien 9 Skötsel av björk, al och asp",
+    area: "broadleaf",
+    species: "blandat",
+    region: "all",
+    appliesTo: ["curve_missing", "cleaning_plan", "cleaning_now", "delayed_cleaning"],
+    claim: "Blandbestånd med löv kräver målbild och separat fältbedömning av konkurrens, skiktning, stamval, risker och hänsyn.",
+    strength: "researchSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.research,
+    confidence: "medium",
+    limitations: ["Ger kontrollflagga och förklaring, men ingen ny kurva eller barrmall som facit."],
+    notes: ["Avgör om målet är barr, bibehållen blandning, lövproduktion, natur eller vilt innan mall används."]
   },
   {
     id: "regional-t20-pilot",
@@ -641,8 +686,13 @@ export function buildEvidenceAssessment(input = {}, baseRecommendation = {}) {
 export function sourceNotesForInput(input = {}) {
   const notes = SKOTSEL_SOURCE_RULES.map((rule) => rule.note);
 
-  if (input.mainSpecies === "bjork") {
-    notes.push("Björkspåret saknar granskade numeriska källvärden i denna checkout.");
+  if (isBroadleafMainSpecies(input.mainSpecies)) {
+    notes.push("Lövspåret saknar granskade numeriska kurvvärden i denna checkout.");
+  }
+
+  if (isBroadleafMainSpecies(input.mainSpecies)) {
+    notes.push(BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.note);
+    notes.push("Skogsskötselserien 9 används som förklarings- och fältstöd för björk, al och asp; inte som ny lövkurva.");
   }
 
   if (input.mainSpecies === "blandat") {
@@ -662,9 +712,11 @@ export function sourceNotesForInput(input = {}) {
   notes.push(GALLRING_RESEARCH_SUPPORT_SUMMARY.note);
   notes.push("Skogsskötselserien 7 Gallring används som förklarings- och riskstöd, inte som ny gallringskurva.");
   notes.push(ROJNING_RESEARCH_SUPPORT_SUMMARY.note);
+  notes.push(BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.note);
+  notes.push("Björk/löv använder inte tall- eller granmall som facit.");
   notes.push("Skogsskötselserien 6 Röjning används som förklarings- och fältstöd, inte som prisregel eller hård stamantalsgräns.");
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
-  notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
+  notes.push("Björk/löv saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];
 }
 
@@ -679,7 +731,9 @@ function buildEvidenceItems(input, baseRecommendation) {
 
 function evidenceApplies(item, input, baseRecommendation) {
   const actionCode = baseRecommendation.actionCode || "";
-  const speciesOk = item.species === "all" || item.species === input.mainSpecies;
+  const speciesOk = item.species === "all" ||
+    item.species === input.mainSpecies ||
+    (Array.isArray(item.species) && item.species.includes(input.mainSpecies));
   const regionOk = item.region === "all" || regionMatches(item.region, input.region);
   const actionOk = item.appliesTo.includes("all") || item.appliesTo.includes(actionCode);
   return speciesOk && regionOk && actionOk;
@@ -727,8 +781,8 @@ function buildFieldWarnings(input, baseRecommendation) {
     warnings.push(warningItem("missing-curve", "Regional gallringskurva saknas för vald kombination.", "source"));
   }
 
-  if (input.mainSpecies === "bjork") {
-    warnings.push(warningItem("missing-birch-curve", "Björkkurva och granskad forskningsregel saknas i appen.", "source"));
+  if (isBroadleafMainSpecies(input.mainSpecies)) {
+    warnings.push(warningItem("missing-broadleaf-curve", "Lövkurva saknas i appen. Tall- eller granmall används inte som facit.", "source"));
   }
 
   return warnings;
@@ -751,7 +805,7 @@ function buildRegionWarnings(input, baseRecommendation) {
 function missingEvidence(input, baseRecommendation) {
   const missing = [];
 
-  if (baseRecommendation.actionCode === "curve_missing" && input.mainSpecies !== "bjork") {
+  if (baseRecommendation.actionCode === "curve_missing" && !isBroadleafMainSpecies(input.mainSpecies)) {
     const candidateClaim = baseRecommendation.sourceCandidate
       ? "Identifierad gallringsmall saknar verifierade kurvdata i appen."
       : "Regional gallringsmall saknas eller är inte inlagd för vald SI/trädslag.";
@@ -762,8 +816,8 @@ function missingEvidence(input, baseRecommendation) {
     missing.push(warningItem("missing-complete-curve", "Full digitaliserad gallringskurva saknas ännu.", "source"));
   }
 
-  if (input.mainSpecies === "bjork") {
-    missing.push(warningItem("missing-birch-research", "Björk saknar komplett källstödd kurva/forskningsregel i appen.", "source"));
+  if (isBroadleafMainSpecies(input.mainSpecies)) {
+    missing.push(warningItem("missing-broadleaf-curve-support", "Lövspåret saknar komplett källstödd kurva i appen.", "source"));
   }
 
   return missing;
@@ -837,9 +891,9 @@ function buildFieldSummary(input, baseRecommendation, supportingEvidence, confli
     };
   }
 
-  if (input.mainSpecies === "bjork") {
+  if (isBroadleafMainSpecies(input.mainSpecies)) {
     return {
-      assessment: legalPrefix + "Björkspåret kräver manuell fältbedömning eftersom björkkurva saknas." + regionSuffix,
+      assessment: legalPrefix + "Lövspåret kräver manuell fältbedömning eftersom granskad lövkurva saknas. Tall/gran används inte som facit." + regionSuffix,
       evidence,
       missing
     };
@@ -877,8 +931,8 @@ function shortEvidence(input, actionCode, supportingEvidence) {
     return withPracticeGuide(withSkogskunskap(["T20-exempel", "gallringsbeslutsstöd", "praktiskt fältstöd"], hasSkogskunskapTool, hasSkogskunskapGuidance), hasPracticeGuide);
   }
 
-  if (input.mainSpecies === "bjork") {
-    return withPracticeGuide(withSkogskunskap(["fältvärden", "björkspecifika kontrollpunkter"], hasSkogskunskapTool, hasSkogskunskapGuidance), hasPracticeGuide);
+  if (isBroadleafMainSpecies(input.mainSpecies)) {
+    return withPracticeGuide(withSkogskunskap(["fältvärden", "lövspecifika kontrollpunkter", "Skogsskötselserien 9"], hasSkogskunskapTool, hasSkogskunskapGuidance), hasPracticeGuide);
   }
 
   const hasResearch = supportingEvidence.some((item) => item.type === "research");
@@ -913,8 +967,8 @@ function fieldLegalPrefix(input, legalBlocks) {
 }
 
 function shortMissing(input, actionCode, conflictingEvidence, baseRecommendation = {}) {
-  if (input.mainSpecies === "bjork") {
-    return ["granskad björkkurva", "komplett björkregel"];
+  if (isBroadleafMainSpecies(input.mainSpecies)) {
+    return ["granskad lövkurva", "komplett lövregel"];
   }
 
   if (actionCode === "curve_reference_pilot") {
@@ -962,6 +1016,10 @@ function warningItem(id, claim, area) {
     limitations: ["Varningen kräver kontroll innan åtgärdsförslag används."],
     notes: []
   };
+}
+
+function isBroadleafMainSpecies(species) {
+  return ["bjork", "asp", "al"].includes(species);
 }
 
 function isLegalFlagged(input) {

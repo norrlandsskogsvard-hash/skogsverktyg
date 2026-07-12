@@ -36,7 +36,7 @@ const DEFAULT_DRAFT = {
 };
 
 const SELECTS = {
-  mainSpecies: [["tall", "Tall"], ["gran", "Gran"], ["bjork", "Björk"], ["blandat", "Blandat"]],
+  mainSpecies: [["tall", "Tall"], ["gran", "Gran"], ["bjork", "Björk"], ["asp", "Asp"], ["al", "Al"], ["blandat", "Blandat"]],
   region: [["norrland_kust", "Norrland kust"], ["norrland_inland", "Norrland inland"], ["hoglage_fjallnara", "Högläge/fjällnära"], ["okand", "Okänd"]],
   ageType: [["totalalder", "Totalålder"], ["brosthojdsalder", "Brösthöjdsålder"], ["osaker", "Osäker"]],
   standPhase: [["ungskog", "Ungskog"], ["gallringsskog", "Gallringsskog"], ["aldre_skog", "Äldre skog"], ["okand", "Okänd"]],
@@ -345,6 +345,17 @@ function evidenceSummaryTemplate(evidenceAssessment) {
 }
 
 function researchSupportTemplate(result) {
+  if (isLovResult(result) && isClearingAction(result.actionCode)) {
+    return "<p class='card__text'>Forskningsstöd: röjning påverkar diameterutveckling, stamval, trädslagsfördelning och framtida kvalitet.</p>" +
+      "<p class='card__text'>Lövspår: eget kunskapsstöd används. Tall/gran-mallar används inte som facit.</p>" +
+      "<p class='card__text'>Skogsskötselserien 9 används för målbild, stamval, ljuskonkurrens, blandning, skador/risk och naturvärden. Det ändrar inte priser, aktiverar inga lövkurvor och skapar inga hårda gränser.</p>";
+  }
+
+  if (isLovResult(result)) {
+    return "<p class='card__text'>Lövspår: eget kunskapsstöd används. Tall/gran-mallar används inte som facit.</p>" +
+      "<p class='card__text'>Skogsskötselserien 9 används för målbild, stamval, ljuskonkurrens, blandning, skador/risk och naturvärden. Det aktiverar inga lövkurvor, diagramvärden, juridiska beslut eller hårda produktionsgränser.</p>";
+  }
+
   if (isClearingAction(result.actionCode)) {
     return "<p class='card__text'>Forskningsstöd: röjning påverkar diameterutveckling, stamval, trädslagsfördelning och framtida kvalitet.</p>" +
       "<p class='card__text'>Används för förklaringar och fältkontroller. Det ändrar inte priser, aktiverar inga kurvor och skapar inga hårda stamantal-/höjdgränser.</p>";
@@ -352,6 +363,17 @@ function researchSupportTemplate(result) {
 
   return "<p class='card__text'>Forskningsstöd: gallring påverkar dimensionsutveckling, risker och beståndets framtida struktur.</p>" +
     "<p class='card__text'>Används för förklaringar, risker och fältkontroller. Det aktiverar inga kurvor, diagramvärden, juridiska beslut eller hårda produktionsgränser.</p>";
+}
+
+function isLovResult(result) {
+  const text = [
+    result?.why,
+    result?.recommendationDirection,
+    result?.chartData?.note,
+    ...(result?.warnings || []),
+    ...(result?.fieldChecks || [])
+  ].filter(Boolean).join(" ");
+  return /Lövspår|LÃ¶vspÃ¥r|Björk|bjÃ¶rk|löv|lÃ¶v|\basp\b|\bal\b/i.test(text);
 }
 
 function compactList(title, values) {

@@ -28,7 +28,9 @@ Kommande steg:
 - .21 aktiverar inga nya kurvor, digitaliserar inga diagram och skapar inga hårda produktionsgränser.
 - .22 lägger in röjningsforskning från Skogsskötselserien 6 som förklarings- och fältstöd.
 - .22 lägger inte till nya prisregler och skapar inga hårda stamantal-/höjdgränser.
-- Nästa steg kan vara ett separat björk-/lövspår från Skogsskötselserien 9.
+- .23 lÃ¤gger in bjÃ¶rk/lÃ¶v som eget spÃ¥r frÃ¥n SkogsskÃ¶tselserien 9.
+- .23 aktiverar inga lÃ¶vkurvor, anvÃ¤nder inga barrmallar som facit fÃ¶r bjÃ¶rk/lÃ¶v och skapar inga hÃ¥rda produktionsgrÃ¤nser.
+- NÃ¤sta steg kan vara bonitering/SI frÃ¥n AC/BD eller fÃ¶rdjupade skador/naturhÃ¤nsyn.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD
@@ -47,6 +49,8 @@ Kommande steg:
 5. Skogsskötselserien 9 Björk/al/asp
    - Björkspår, lövröjning och lövgallring.
    - Får inte blandas med tall-/granmall.
+   - .23 används endast som förklaring, fältkontroll och riskstöd.
+   - Inga lövkurvor eller diagramvärden aktiveras i detta steg.
 
 6. Naturhänsyn, skador, vilt och kulturmiljö
    - Risk- och kontrollflaggor.

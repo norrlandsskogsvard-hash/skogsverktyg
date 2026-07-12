@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-bjork-lov.1 - 2026-07-12
+
+### Added - Bjork/lov-stod
+
+- Bjork/lov-stod fran Skogsskotselserien 9 har lagts till.
+- Bjork, al och asp hanteras som eget skotselspar.
+- Tall/gran-mallar kan inte anvandas som facit for lovsparet.
+- Lovstodet kan inte aktivera kurvor eller skapa harda gransvarden.
+- Validering for bjork/lov-stod har lagts till.
+- PWA-cache hojd till bjork-lov.1.
+
 ## v2.0.0-alpha.1-rojning-research.1 - 2026-07-12
 
 ### Added - Forskningsstöd för röjning

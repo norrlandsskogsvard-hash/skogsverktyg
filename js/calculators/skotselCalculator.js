@@ -1,6 +1,7 @@
 import { estimateSiteIndex } from "./siteIndexCalculator.js";
 import {
   buildEvidenceAssessment,
+  BJORK_LOV_RESEARCH_SUPPORT_SUMMARY,
   findGallringZone,
   findThinningSourceCandidate,
   GALLRING_RESEARCH_SUPPORT_SUMMARY,
@@ -111,6 +112,25 @@ export function calculateSkotselRecommendation(input = {}) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
   }
 
+  const bjorkLovResearch = buildBjorkLovResearchAssessment(normalized, quickAssessment);
+  quickAssessment.fieldChecks = unique([
+    ...bjorkLovResearch.fieldChecks,
+    ...quickAssessment.fieldChecks
+  ]);
+  quickAssessment.warnings.push(...bjorkLovResearch.warnings);
+  quickAssessment.sourceNotes = unique([
+    ...(quickAssessment.sourceNotes || []),
+    ...bjorkLovResearch.sourceNotes
+  ]);
+
+  if (bjorkLovResearch.explanation) {
+    quickAssessment.why = quickAssessment.why + " " + bjorkLovResearch.explanation;
+  }
+
+  if (bjorkLovResearch.lowersConfidence) {
+    quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
+  }
+
   if (legal.hasConservationFlag) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
     quickAssessment.fieldChecks.push("Kontrollera juridiska krav och hänsyn innan produktionsåtgärd skrivs som huvudförslag.");
@@ -207,18 +227,18 @@ function assessQuickCurve(input, siteIndexEstimate) {
     };
   }
 
-  if (input.mainSpecies === "bjork") {
+  if (isLovSpecies(input.mainSpecies)) {
     return {
       actionCode: "curve_missing",
       confidence: "low",
-      why: "Björkspår: punkten kan visas, men kurvunderlag saknas eller är ofullständigt i appens kunskapsbas.",
-      recommendationDirection: "Kontrollera kvalitet, vitala huvudstammar och mål med beståndet innan gallring föreslås.",
+      why: "Lövspår: punkten kan visas, men kurvunderlag saknas eller är ofullständigt i appens kunskapsbas.",
+      recommendationDirection: "Kontrollera kvalitet, vitala huvudstammar, ljuskonkurrens och mål med beståndet innan gallring föreslås.",
       fieldChecks: [
-        "Bedöm om målet är björkproduktion, barrföryngring under björk eller naturhänsyn.",
+        "Bedöm om målet är lövproduktion, barrföryngring under löv, blandning eller naturhänsyn.",
         "Kontrollera antal raka, vitala huvudstammar.",
-        "Kontrollera kronutrymme, röta, krokighet och snö-/stormskador."
+        "Kontrollera kronutrymme, ljuskonkurrens, röta, krokighet, vilt och snö-/stormskador."
       ],
-      warnings: ["Tall- eller granmall används inte som facit för björk."]
+      warnings: ["Tall- eller granmall används inte som facit för lövspåret."]
     };
   }
 
@@ -534,8 +554,8 @@ function buildNorraTextRuleAssessment(input, assessment) {
     lowersConfidence = true;
   }
 
-  if (input.mainSpecies === "bjork" || input.mainSpecies === "blandat") {
-    warnings.push("Norra tall-/granmall ska inte användas som facit för björk eller blandbestånd.");
+  if (isLovSpecies(input.mainSpecies) || input.mainSpecies === "blandat") {
+    warnings.push("Norra tall-/granmall ska inte användas som facit för lövspår eller blandbestånd.");
     lowersConfidence = true;
   }
 
@@ -584,7 +604,7 @@ function buildNorraTextRuleAssessment(input, assessment) {
 }
 
 function buildGallringResearchAssessment(input, assessment) {
-  if (!isGallringResearchRelevant(assessment)) {
+  if (!isGallringResearchRelevant(input, assessment)) {
     return emptyResearchAssessment();
   }
 
@@ -637,7 +657,7 @@ function buildGallringResearchAssessment(input, assessment) {
     lowersConfidence = true;
   }
 
-  if (input.mainSpecies === "bjork") {
+  if (isLovSpecies(input.mainSpecies)) {
     fieldChecks.push("Björk/löv: använd inte tall- eller granmall som facit; välj separat lövspår när källstöd finns.");
   }
 
@@ -688,7 +708,7 @@ function buildRojningResearchAssessment(input, assessment) {
     fieldChecks.push("Granungskog: kontrollera röta, rotrisk och skador innan åtgärd planeras.");
   }
 
-  if (input.mainSpecies === "bjork") {
+  if (isLovSpecies(input.mainSpecies)) {
     warnings.push("Röjningsstöd: björk/löv kräver egen målbild och ska inte styras av tall- eller granmall som facit.");
     priorityFieldChecks.push("Björk/löv: bestäm om målet är lövproduktion, barrföryngring, naturhänsyn eller blandning.");
     lowersConfidence = true;
@@ -735,12 +755,68 @@ function buildRojningResearchAssessment(input, assessment) {
   };
 }
 
-function isGallringResearchRelevant(assessment) {
+function buildBjorkLovResearchAssessment(input, assessment) {
+  if (!isBjorkLovResearchRelevant(input, assessment)) {
+    return emptyResearchAssessment();
+  }
+
+  const warnings = [
+    "Lövspår: eget kunskapsstöd används. Tall/gran-mallar används inte som facit."
+  ];
+  const fieldChecks = [
+    "Lövspår: kontrollera målbild innan åtgärd - lövproduktion, barr, bibehållen blandning, natur eller vilt.",
+    "Kontrollera stamval: vitalitet, kvalitet, skador, rakhet, krona och utvecklingsbarhet.",
+    "Kontrollera ljuskonkurrens och grönkrona; björk, asp och al är pionjärträdslag med eget skötselbehov.",
+    "Kontrollera skador/risk: vilt, röta, svamp, insekter, snö-/vindrisk och konkurrensskador.",
+    "Kontrollera naturvärden och hänsyn separat från produktionsmålet."
+  ];
+  const sourceNotes = [
+    BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.note,
+    "Skogsskötselserien 9 används för förklaring och fältkontroll. Den aktiverar inga lövkurvor, barrmallar, diagramvärden, juridiska beslut eller hårda produktionsgränser."
+  ];
+  let lowersConfidence = false;
+
+  if (input.mainSpecies === "asp") {
+    fieldChecks.push("Asp: kontrollera rotskott, vilt/skador, grönkrona, kvalitet, naturvärden och om beståndet är vanlig asp eller hybridasp.");
+  }
+
+  if (input.mainSpecies === "al") {
+    fieldChecks.push("Al: kontrollera ståndort, fukt, kvävefixering, skottskjutning, skador och om beståndet är klibbal eller gråal.");
+  }
+
+  if (input.mainSpecies === "blandat" || (input.birchShare !== null && input.birchShare > 30)) {
+    warnings.push("Lövinslag/blandbestånd: kontrollera om målet är barr, bibehållen blandning, lövproduktion, natur eller vilt innan mall används.");
+    fieldChecks.push("Blandbestånd: bedöm trädslag var för sig och använd inte tall-/granmall som facit för lövdelen.");
+    lowersConfidence = true;
+  }
+
+  if (input.damage === "tydliga" || input.damage === "svara" || input.vitality === "svag" || input.snowWindRisk === "ja") {
+    lowersConfidence = true;
+  }
+
+  return {
+    explanation: "Lövstödet från Skogsskötselserien 9 används som förklarings- och fältstöd, inte som ny kurva eller barrfacit.",
+    warnings,
+    fieldChecks,
+    sourceNotes,
+    lowersConfidence
+  };
+}
+
+function isGallringResearchRelevant(input, assessment) {
+  if (isLovSpecies(input.mainSpecies)) return false;
   return ["curve_reference_pilot", "curve_missing", "final_felling_check", "curve_monitor", "thinning_soon", "thinning_now", "late_thinning_risk"].includes(assessment.actionCode);
 }
 
 function isRojningResearchRelevant(input, assessment) {
   return input.standPhase === "ungskog" || ["cleaning_plan", "cleaning_now", "delayed_cleaning"].includes(assessment.actionCode);
+}
+
+function isBjorkLovResearchRelevant(input, assessment) {
+  return isLovSpecies(input.mainSpecies) ||
+    input.mainSpecies === "blandat" ||
+    (input.birchShare !== null && input.birchShare > 30) ||
+    (assessment.actionCode === "curve_missing" && isLovSpecies(input.mainSpecies));
 }
 
 function emptyResearchAssessment() {
@@ -819,8 +895,8 @@ function chartNote(actionCode, input, siteIndexEstimate, curveReference, sourceC
   if (isClearingAction(actionCode)) {
     return "Röjningsspår: forskningsstödet visas som fältkontroll. Ingen gallringskurva används som röjningsfacit.";
   }
-  if (input.mainSpecies === "bjork") {
-    return "Björkspår: kurvunderlag saknas eller är ofullständigt. Punkten visas utan tall-/granmall som facit.";
+  if (isLovSpecies(input.mainSpecies)) {
+    return "Lövspår: kurvunderlag saknas eller är ofullständigt. Punkten visas utan tall-/granmall som facit.";
   }
   if (actionCode === "curve_reference_pilot") {
     return "Källstött T20-exempel finns. Jämför mot full gallringsmall innan åtgärd.";
@@ -898,6 +974,10 @@ function isPilotCurveStatus(status) {
 
 function isClearingAction(actionCode) {
   return ["cleaning_plan", "cleaning_now", "delayed_cleaning"].includes(actionCode);
+}
+
+function isLovSpecies(species) {
+  return ["bjork", "asp", "al"].includes(species);
 }
 
 function toNumber(value) {
