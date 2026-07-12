@@ -9,6 +9,9 @@ import {
 } from "./norraThinningValues.js";
 
 export const SKOTSEL_SOURCE_DOCUMENTS = [
+  "docs/skotselkollen-kallbibliotek.md",
+  "docs/skotselkollen-kallindex.md",
+  "docs/skotselkollen-extraktionsplan.md",
   "docs/skotselkollen-kallmatris.md",
   "docs/skotselkollen-beslutsmodell.md",
   "docs/skotselkollen-lagkontroll.md",
@@ -26,6 +29,14 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
+
+export const SOURCE_LIBRARY_SUMMARY = {
+  status: "indexed_local_library",
+  indexedSources: 19,
+  dataFile: "data/source-library.json",
+  canActivateDirectly: false,
+  note: "Lokalt källbibliotek finns, värden aktiveras först efter granskning."
+};
 
 export const EVIDENCE_TYPE_WEIGHTS = {
   law: 100,
@@ -544,6 +555,7 @@ export function sourceNotesForInput(input = {}) {
   notes.push("Heureka används som referens för långsiktigt scenario- och beslutsstöd, inte som direkt fältgräns.");
   notes.push("Skogskunskap används som forskningsnära verktygs- och vägledningsstöd, inte som ensam facitkälla.");
   notes.push("Norra Skog 2024 används som praktisk skötselmall och skogsägarstöd, inte som facit eller regional kurva.");
+  notes.push(SOURCE_LIBRARY_SUMMARY.note);
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
   notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];

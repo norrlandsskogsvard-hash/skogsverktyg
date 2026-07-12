@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-source-library.1 - 2026-07-12
+
+### Added - Lokalt källbibliotek
+
+- Lokalt källbibliotek för Skötselkollen har indexerats.
+- Source-library.json har skapats.
+- Script för källindex och källvalidering har lagts till.
+- Extraktionsplan för gallring, röjning, bonitering, björk/löv och hänsyn har skapats.
+- PWA-cache höjd till source-library.1.
+
 ## v2.0.0-alpha.1-skotselkollen.16 - 2026-07-08
 
 ### Added - Norra batch 01

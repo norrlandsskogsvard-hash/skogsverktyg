@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "import:norra-thinning": "node scripts/import-norra-thinning-values.mjs",
+    "index:sources": "node scripts/index-source-library.mjs",
+    "validate:sources": "node scripts/validate-source-library.mjs",
     "validate:thinning-data": "node scripts/validate-thinning-data.mjs",
-    "test": "npm run validate:thinning-data && playwright test",
+    "test": "npm run validate:sources && npm run validate:thinning-data && playwright test",
     "test:headed": "playwright test --headed",
     "test:update": "playwright test --update-snapshots"
   },

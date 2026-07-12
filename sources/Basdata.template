@@ -1,0 +1,61 @@
+400,Ståndortsdata för objekt :10000: Ange identifikationsnummer för aktuellt bestånd
+001,TYP AV INDATA            :00001: 1=EGNA DATA FRAN FORDELNINGSFUKTIONER (WEBBVERSION), 2=TESTSNURRA
+002,Antal provytor(r=10)     :00010: Programmet är dimensionerat för 10 ytor so far
+003,Antal 5-års perioder     :00000: Prognoslängd, antal 5-års perioder
+007,Latitud, 1/10 grad N     :00570: !tas senare från karta
+008,Altitud, m               :00300: !tas senare från karta
+010,Direkt länskod           :00000: Koder enligt RIS; 0=kartdata inbuff(33) och inbuff(34) måste sättas
+033,landsdel,regioner kod    :00003: Koder 1-3 enl karta: regioner;1=norra,2=mellan, 3=södra 
+034,landsdel kod (Söderberg) :00001: Koder 1-3 enl karta: SOST & REG5; 1=övriga sv,2=SOST, 3=REG5 
+012,Markvegetationstyp       :00013: Koder enligt RIS; 13=Blåbär
+013,Markfuktighet,           :00002: Koder eenligt RIS;1=torr2=frisk 3=frisk-fuktig 4=fuktig 5=blöt
+014,Rörligt Markvatten,      :00001 :Koder nligt RIS;1=saknas-sällan,2=kortare,3=längre perioder
+015,Bottenskiktstyp          :00006: Koder enligt RIS; 6=friskmosstyp
+016,Jordartens textur        :00004: Koder enligt RIS; 4=sandig moig morän
+017,Avstånd till kust, km    :00100: ! tas senare från karta 
+018,lokalklimatiskt område   :00000: Koder enligt RIS; 0=övriga Sverige,1-3 (M1-M3),4-6(K1-K3),tas senare från karta 
+019,Exposition               :00000: Koder enligt RIS; 0=plan mark
+444,STICKVÄGSDATA            :00000: FÖR AKTUELLT BESTÅND
+340,Stickvägsberdd, dm       :00000: SÄTT 0 FÖR 100 % SELEKTIV GALLRING "DVS EJ STICKVÄGAR"
+341,Stickvägsavstånd, dm     :00000:
+342,Slingerkorrektion,       :00075: 1/100, DVS 0.75 ANGES SOM 00075 ; 100=ingen slingerkorrektion
+343,Stickvagsnara trad, KAT1 :00000: (dm)
+344,Stickvagsnara trad, KAT2 :00000: (dm)
+080,Gödslingshistorik, utgl  :00000: 0=ogödslat, 1=gödslat 
+117,Gallringshistorik, utgl  :00000: 0=ogallrat,1=nygallrat(inom 5 år),2=gall 5-10 år sedan,3=gallrat >10 år
+555,BESTÅNDSDATA             :00000: FÖR AKTUELLT BESTÅND
+004,Bonitetsvisande trädslag,:00002: 1=tall, 2=gran
+005,STÅNDORTSINDEX,dm        :00000: STÅNDORTSINDEX FÖR BONITETSVISANDE TRÄDSLAG,DM
+048,ÖVRE HÖJD                :00000: Övrehöjden , dm (SÄTT 0 OM DEN SAKNAS)
+049,ÖVRE ÅLDER               :00000: Övre höjdsträdens brh.ålder, 1/10 år
+052,Grundytevägd totalålder  :00000:
+131,Stamantal tall           :00000: antal/ha   
+133,Grundyta  tall           :00000: dm2/ha
+151,Stamantal gran           :00000: antal/ha
+153,Grundyta  gran           :00000: dm2/ha
+171,Stamantal björk          :00000: antal/ha
+173,Grundyta  björk          :00000: dm2/ha
+666, GALLRINGSDATA           :00000: AKTUELLT BESTÅND
+115, ANTAL GALLRINGAR        :00000: FÖR AKTUELLT BESTÅND
+361, GALLRING 1              :00000: GRUNDYTA (m2/ha),STYRKA (%),FORM, KOD FORM 0=LIKFORM 1=LÅG 2=HÖG              :       
+362, GALLRING 2              :00000:                                   
+363, GALLRING 3              :00000:                   
+364, GALLRING 4              :00000:                     
+365, GALLRING 5              :00000:                     
+366, GALLRING 6              :00000:                    
+367, TRÄDSLAGS PRIORITET     :00001: VID GALLRING: BARR/LÖV 0=LIKA 1=GALLRA BI-TRÄDSLAGEN HÅRDARE (DVS. TRÄDSLAG EJ LIKA MED BONITETSVISANDE TRÄDSLAG) 
+368, MINIMIDIMENSION         :00080: REDOVISNING AV GALLRINGSUTTAGET UNDER SPECIFICERAD MINIMIDIMENSION, MM (less than) 
+370,MASSASLUTENHET, 1/10     :00010: SLUTENHET, INGÅNGSVÄRDE FÖR GRUNDYTA ENL HÄGGLUND&ELFVING
+380, KORR GALL.REAKTION -35  :00100: SLAVBUFFAR FÖR INSATTA VIP PERSONER, 107 GER KORR=1.07*Q !ej aktiverad
+381, KORR GALL.REAKTION 35+  :00100: SLAVBUFFAR FÖR INSATTA VIP PERSONER                      !ej aktiverad
+382, KORR FORMHÖJD   WT -35  :00010: GRUNDYTEKORR I FORMHÖJDSFUNK AKTIVERAS 0-35 ÅR EFTER GALLRING OM AKTUELL GRY > GRY F GALL, GRY=AKTUELL GRY*WT+GRY F GALL*(1.00-WT)
+383, KORR FORMHÖJD      35+  :00100: FORMHÖJDSKORREKTION AKTIVERAS 35 ÅR EFTER GALLRING,101 GER KORR=1.01*fh !ej aktiverad
+390,RESTEFFEKT GALLRING      :00001: 0=IGEN, 1=BENGT JONSSONS RESTVÄRDE KORRIGERAT,2=JONSSON AVTAGANDE
+391,SKA TRÄDDATA SPARAS      :00000: 0=NEJ,1=JA TSL,DIAM OCH KATEGORI SPARAS PÅ FIL FÖR SENARE ANALYSER
+392,UTSKRIFT KATEGORIDATA    :00000: 0=NEJ,1=JA STHA DGV OCH GRUNDYTA INOM RESP KATEGORI SPARAS PÅ FIL 
+395,FUNKTIONSUTJÄMNING,AKL1&2:00001: 0=INGEN,1 = MEDELTAL AV FUNKTIONER FÖR  AKL1 OCH AKL 2 UNDER 2-4 PERIODER
+396,Val av mortalitetrutiner :00003: 0=INGEN AVGÅNG, 1:Fridman & Sthål; 2: Söderberg 3: SÖDERBERG & BENGTSSON 4:BENGTSSON
+397,Beräkning av Weibullförd.:00002: 1: VIA SPECIFICERAD VC(dBH), 2: VIA BESTÅNDSDATA OCH INDIKATORVARIABLER VC(DBH)
+398,Val av volymberäkning    :00001: 1: Söderbergs formhfunk, 2:Brandel funktyp(100-01)
+399,Max Grundyteavvikelse,%  :00001: Den enskilda provytans maximala avvikelse från beståndsgrundytan i utgångsläget
+000,Slut på indatafilen      :00000: 
