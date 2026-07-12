@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-gallring-research.1 - 2026-07-12
+
+### Added - Forskningsstöd för gallring
+
+- Forskningsstöd för gallring från Skogsskötselserien 7 har lagts till.
+- Stödet används för förklaringar, risker och fältkontroller.
+- Forskningsstödet kan inte aktivera kurvor eller skapa hårda gränsvärden.
+- Validering för gallringsforskning har lagts till.
+- PWA-cache höjd till gallring-research.1.
+
 ## v2.0.0-alpha.1-legal-flags.1 - 2026-07-12
 
 ### Added - Juridiska kontrollflaggor

@@ -3,6 +3,7 @@ import {
   buildEvidenceAssessment,
   findGallringZone,
   findThinningSourceCandidate,
+  GALLRING_RESEARCH_SUPPORT_SUMMARY,
   LEGAL_CONTROL_RULES_SUMMARY,
   NORRA_TEXT_RULES_SUMMARY,
   sourceNotesForInput
@@ -68,6 +69,25 @@ export function calculateSkotselRecommendation(input = {}) {
   ]);
 
   if (norraTextRules.lowersConfidence) {
+    quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
+  }
+
+  const gallringResearch = buildGallringResearchAssessment(normalized, quickAssessment);
+  quickAssessment.fieldChecks = unique([
+    ...gallringResearch.fieldChecks,
+    ...quickAssessment.fieldChecks
+  ]);
+  quickAssessment.warnings.push(...gallringResearch.warnings);
+  quickAssessment.sourceNotes = unique([
+    ...(quickAssessment.sourceNotes || []),
+    ...gallringResearch.sourceNotes
+  ]);
+
+  if (gallringResearch.explanation) {
+    quickAssessment.why = quickAssessment.why + " " + gallringResearch.explanation;
+  }
+
+  if (gallringResearch.lowersConfidence) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
   }
 
@@ -522,6 +542,77 @@ function buildNorraTextRuleAssessment(input, assessment) {
   return {
     warnings,
     fieldChecks,
+    sourceNotes,
+    lowersConfidence
+  };
+}
+
+function buildGallringResearchAssessment(input, assessment) {
+  const warnings = [];
+  const priorityFieldChecks = [];
+  const fieldChecks = [
+    "Forskningsstöd: kontrollera gallringsform, gallringsstyrka, skador och beståndets framtida struktur."
+  ];
+  const sourceNotes = [
+    GALLRING_RESEARCH_SUPPORT_SUMMARY.note,
+    "Forskningsstödet används för förklaring, risk och fältkontroll. Det aktiverar inga kurvor, diagramvärden, juridiska beslut eller hårda gränser."
+  ];
+  let lowersConfidence = false;
+
+  if (isLikelyFirstThinning(input, assessment)) {
+    fieldChecks.push("Första gallring: kontrollera urval, stickvägar, stabilitet och framtida huvudstammar i fält.");
+  }
+
+  if (assessment.actionCode === "curve_reference_pilot") {
+    fieldChecks.push("Väg T20-jämförelsen mot fältbilden: gallring kan gynna dimensionsutveckling utan att vara ett exakt facit.");
+  }
+
+  if (input.snowWindRisk === "ja") {
+    warnings.push("Forskningsstöd: markerad snö-/vindrisk kräver kontroll av stabilitet, gallringsstyrka och exponering.");
+    priorityFieldChecks.push("Kontrollera storm- och snörisk innan gallringsstyrka föreslås.");
+    lowersConfidence = true;
+  }
+
+  if (input.damage === "tydliga" || input.damage === "svara") {
+    warnings.push("Forskningsstöd: tydliga skador kan öka risken för rotröta, svamp, insekter och tillväxtnedsättning.");
+    priorityFieldChecks.push("Kontrollera mekaniska skador, röta, svamp och insektsrisk i skadade partier.");
+    lowersConfidence = true;
+  }
+
+  if (input.bearing === "svag_blot") {
+    warnings.push("Forskningsstöd: svag eller blöt bärighet ökar behovet av kontroll av stickvägar och körskador.");
+    priorityFieldChecks.push("Planera stickvägar och körning så att skador på stammar och rötter begränsas.");
+    lowersConfidence = true;
+  }
+
+  if (input.vitality === "svag") {
+    warnings.push("Forskningsstöd: svag vitalitet gör att skade- och svamprisk behöver bedömas innan gallringsförslag används.");
+    fieldChecks.push("Kontrollera kronstatus, vitalitet och synliga svampangrepp.");
+    lowersConfidence = true;
+  }
+
+  if (input.mainSpecies === "blandat" || (input.birchShare !== null && input.birchShare > 30)) {
+    warnings.push("Forskningsstöd: blandbestånd och högt lövinslag kräver särskild fältbedömning av trädslag, kvalitet och målbild.");
+    fieldChecks.push("Blandbestånd: bedöm trädslag var för sig och använd inte tall-/granmall som facit.");
+    lowersConfidence = true;
+  }
+
+  if (input.mainSpecies === "bjork") {
+    fieldChecks.push("Björk/löv: använd inte tall- eller granmall som facit; välj separat lövspår när källstöd finns.");
+  }
+
+  if (input.mainSpecies === "gran") {
+    fieldChecks.push("Gran: kontrollera rotröta, körskador och stormkänslighet särskilt noga.");
+  }
+
+  if (input.mainSpecies === "tall") {
+    fieldChecks.push("Tall: kontrollera framtidsträd, kronutveckling, snöskador och insektstecken i fält.");
+  }
+
+  return {
+    explanation: "Forskningsstödet används som förklarings- och riskstöd, inte som ny kurva.",
+    warnings,
+    fieldChecks: unique([...priorityFieldChecks, ...fieldChecks]),
     sourceNotes,
     lowersConfidence
   };

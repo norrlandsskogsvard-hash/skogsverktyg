@@ -28,6 +28,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-norra-importflode.md",
   "docs/skotselkollen-norra-textregler.md",
   "docs/skotselkollen-juridiska-kontrollflaggor.md",
+  "docs/skotselkollen-gallring-forskningsstod.md",
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
@@ -63,6 +64,17 @@ export const LEGAL_CONTROL_RULES_SUMMARY = {
   activeUse: "legal_control_flags_only",
   canMakeLegalDecision: false,
   note: "Juridiska kontrollflaggor är inlästa som kontrollstöd, inte juridiskt besked."
+};
+
+export const GALLRING_RESEARCH_SUPPORT_SUMMARY = {
+  sourceId: "skogsskotselserien-7-gallring",
+  dataFile: "data/gallring-research-rules.json",
+  ruleCount: 12,
+  status: "reviewed_research_support",
+  activeUse: "explanation_and_risk_support_only",
+  canActivateCurves: false,
+  canCreateHardThresholds: false,
+  note: "Forskningsstöd: gallring påverkar dimensionsutveckling, risker och beståndets framtida struktur."
 };
 
 export const EVIDENCE_TYPE_WEIGHTS = {
@@ -262,6 +274,22 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
     confidence: "medium",
     limitations: ["Ingen komplett art- och SI-specifik forskningsmatris är inlagd i appen ännu."],
     notes: ["Väger tyngre än praktiska mallar men ger inte ensam en exakt kurvstatus."]
+  },
+  {
+    id: "research-skotselserien-7-gallring",
+    type: "research",
+    source: "skogsskotselserien-7-gallring",
+    sourceLabel: "Skogsskötselserien 7 Gallring",
+    area: "thinning",
+    species: "all",
+    region: "all",
+    appliesTo: ["curve_reference_pilot", "curve_missing", "final_felling_check"],
+    claim: "Forskningsstödet används för gallringens syfte, styrka, gallringsform, dimensionsutveckling och riskkontroller.",
+    strength: "researchSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.research,
+    confidence: "medium",
+    limitations: ["Aktiverar inga kurvor, diagramvärden, juridiska beslut eller hårda produktionsgränser."],
+    notes: ["Används som förklaring och risk-/fältstöd, inte som facit."]
   },
   {
     id: "regional-t20-pilot",
@@ -603,6 +631,8 @@ export function sourceNotesForInput(input = {}) {
   notes.push(NORRA_TEXT_RULES_SUMMARY.note);
   notes.push("Norra textregler används endast som kontrollflaggor och fältstöd, inte som nya kurvor.");
   notes.push(LEGAL_CONTROL_RULES_SUMMARY.note);
+  notes.push(GALLRING_RESEARCH_SUPPORT_SUMMARY.note);
+  notes.push("Skogsskötselserien 7 Gallring används som förklarings- och riskstöd, inte som ny gallringskurva.");
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
   notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];

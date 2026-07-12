@@ -118,6 +118,8 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
       activeCount: active.length,
       activeCodes: active.map((item) => item.speciesCode + item.siteIndex),
       curveCount: knowledge.THINNING_CURVES.length,
+      researchRuleCount: knowledge.GALLRING_RESEARCH_SUPPORT_SUMMARY.ruleCount,
+      researchCanActivateCurves: knowledge.GALLRING_RESEARCH_SUPPORT_SUMMARY.canActivateCurves,
       t20Status: t20?.status,
       t20DataQuality: t20?.dataQuality,
       t20ReviewNeeded: t20?.reviewNeeded,
@@ -145,6 +147,8 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.activeCount).toBe(1);
   expect(summary.activeCodes).toEqual(["T20"]);
   expect(summary.curveCount).toBe(1);
+  expect(summary.researchRuleCount).toBe(12);
+  expect(summary.researchCanActivateCurves).toBe(false);
   expect(summary.t20Status).toBe("active_pilot");
   expect(summary.t20DataQuality).toBe("pilot_example");
   expect(summary.t20ReviewNeeded).toBe(false);
@@ -177,6 +181,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Juridiska kontrollflaggor");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
+  await expect(page.locator("body")).toContainText("Forskningsstöd");
+  await expect(page.locator("body")).toContainText("Skogsskötselserien 7 Gallring");
   await expect(page.locator("body")).toContainText("Norra textregler");
   await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
   await expect(page.locator("body")).toContainText("Norra Skog 2024");
@@ -209,11 +215,40 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Juridiska kontrollflaggor");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
+  await expect(page.locator("body")).toContainText("Forskningsstöd");
+  await expect(page.locator("body")).toContainText("Skogsskötselserien 7 Gallring");
   await expect(page.locator("body")).toContainText("Norra textregler");
   await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
   await expect(page.locator("body")).toContainText("Norra Skog 2024");
   await expectNoHorizontalScroll(page);
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-mobile.png`, fullPage: true });
+});
+
+test("Skötselkollen visar forskningsrisker utan att skapa ny kurva", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/skotselkollen");
+  await fillSkotselkollenPilot(page);
+  await openSkotselAdvanced(page);
+  await page.evaluate(() => {
+    document.querySelectorAll(".skotsel-advanced-root details").forEach((details) => {
+      details.open = true;
+    });
+  });
+
+  await page.locator('select[name="snowWindRisk"]').selectOption("ja");
+  await page.locator('select[name="damage"]').selectOption("tydliga");
+  await page.locator('select[name="bearing"]').selectOption("svag_blot");
+  await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
+
+  await expect(page.locator("body")).toContainText("Forskningsstöd: markerad snö-/vindrisk");
+  await expect(page.locator("body")).toContainText("Kontrollera storm- och snörisk");
+  await expect(page.locator("body")).toContainText("rotröta, svamp, insekter");
+  const curveCount = await page.evaluate(async () => {
+    const knowledge = await import("/js/calculators/skotselKnowledgeBase.js");
+    return knowledge.THINNING_CURVES.length;
+  });
+  expect(curveCount).toBe(1);
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Låg");
 });
 
 test("Skötselkollen markförutsättning styr juridisk status utan att dölja skoglig status", async ({ page }) => {

@@ -24,6 +24,9 @@ Kommande steg:
 - .20 lägger in juridiska kontrollflaggor och separerar juridik från skoglig rekommendation.
 - Lagkällor måste kontrolleras online innan juridiska regler uppdateras.
 - Juridiska kontrollflaggor får sänka säkerhet och visa kontrollkrav, men inte aktivera juridiska beslut.
+- .21 lägger in gallringsforskning från Skogsskötselserien 7 som förklarings- och riskstöd.
+- .21 aktiverar inga nya kurvor, digitaliserar inga diagram och skapar inga hårda produktionsgränser.
+- Nästa steg kan vara röjningsforskning eller ett separat björk-/lövspår.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD

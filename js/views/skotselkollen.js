@@ -244,6 +244,7 @@ function resultTemplate(result) {
       directionBlock(result.recommendationDirection) +
     "</div>" +
     "<div class='skotsel-advanced skotsel-advanced--result'>" +
+      advancedDetails("Forskningsstöd", researchSupportTemplate()) +
       advancedDetails("Juridisk kontroll", resultBlock("Juridisk kontroll", result.legalAssessment)) +
       advancedDetails("Juridiska kontrollflaggor", legalChecksTemplate(result.legalChecks || []), Boolean(result.legalChecks?.length), "skotsel-legal-flags") +
       advancedDetails("Varningar", listTemplate(result.warnings), hasWarnings) +
@@ -288,7 +289,7 @@ function quickProposal(result) {
     return {
       proposal: "Använd T20-exemplet som jämförelse, inte som färdigt åtgärdsbeslut.",
       why: "Beståndspunkten kan jämföras mot källstött pilotunderlag, men full kurva saknas.",
-      checks: ["Stabilitet och kronslängd.", "Full regional gallringsmall.", "Naturvärden och hänsyn."],
+      checks: (result.quickChecks || []).slice(0, 3),
       nextStep: "Jämför mot komplett mall innan åtgärd."
     };
   }
@@ -341,6 +342,11 @@ function evidenceSummaryTemplate(evidenceAssessment) {
     compactList("Underlag", summary.evidence || []) +
     compactList("Saknas", summary.missing || []) +
   "</section>";
+}
+
+function researchSupportTemplate() {
+  return "<p class='card__text'>Forskningsstöd: gallring påverkar dimensionsutveckling, risker och beståndets framtida struktur.</p>" +
+    "<p class='card__text'>Används för förklaringar, risker och fältkontroller. Det aktiverar inga kurvor, diagramvärden, juridiska beslut eller hårda produktionsgränser.</p>";
 }
 
 function compactList(title, values) {
