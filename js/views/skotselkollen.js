@@ -59,6 +59,7 @@ const SOURCE_GROUPS = [
   ["decision_support_reference", "Beslutsstöd"],
   ["scenario_reference", "Scenarioverktyg"],
   ["practice_guide", "Praktiska skötselmallar"],
+  ["field_method", "Fältmetoder"],
   ["field_observation", "Fältobservationer"],
   ["warning", "Fältvarningar"]
 ];
@@ -234,6 +235,7 @@ function resultTemplate(result) {
       resultMetric("Skogligt", result.forestryStatus || result.actionLabel) +
       resultMetric("Juridik", result.legalStatus || "OK") +
       resultMetric("Säkerhet", confidenceLabel(result.confidence)) +
+      resultMetric("SI", siStatusLabel(result.siteIndexEstimate)) +
     "</div>" +
     chartTemplate(result.chartData) +
     regionWarningTemplate(result.regionWarning) +
@@ -429,6 +431,7 @@ function sourceRoleLabel(type) {
     decision_support_reference: "beslutsstöd",
     scenario_reference: "scenarioverktyg",
     practice_guide: "praktisk mall",
+    field_method: "fältmetod",
     field_observation: "fältvärden",
     warning: "varning"
   }[type] || type;
@@ -438,6 +441,7 @@ function sourceLimitation(item) {
   if (item.type === "decision_support_reference") return "referensram, inte facit";
   if (item.type === "scenario_reference") return "långsiktig analys, inte fältgräns";
   if (item.type === "practice_guide") return "förenklad, ej facit";
+  if (item.type === "field_method") return "metodstöd, inte auto-SI";
   if (item.type === "skogskunskap_tool") return skogskunskapToolLimitation(item);
   if (item.type === "skogskunskap_guidance") return "ska vägas mot lag/forskning/fält";
   if (item.type === "regional_curve" && item.strength === "pilot") return "pilot, inte full kurva";
@@ -670,6 +674,12 @@ function directionBlock(text) {
 
 function resultMetric(label, value) {
   return "<div class='result-chip skotsel-metric'><span>" + escapeHtml(label) + "</span><strong>" + escapeHtml(value) + "</strong></div>";
+}
+
+function siStatusLabel(siteIndexEstimate = {}) {
+  if (siteIndexEstimate.method === "manual") return "Manuellt";
+  if (siteIndexEstimate.numericSiteIndex) return "Beräknat";
+  return "Saknas";
 }
 
 function resultBlock(title, text) {

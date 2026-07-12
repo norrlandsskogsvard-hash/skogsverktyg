@@ -31,12 +31,17 @@ Kommande steg:
 - .23 lÃ¤gger in bjÃ¶rk/lÃ¶v som eget spÃ¥r frÃ¥n SkogsskÃ¶tselserien 9.
 - .23 aktiverar inga lÃ¶vkurvor, anvÃ¤nder inga barrmallar som facit fÃ¶r bjÃ¶rk/lÃ¶v och skapar inga hÃ¥rda produktionsgrÃ¤nser.
 - NÃ¤sta steg kan vara bonitering/SI frÃ¥n AC/BD eller fÃ¶rdjupade skador/naturhÃ¤nsyn.
+- .24 lagger in bonitering/SI fran AC/BD och B69 som faltmetod, metodbegransning och osakerhetsstod.
+- .24 aktiverar inte auto-SI, digitaliserar inga hojdutvecklingskurvor, lagger inte in diagramvarden och skapar inga harda produktionsgranser.
+- Nasta steg kan vara fordjupade skador/naturhansyn eller ett separat manuellt granskningsflode for SI-tabeller.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD
    - SI-regler och begränsningar extraheras först.
    - Höjdutvecklingskurvor kräver försiktig hantering.
    - Auto-SI får aktiveras först efter verifierade tabeller och testfall.
+   - .24 anvander AC, BD och B69 som faltstod och kontrollfragor, inte som inlagda SI-/kurvvarden.
+   - B69 behandlas som diagram-/tabellkalla utan digitaliserade varden i detta steg.
 
 3. Skogsskötselserien 7 Gallring
    - Forskningsstöd, principer och risktexter.

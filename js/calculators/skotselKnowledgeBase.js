@@ -31,6 +31,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-gallring-forskningsstod.md",
   "docs/skotselkollen-rojning-forskningsstod.md",
   "docs/skotselkollen-bjork-lov-forskningsstod.md",
+  "docs/skotselkollen-bonitering-si-faltstod.md",
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
@@ -102,6 +103,18 @@ export const BJORK_LOV_RESEARCH_SUPPORT_SUMMARY = {
   note: "Forskningsstöd: björk, al och asp hanteras som eget lövspår med målbild, ljuskonkurrens, stamval, risker och hänsyn."
 };
 
+export const SITE_INDEX_FIELD_SUPPORT_SUMMARY = {
+  sourceIds: ["bonitering-ac", "bonitering-bd", "b69-si-internlankar-tabeller"],
+  dataFile: "data/site-index-field-rules.json",
+  ruleCount: 12,
+  status: "reviewed_field_method_support",
+  activeUse: "field_method_and_limitations_only",
+  canAutoCalculateSI: false,
+  canDigitizeCurves: false,
+  canCreateHardThresholds: false,
+  note: "Bonitering/SI-stöd från AC, BD och B69 används som fältmetod, metodbegränsning och kontrollfrågor. Auto-SI och kurvdigitalisering är spärrade."
+};
+
 export const EVIDENCE_TYPE_WEIGHTS = {
   law: 100,
   research: 80,
@@ -111,6 +124,7 @@ export const EVIDENCE_TYPE_WEIGHTS = {
   decision_support_reference: 50,
   scenario_reference: 45,
   practice_guide: 35,
+  field_method: 65,
   field_observation: 60,
   warning: 75
 };
@@ -363,6 +377,22 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
     confidence: "medium",
     limitations: ["Ger kontrollflagga och förklaring, men ingen ny kurva eller barrmall som facit."],
     notes: ["Avgör om målet är barr, bibehållen blandning, lövproduktion, natur eller vilt innan mall används."]
+  },
+  {
+    id: "field-method-bonitering-ac-bd-b69",
+    type: "field_method",
+    source: "bonitering-ac-bd-b69",
+    sourceLabel: "Bonitering AC/BD och B69 SI",
+    area: "siteIndex",
+    species: "all",
+    region: "all",
+    appliesTo: ["all"],
+    claim: "Bonitering/SI används som fältmetod och metodkontroll för höjdutvecklingskurvor, övre höjd, interceptmetod, regionalt underlag och osäkra bestånd.",
+    strength: "fieldMethod",
+    weight: 65,
+    confidence: "medium",
+    limitations: ["Auto-SI, diagramdigitalisering, nya kurvor och hårda produktionsgränser är spärrade."],
+    notes: ["SI är underlag och osäkerhetsmarkör, inte ensam facitkälla."]
   },
   {
     id: "regional-t20-pilot",
@@ -714,6 +744,8 @@ export function sourceNotesForInput(input = {}) {
   notes.push(ROJNING_RESEARCH_SUPPORT_SUMMARY.note);
   notes.push(BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.note);
   notes.push("Björk/löv använder inte tall- eller granmall som facit.");
+  notes.push(SITE_INDEX_FIELD_SUPPORT_SUMMARY.note);
+  notes.push("SI-stödet är fältmetod och osäkerhetsstöd; det aktiverar inte auto-SI, höjdutvecklingskurvor eller nya gallringskurvor.");
   notes.push("Skogsskötselserien 6 Röjning används som förklarings- och fältstöd, inte som prisregel eller hård stamantalsgräns.");
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
   notes.push("Björk/löv saknar ännu fullständig granskad kurva i appens kunskapsbas.");
@@ -1064,6 +1096,7 @@ function typeLabel(type) {
     decision_support_reference: "beslutsstöd",
     scenario_reference: "scenarioverktyg",
     practice_guide: "praktisk skötselmall",
+    field_method: "fältmetod",
     field_observation: "fältobservationer",
     warning: "fältvarningar"
   }[type] || type;

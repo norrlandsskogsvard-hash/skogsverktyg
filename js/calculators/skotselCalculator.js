@@ -8,6 +8,7 @@ import {
   LEGAL_CONTROL_RULES_SUMMARY,
   NORRA_TEXT_RULES_SUMMARY,
   ROJNING_RESEARCH_SUPPORT_SUMMARY,
+  SITE_INDEX_FIELD_SUPPORT_SUMMARY,
   sourceNotesForInput
 } from "./skotselKnowledgeBase.js";
 
@@ -71,6 +72,25 @@ export function calculateSkotselRecommendation(input = {}) {
   ]);
 
   if (norraTextRules.lowersConfidence) {
+    quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
+  }
+
+  const siteIndexField = buildSiteIndexFieldAssessment(normalized, siteIndexEstimate);
+  quickAssessment.fieldChecks = unique([
+    ...siteIndexField.fieldChecks,
+    ...quickAssessment.fieldChecks
+  ]);
+  quickAssessment.warnings.push(...siteIndexField.warnings);
+  quickAssessment.sourceNotes = unique([
+    ...(quickAssessment.sourceNotes || []),
+    ...siteIndexField.sourceNotes
+  ]);
+
+  if (siteIndexField.explanation) {
+    quickAssessment.why = quickAssessment.why + " " + siteIndexField.explanation;
+  }
+
+  if (siteIndexField.lowersConfidence) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
   }
 
@@ -603,6 +623,65 @@ function buildNorraTextRuleAssessment(input, assessment) {
   };
 }
 
+function buildSiteIndexFieldAssessment(input, siteIndexEstimate = {}) {
+  const warnings = [];
+  const fieldChecks = [
+    "SI-fältstöd: kontrollera bonitetsvisande trädslag, likåldrigt bestånd och ostörd höjdutveckling innan SI används som underlag.",
+    "SI-fältstöd: välj oskadade övrehöjdsträd av rätt trädslag och kontrollera övre höjd enligt boniteringsmetoden.",
+    "SI-fältstöd: höjdutvecklingskurvor och B69-diagram är källor men digitaliseras inte i detta steg."
+  ];
+  const sourceNotes = [
+    SITE_INDEX_FIELD_SUPPORT_SUMMARY.note,
+    "AC-häftet avser Västerbottens län och BD-häftet avser Norrbottens län. B69 används som diagram-/tabellkälla, inte som inlagda värden.",
+    "Övre höjd i häftena definieras som medelhöjden för de två grövsta träden på provyta med 10 m radie.",
+    "Interceptmetoden beskrivs som fältmetod för yngre tall- och granbestånd, men appen räknar inte ut SI automatiskt."
+  ];
+  let lowersConfidence = false;
+  const hasManualSi = siteIndexEstimate.method === "manual";
+  const hasSi = Boolean(siteIndexEstimate.numericSiteIndex);
+
+  if (!hasSi) {
+    warnings.push("SI saknas - bedömningen blir osäkrare.");
+    fieldChecks.push("SI saknas: gör fördjupad bonitering eller ange manuellt SI innan regional gallringsmall används som stöd.");
+    lowersConfidence = true;
+  }
+
+  if (hasManualSi) {
+    fieldChecks.push("SI är manuellt inmatat: kontrollera att värdet kommer från rätt regionalt boniteringsunderlag och rätt trädslag.");
+  }
+
+  if (input.region === "okand") {
+    warnings.push("SI-stöd: region är okänd. Kontrollera om AC-, BD- eller annat regionalt boniteringsunderlag är relevant.");
+    lowersConfidence = true;
+  } else if (["norrland_kust", "norrland_inland", "hoglage_fjallnara"].includes(input.region)) {
+    fieldChecks.push("Regionalt SI-stöd: AC/BD-häftena är relevanta som fältmetod i Västerbotten/Norrbotten när beståndet ligger inom deras tillämpning.");
+  }
+
+  if (input.mainSpecies === "bjork") {
+    warnings.push("SI-stöd: björk kräver eget björk-/lövunderlag. Tall- eller gran-SI används inte som facit.");
+    lowersConfidence = true;
+  }
+
+  if (isLovSpecies(input.mainSpecies)) {
+    fieldChecks.push("Lövspår och SI: kontrollera att bonitetsvisande trädslag och SI-underlag passar lövbeståndet.");
+  }
+
+  if (input.gaps === "nagot_luckigt" || input.gaps === "luckigt" || input.damage === "tydliga" || input.damage === "svara" || input.vitality === "svag") {
+    warnings.push("SI-stöd: skador, luckighet eller svag vitalitet kan störa höjdutvecklingen. Använd höjdutvecklingskurvor med försiktighet.");
+    lowersConfidence = true;
+  }
+
+  return {
+    explanation: hasSi
+      ? (hasManualSi ? "SI är manuellt underlag och ska kontrolleras mot fältmetod och regional källa." : "SI-stödet används som metodkontroll, inte som ny auto-SI.")
+      : "SI saknas och därför blir gallringsjämförelsen mer osäker.",
+    warnings,
+    fieldChecks,
+    sourceNotes,
+    lowersConfidence
+  };
+}
+
 function buildGallringResearchAssessment(input, assessment) {
   if (!isGallringResearchRelevant(input, assessment)) {
     return emptyResearchAssessment();
@@ -876,6 +955,7 @@ function groupSourcesByEvidence(evidenceAssessment) {
     decision_support_reference: [],
     scenario_reference: [],
     practice_guide: [],
+    field_method: [],
     field_observation: [],
     warning: []
   };

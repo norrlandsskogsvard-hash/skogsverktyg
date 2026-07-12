@@ -109,6 +109,7 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   await gotoRoute(page, "/skotselkollen");
   const summary = await page.evaluate(async () => {
     const knowledge = await import("/js/calculators/skotselKnowledgeBase.js");
+    const siteIndex = await import("/js/calculators/siteIndexCurves.js");
     const active = knowledge.NORRA_THINNING_SOURCE_VALUES.filter(knowledge.isActiveCurveSourceValue);
     const t20 = knowledge.NORRA_THINNING_SOURCE_VALUES.find((item) => item.id === "norra-tall-t20-pilot");
     const t22 = knowledge.NORRA_THINNING_SOURCE_VALUES.find((item) => item.id === "norra-tall-t22-candidate");
@@ -125,6 +126,11 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
       bjorkLovRuleCount: knowledge.BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.ruleCount,
       bjorkLovCanActivateCurves: knowledge.BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.canActivateCurves,
       bjorkLovCanUseConiferTemplatesAsTruth: knowledge.BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.canUseConiferTemplatesAsTruth,
+      siteIndexRuleCount: knowledge.SITE_INDEX_FIELD_SUPPORT_SUMMARY.ruleCount,
+      siteIndexCanAutoCalculateSI: knowledge.SITE_INDEX_FIELD_SUPPORT_SUMMARY.canAutoCalculateSI,
+      siteIndexCanDigitizeCurves: knowledge.SITE_INDEX_FIELD_SUPPORT_SUMMARY.canDigitizeCurves,
+      siteIndexCanCreateHardThresholds: knowledge.SITE_INDEX_FIELD_SUPPORT_SUMMARY.canCreateHardThresholds,
+      siteIndexCurveCount: siteIndex.SITE_INDEX_CURVES.length,
       t20Status: t20?.status,
       t20DataQuality: t20?.dataQuality,
       t20ReviewNeeded: t20?.reviewNeeded,
@@ -159,6 +165,11 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.bjorkLovRuleCount).toBe(12);
   expect(summary.bjorkLovCanActivateCurves).toBe(false);
   expect(summary.bjorkLovCanUseConiferTemplatesAsTruth).toBe(false);
+  expect(summary.siteIndexRuleCount).toBe(12);
+  expect(summary.siteIndexCanAutoCalculateSI).toBe(false);
+  expect(summary.siteIndexCanDigitizeCurves).toBe(false);
+  expect(summary.siteIndexCanCreateHardThresholds).toBe(false);
+  expect(summary.siteIndexCurveCount).toBe(0);
   expect(summary.t20Status).toBe("active_pilot");
   expect(summary.t20DataQuality).toBe("pilot_example");
   expect(summary.t20ReviewNeeded).toBe(false);
@@ -188,10 +199,15 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
   await expect(page.locator("body")).toContainText("Jämför mot komplett mall innan åtgärd");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("OK");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Manuellt");
+  await expect(page.locator("body")).toContainText(/SI.*manuellt underlag/i);
   await expect(page.locator("body")).toContainText("Juridiska kontrollflaggor");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
   await expect(page.locator("body")).toContainText("Forskningsstöd");
+  await expect(page.locator("body")).toContainText("Fältmetoder");
+  await expect(page.locator("body")).toContainText("Bonitering AC/BD och B69 SI");
+  await expect(page.locator("body")).toContainText("metodstöd, inte auto-SI");
   await expect(page.locator("body")).toContainText("Skogsskötselserien 7 Gallring");
   await expect(page.locator("body")).toContainText("Norra textregler");
   await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
@@ -222,10 +238,13 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("T20-exempel, ej full kurva");
   await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("OK");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Manuellt");
   await expect(page.locator("body")).toContainText("Juridiska kontrollflaggor");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
   await expect(page.locator("body")).toContainText("Forskningsstöd");
+  await expect(page.locator("body")).toContainText("Fältmetoder");
+  await expect(page.locator("body")).toContainText("Bonitering AC/BD och B69 SI");
   await expect(page.locator("body")).toContainText("Skogsskötselserien 7 Gallring");
   await expect(page.locator("body")).toContainText("Norra textregler");
   await expect(page.locator("body")).toContainText("Praktiska skötselmallar");

@@ -13,7 +13,8 @@
     "validate:gallring-research": "node scripts/validate-gallring-research-rules.mjs",
     "validate:rojning-research": "node scripts/validate-rojning-research-rules.mjs",
     "validate:bjork-lov": "node scripts/validate-bjork-lov-research-rules.mjs",
-    "test": "npm run validate:sources && npm run validate:thinning-data && npm run validate:norra-text-rules && npm run validate:legal-rules && npm run validate:gallring-research && npm run validate:rojning-research && npm run validate:bjork-lov && playwright test",
+    "validate:site-index": "node scripts/validate-site-index-field-rules.mjs",
+    "test": "npm run validate:sources && npm run validate:thinning-data && npm run validate:norra-text-rules && npm run validate:legal-rules && npm run validate:gallring-research && npm run validate:rojning-research && npm run validate:bjork-lov && npm run validate:site-index && playwright test",
     "test:headed": "playwright test --headed",
     "test:update": "playwright test --update-snapshots"
   },

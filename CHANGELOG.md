@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-site-index-field.1 - 2026-07-12
+
+### Added - Bonitering/SI faltstod
+
+- Bonitering/SI-stod fran AC-, BD- och B69-underlag har lagts till.
+- Stodet anvands som faltmetod, metodbegransning, kontrollfragor och osakerhetsstod.
+- Auto-SI, kurvdigitalisering och diagramvarden ar fortsatt sparrade.
+- Endast T20-piloten ar fortsatt aktiv gallringskurva.
+- Validering for SI-/boniteringsstod har lagts till.
+- PWA-cache hojd till site-index-field.1.
+
 ## v2.0.0-alpha.1-bjork-lov.1 - 2026-07-12
 
 ### Added - Bjork/lov-stod
