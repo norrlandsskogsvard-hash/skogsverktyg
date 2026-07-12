@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-norra-text-rules.1 - 2026-07-12
+
+### Added - Norra textregler
+
+- Norra gallringsmallarnas textregler och användningsvillkor har extraherats.
+- Textregler används endast som kontrollflaggor/underlag.
+- Inga nya kurvor eller diagramvärden har aktiverats.
+- Validering för Norra textregler har lagts till.
+- PWA-cache höjd till norra-text-rules.1.
+
 ## v2.0.0-alpha.1-source-library.2 - 2026-07-12
 
 ### Added - Onlinekällor och speglar

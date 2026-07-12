@@ -1,4 +1,4 @@
-const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-source-library.2";
+const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-norra-text-rules.1";
 
 const CORE_ASSETS = [
   "./",

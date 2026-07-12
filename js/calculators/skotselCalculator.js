@@ -1,5 +1,11 @@
 import { estimateSiteIndex } from "./siteIndexCalculator.js";
-import { buildEvidenceAssessment, findGallringZone, findThinningSourceCandidate, sourceNotesForInput } from "./skotselKnowledgeBase.js";
+import {
+  buildEvidenceAssessment,
+  findGallringZone,
+  findThinningSourceCandidate,
+  NORRA_TEXT_RULES_SUMMARY,
+  sourceNotesForInput
+} from "./skotselKnowledgeBase.js";
 
 const ACTIONS = {
   curve_under: ["Under mall", "Låg"],
@@ -51,6 +57,17 @@ export function calculateSkotselRecommendation(input = {}) {
   }
 
   const quickAssessment = assessQuickCurve(normalized, siteIndexEstimate);
+  const norraTextRules = buildNorraTextRuleAssessment(normalized, quickAssessment);
+  quickAssessment.fieldChecks.push(...norraTextRules.fieldChecks);
+  quickAssessment.warnings.push(...norraTextRules.warnings);
+  quickAssessment.sourceNotes = unique([
+    ...(quickAssessment.sourceNotes || []),
+    ...norraTextRules.sourceNotes
+  ]);
+
+  if (norraTextRules.lowersConfidence) {
+    quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
+  }
 
   if (legal.hasConservationFlag) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
@@ -63,7 +80,7 @@ export function calculateSkotselRecommendation(input = {}) {
     legalAssessment: legal.text,
     warnings: [...warnings, ...quickAssessment.warnings],
     fieldChecks: [...quickAssessment.fieldChecks, ...legal.nextChecks],
-    sourceNotes,
+    sourceNotes: unique([...sourceNotes, ...(quickAssessment.sourceNotes || [])]),
     siteIndexEstimate
   });
 }
@@ -319,6 +336,77 @@ function baseFieldChecks(input) {
   if (input.damage === "tydliga" || input.damage === "svara") checks.push("Bedöm skador innan gallringsstyrka föreslås.");
   if (input.snowWindRisk === "ja") checks.push("Var försiktig med gallringsstyrka vid snö- eller vindrisk.");
   return checks;
+}
+
+function buildNorraTextRuleAssessment(input, assessment) {
+  const warnings = [];
+  const fieldChecks = [
+    "Norra textregler: kontrollera att mallen passar beståndets region, trädslagsfördelning, skiktning och gallringsform."
+  ];
+  const sourceNotes = [
+    NORRA_TEXT_RULES_SUMMARY.note,
+    "Norra textregler är användningsvillkor och kontrollflaggor, inte aktiva kurvor eller juridiska beslut."
+  ];
+  let lowersConfidence = false;
+
+  if (input.region === "okand") {
+    warnings.push("Norra gallringsmallar har regional begränsning. Välj eller kontrollera region innan mallen används som stöd.");
+    lowersConfidence = true;
+  }
+
+  if (input.mainSpecies === "bjork" || input.mainSpecies === "blandat") {
+    warnings.push("Norra tall-/granmall ska inte användas som facit för björk eller blandbestånd.");
+    lowersConfidence = true;
+  }
+
+  if (input.birchShare !== null && input.birchShare > 30) {
+    warnings.push("Högt lövinslag: kontrollera att minst cirka 70 procent av grundytan är tall eller gran innan Norra-mall används.");
+    lowersConfidence = true;
+  }
+
+  if (input.mainSpecies === "tall" || input.mainSpecies === "gran") {
+    const matchingShare = input.mainSpecies === "tall" ? input.pineShare : input.spruceShare;
+    if (matchingShare !== null && matchingShare < 70) {
+      warnings.push("Trädslagsfördelningen kan ligga utanför Norra-mallens användningsvillkor. Kontrollera grundyteandel för tall/gran.");
+      lowersConfidence = true;
+    }
+    if (input.pineShare === null && input.spruceShare === null && input.birchShare === null) {
+      fieldChecks.push("Kontrollera i fält att tall/gran dominerar grundytan innan mallen används.");
+    }
+  }
+
+  if (input.gaps === "nagot_luckigt" || input.gaps === "luckigt" || input.damage === "tydliga" || input.damage === "svara" || input.vitality === "svag") {
+    warnings.push("Ojämnhet, luckor, skador eller svag vitalitet gör att Norra-mallen ska användas med försiktighet och fältanpassning.");
+    lowersConfidence = true;
+  }
+
+  if (isLikelyFirstThinning(input, assessment)) {
+    fieldChecks.push("Första gallring: kontrollera stickvägsuttag och total uttagsstyrka mot Norra-mallens användningsvillkor.");
+  }
+
+  if (input.mainSpecies === "gran" && input.heightMeters !== null && input.heightMeters > 25) {
+    warnings.push("Gran med övre höjd över cirka 25-26 m: gallring ska hanteras med tydlig försiktighet och stormriskkontroll.");
+    lowersConfidence = true;
+  }
+
+  if (assessment.actionCode === "curve_reference_pilot") {
+    fieldChecks.push("När T20-pilot visas: lägg störst vikt vid kontroll av grundyta efter gallring och fältbild.");
+  }
+
+  fieldChecks.push("Vid noggrann bedömning: använd systematiska provytor, mät grundyta på varje yta och kontrollera SI/övre höjd där det går.");
+
+  return {
+    warnings,
+    fieldChecks,
+    sourceNotes,
+    lowersConfidence
+  };
+}
+
+function isLikelyFirstThinning(input, assessment) {
+  if (input.standPhase === "ungskog") return true;
+  if (assessment.actionCode === "curve_reference_pilot" && input.heightMeters !== null && input.heightMeters <= 15.5) return true;
+  return false;
 }
 
 function curveSourceNotes(curveReference) {

@@ -176,6 +176,7 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Ingen flagga");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
+  await expect(page.locator("body")).toContainText("Norra textregler");
   await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
   await expect(page.locator("body")).toContainText("Norra Skog 2024");
   await expect(page.locator(".skotsel-source-balance-details").first()).not.toHaveAttribute("open", "");
@@ -206,6 +207,7 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Ingen flagga");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
+  await expect(page.locator("body")).toContainText("Norra textregler");
   await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
   await expect(page.locator("body")).toContainText("Norra Skog 2024");
   await expectNoHorizontalScroll(page);

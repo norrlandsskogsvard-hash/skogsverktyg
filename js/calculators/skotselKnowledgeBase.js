@@ -26,6 +26,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-norra-massimport.md",
   "docs/skotselkollen-norra-batchimport.md",
   "docs/skotselkollen-norra-importflode.md",
+  "docs/skotselkollen-norra-textregler.md",
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
@@ -40,6 +41,16 @@ export const SOURCE_LIBRARY_SUMMARY = {
   canActivateDirectly: false,
   note: "Lokalt källbibliotek och onlinekällor finns, värden aktiveras först efter granskning.",
   legalNote: "Riksdagen/SFS är primär lagkälla och Skogsstyrelsen är vägledning. Appens juridiska del är kontrollstöd, inte juridiskt besked."
+};
+
+export const NORRA_TEXT_RULES_SUMMARY = {
+  sourceId: "norra-gallringsriktlinjer-gallringsmallar",
+  dataFile: "data/norra-thinning-text-rules.json",
+  ruleCount: 13,
+  status: "reviewed_text_rules",
+  activeUse: "control_flags_only",
+  canActivateCurves: false,
+  note: "Norra textregler: användningsvillkor och kontrollflaggor inlästa."
 };
 
 export const EVIDENCE_TYPE_WEIGHTS = {
@@ -255,6 +266,22 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
     confidence: "medium",
     limitations: ["Pilot/exempel, inte full digitaliserad gallringskurva."],
     notes: ["Ska användas som jämförelse och inte som facit."]
+  },
+  {
+    id: "norra-text-rules-control-flags",
+    type: "regional_curve",
+    source: "norra-thinning-text-rules",
+    sourceLabel: "Norra textregler",
+    area: "thinning",
+    species: "all",
+    region: "norra-sverige",
+    appliesTo: ["curve_reference_pilot", "curve_missing"],
+    claim: "Norra gallringsmallarnas användningsvillkor är inlästa som kontrollflaggor och fältstöd.",
+    strength: "controlFlags",
+    weight: EVIDENCE_TYPE_WEIGHTS.regional_curve,
+    confidence: "medium",
+    limitations: ["Textregler aktiverar inga kurvor och innehåller inga digitaliserade diagramvärden."],
+    notes: ["Används för kontroll av region, trädslagsandel, beståndstyp, stickvägar, uttagsstyrka och fältmetod."]
   },
   {
     id: "skogskunskap-general-guidance",
@@ -561,6 +588,8 @@ export function sourceNotesForInput(input = {}) {
   notes.push("Norra Skog 2024 används som praktisk skötselmall och skogsägarstöd, inte som facit eller regional kurva.");
   notes.push(SOURCE_LIBRARY_SUMMARY.note);
   notes.push(SOURCE_LIBRARY_SUMMARY.legalNote);
+  notes.push(NORRA_TEXT_RULES_SUMMARY.note);
+  notes.push("Norra textregler används endast som kontrollflaggor och fältstöd, inte som nya kurvor.");
   notes.push("Gallringsmallar norra Sverige används som kommande källa för tall/gran när källmatris är inlagd.");
   notes.push("Björk saknar ännu fullständig granskad kurva i appens kunskapsbas.");
   return [...new Set(notes)];

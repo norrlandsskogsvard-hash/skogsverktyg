@@ -1,0 +1,224 @@
+{
+  "sourceId": "norra-gallringsriktlinjer-gallringsmallar",
+  "title": "Norra gallringsmallar - textregler och användningsvillkor",
+  "status": "reviewed_text_rules",
+  "activeUse": "control_flags_only",
+  "canActivateCurves": false,
+  "rules": [
+    {
+      "id": "norra-valid-region",
+      "area": "gallring",
+      "type": "scope",
+      "severity": "info",
+      "conditionField": "region",
+      "condition": "region_norra_sverige",
+      "message": "Norra gallringsmallar avser norra Sverige och ska användas som regionalt relevant underlag där.",
+      "sourcePage": "s. 34",
+      "sourceSummary": "Källan anger att gallringsmallarna gäller norra Sverige, definierat som Norrland samt Värmlands och Kopparbergs län.",
+      "effect": "supports_source_relevance",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-species-basal-area-70",
+      "area": "gallring",
+      "type": "scope",
+      "severity": "control",
+      "conditionField": "mainSpecies,birchShare,pineShare,spruceShare",
+      "condition": "tall_or_gran_basal_area_at_least_70_percent",
+      "message": "Kontrollera att minst cirka 70 procent av grundytan består av tall eller gran innan tall-/granmall används som stöd.",
+      "sourcePage": "s. 34",
+      "sourceSummary": "Källans krav på beståndet anger att grundytan ska bestå till minst 70 procent av tall eller gran.",
+      "numericValues": [
+        {
+          "parameter": "min_pine_or_spruce_basal_area_share",
+          "value": 70,
+          "unit": "percent",
+          "sourcePage": "s. 34",
+          "sourceSummary": "Minst 70 procent av grundytan ska vara tall eller gran."
+        }
+      ],
+      "effect": "control_flag_only",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-birch-not-facit",
+      "area": "gallring",
+      "type": "scope",
+      "severity": "control",
+      "conditionField": "mainSpecies",
+      "condition": "main_species_bjork_or_high_broadleaf_share",
+      "message": "Norra tall-/granmall ska inte användas som facit för björk eller lövdominerade bestånd.",
+      "sourcePage": "s. 34",
+      "sourceSummary": "Källans beståndskrav är kopplat till tall- eller grandominerad grundyta.",
+      "effect": "control_flag_only",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-stand-even-closed-managed",
+      "area": "gallring",
+      "type": "stand_condition",
+      "severity": "control",
+      "conditionField": "gaps,standPhase,damage,vitality",
+      "condition": "stand_even_closed_previously_managed",
+      "message": "Mallen passar bäst i någorlunda jämna, välslutna och tidigare skötta bestånd. Använd med försiktighet vid luckor, ojämnhet, skador eller specialfall.",
+      "sourcePage": "s. 34",
+      "sourceSummary": "Källan anger att beståndet ska vara någorlunda jämnt, välslutet och tidigare skött, och att mallarna bara ger viss vägledning när kraven inte uppfylls fullt ut.",
+      "effect": "control_flag_only",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-low-thinning-main-form",
+      "area": "gallring",
+      "type": "thinning_form",
+      "severity": "info",
+      "conditionField": "thinningForm",
+      "condition": "mainly_low_thinning",
+      "message": "Norra gallringsmallar avser främst låggallring eller normal användning där grövre träd gynnas.",
+      "sourcePage": "s. 34",
+      "sourceSummary": "Källans användningsvillkor anger att gallringen huvudsakligen ska utföras som låggallring.",
+      "effect": "control_flag_only",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-max-removal-young-first-thinning",
+      "area": "gallring",
+      "type": "removal_strength",
+      "severity": "control",
+      "conditionField": "heightMeters,standPhase",
+      "condition": "young_or_first_thinning_removal_strength",
+      "message": "Vid första gallring bör uttag inklusive stickvägar kontrolleras mot Norra-mallens rekommenderade maxnivå.",
+      "sourcePage": "s. 35, s. 38",
+      "sourceSummary": "Källan anger att uttag inklusive stickvägar vid yngre skog bör hålla sig inom högsta uttag i grundyta.",
+      "numericValues": [
+        {
+          "parameter": "max_basal_area_removal_young_forest_including_strip_roads",
+          "value": 40,
+          "unit": "percent",
+          "sourcePage": "s. 35, s. 38",
+          "sourceSummary": "Högsta uttag i yngre skog anges till 40 procent av grundytan före gallring, inklusive stickvägar."
+        }
+      ],
+      "effect": "control_flag_only",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-max-removal-mid-aged",
+      "area": "gallring",
+      "type": "removal_strength",
+      "severity": "info",
+      "conditionField": "standPhase,heightMeters",
+      "condition": "mid_aged_removal_strength",
+      "message": "Vid senare eller medelålders gallring bör uttagsstyrkan kontrolleras mot Norra-mallens rekommenderade maxnivå.",
+      "sourcePage": "s. 38",
+      "sourceSummary": "Källan anger högsta uttag i grundyta för yngre respektive medelålders skog och att värdena inkluderar stickvägar.",
+      "numericValues": [
+        {
+          "parameter": "max_basal_area_removal_mid_aged_forest_including_strip_roads",
+          "value": 35,
+          "unit": "percent",
+          "sourcePage": "s. 38",
+          "sourceSummary": "Högsta uttag i medelålders skog anges till 35 procent av grundytan före gallring, inklusive stickvägar."
+        }
+      ],
+      "effect": "control_flag_only",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-spruce-high-height-caution",
+      "area": "gallring",
+      "type": "risk",
+      "severity": "control",
+      "conditionField": "mainSpecies,heightMeters",
+      "condition": "spruce_top_height_over_25_to_26_m",
+      "message": "Granbestånd med övre höjd över cirka 25-26 meter ska hanteras med tydlig försiktighet och stormriskkontroll före gallring.",
+      "sourcePage": "s. 35",
+      "sourceSummary": "Källan anger att man i granbestånd inte bör gallra om övre höjden överstiger 25-26 meter.",
+      "numericValues": [
+        {
+          "parameter": "spruce_caution_top_height",
+          "minValue": 25,
+          "maxValue": 26,
+          "unit": "m",
+          "sourcePage": "s. 35",
+          "sourceSummary": "För gran anges försiktighet när övre höjden överstiger 25-26 meter."
+        }
+      ],
+      "effect": "control_flag_only",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-systematic-sample-plots",
+      "area": "gallring",
+      "type": "field_method",
+      "severity": "info",
+      "conditionField": "fieldMethod",
+      "condition": "systematic_sample_plots",
+      "message": "Bedöm gallringsbehov med systematiska provytor när noggrann bedömning behövs.",
+      "sourcePage": "s. 32-33",
+      "sourceSummary": "Källan beskriver systematiskt utlagda provytor, normalt omkring 10 stycken, med grundyta på varje provyta.",
+      "numericValues": [
+        {
+          "parameter": "typical_sample_plot_count",
+          "value": 10,
+          "unit": "plots",
+          "sourcePage": "s. 32",
+          "sourceSummary": "Antalet provytor bör normalt vara omkring 10, med färre eller fler vid små/homogena respektive stora bestånd."
+        }
+      ],
+      "effect": "checklist_support",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-measure-basal-area-and-height",
+      "area": "gallring",
+      "type": "field_method",
+      "severity": "info",
+      "conditionField": "fieldMethod",
+      "condition": "measure_basal_area_si_height_stems_when_needed",
+      "message": "Mät grundyta på varje provyta och kontrollera SI, övre höjd och stamantal när fältbilden kräver det.",
+      "sourcePage": "s. 32",
+      "sourceSummary": "Källan anger att grundyta alltid mäts på varje provyta, SI och övre höjd bestäms på vissa provytor och stamantal kan räknas vid behov.",
+      "effect": "checklist_support",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-template-is-support",
+      "area": "gallring",
+      "type": "interpretation",
+      "severity": "info",
+      "conditionField": "result",
+      "condition": "template_is_decision_support",
+      "message": "Gallringsmallen är ett hjälpmedel. Andra faktorer måste vägas in innan åtgärd föreslås.",
+      "sourcePage": "s. 33",
+      "sourceSummary": "Källan betonar att gallringsmallen endast är ett hjälpmedel och att ytterligare faktorer måste vägas in.",
+      "effect": "advisory_text",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-basal-area-after-important",
+      "area": "gallring",
+      "type": "interpretation",
+      "severity": "info",
+      "conditionField": "basalArea",
+      "condition": "basal_area_after_thinning_is_key",
+      "message": "Grundyta efter gallring är den viktigaste mallstyrningen när T20-pilot används som jämförelse.",
+      "sourcePage": "s. 35, s. 38",
+      "sourceSummary": "Källan anger att mallarna är grundytemallar och att grundytan efter gallring är viktigast.",
+      "effect": "advisory_text",
+      "canBlockAction": false
+    },
+    {
+      "id": "norra-strip-road-first-thinning",
+      "area": "gallring",
+      "type": "field_method",
+      "severity": "control",
+      "conditionField": "heightMeters,standPhase",
+      "condition": "first_thinning_strip_road_removal",
+      "message": "Vid första gallring ska stickvägsuttag och total uttagsstyrka kontrolleras i fält.",
+      "sourcePage": "s. 33, s. 35",
+      "sourceSummary": "Källan anger att första gallring får ytterligare uttag i grundyta för stickvägar och att hänsyn ska tas till detta.",
+      "effect": "control_flag_only",
+      "canBlockAction": false
+    }
+  ]
+}

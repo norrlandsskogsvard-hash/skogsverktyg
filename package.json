@@ -8,7 +8,8 @@
     "index:sources": "node scripts/index-source-library.mjs",
     "validate:sources": "node scripts/validate-source-library.mjs",
     "validate:thinning-data": "node scripts/validate-thinning-data.mjs",
-    "test": "npm run validate:sources && npm run validate:thinning-data && playwright test",
+    "validate:norra-text-rules": "node scripts/validate-norra-text-rules.mjs",
+    "test": "npm run validate:sources && npm run validate:thinning-data && npm run validate:norra-text-rules && playwright test",
     "test:headed": "playwright test --headed",
     "test:update": "playwright test --update-snapshots"
   },

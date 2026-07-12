@@ -12,12 +12,17 @@ Extraktion ska ske stegvis. Varje värde ska ha källa, sida/tabell/diagram, enh
 
 1. Norra gallringsmallar
    - Tydliga text- och tabellvärden först.
+   - .19 extraherar textregler och användningsvillkor som kontrollflaggor.
    - Diagramdigitalisering hanteras separat.
    - T20 är aktiv pilot.
    - Övriga mallar är candidates tills de är verifierade.
    - Yumpu-spegeln kan användas för text/OCR-stöd.
    - Lokal Norra-PDF är primär källa.
    - Spegel får inte ensam skapa verified_candidate.
+
+Kommande steg:
+- .20 kan bygga vidare med juridiska kontrollflaggor, utan juridiskt bindande besked.
+- Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD
    - SI-regler och begränsningar extraheras först.
