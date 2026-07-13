@@ -131,6 +131,11 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
       siteIndexCanDigitizeCurves: knowledge.SITE_INDEX_FIELD_SUPPORT_SUMMARY.canDigitizeCurves,
       siteIndexCanCreateHardThresholds: knowledge.SITE_INDEX_FIELD_SUPPORT_SUMMARY.canCreateHardThresholds,
       siteIndexCurveCount: siteIndex.SITE_INDEX_CURVES.length,
+      hansynRiskRuleCount: knowledge.HANSYN_RISK_SUPPORT_SUMMARY.ruleCount,
+      hansynRiskCanMakeLegalDecision: knowledge.HANSYN_RISK_SUPPORT_SUMMARY.canMakeLegalDecision,
+      hansynRiskCanActivateCurves: knowledge.HANSYN_RISK_SUPPORT_SUMMARY.canActivateCurves,
+      hansynRiskCanChangePricing: knowledge.HANSYN_RISK_SUPPORT_SUMMARY.canChangePricing,
+      hansynRiskCanCreateHardThresholds: knowledge.HANSYN_RISK_SUPPORT_SUMMARY.canCreateHardThresholds,
       t20Status: t20?.status,
       t20DataQuality: t20?.dataQuality,
       t20ReviewNeeded: t20?.reviewNeeded,
@@ -170,6 +175,11 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.siteIndexCanDigitizeCurves).toBe(false);
   expect(summary.siteIndexCanCreateHardThresholds).toBe(false);
   expect(summary.siteIndexCurveCount).toBe(0);
+  expect(summary.hansynRiskRuleCount).toBe(12);
+  expect(summary.hansynRiskCanMakeLegalDecision).toBe(false);
+  expect(summary.hansynRiskCanActivateCurves).toBe(false);
+  expect(summary.hansynRiskCanChangePricing).toBe(false);
+  expect(summary.hansynRiskCanCreateHardThresholds).toBe(false);
   expect(summary.t20Status).toBe("active_pilot");
   expect(summary.t20DataQuality).toBe("pilot_example");
   expect(summary.t20ReviewNeeded).toBe(false);
@@ -200,7 +210,10 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Jämför mot komplett mall innan åtgärd");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("OK");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Manuellt");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Hänsyn/risk");
   await expect(page.locator("body")).toContainText(/SI.*manuellt underlag/i);
+  await expect(page.locator("body")).toContainText("Naturhänsyn, skador och vilt");
+  await expect(page.locator("body")).toContainText("risk- och fältstöd");
   await expect(page.locator("body")).toContainText("Juridiska kontrollflaggor");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
@@ -208,6 +221,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Fältmetoder");
   await expect(page.locator("body")).toContainText("Bonitering AC/BD och B69 SI");
   await expect(page.locator("body")).toContainText("metodstöd, inte auto-SI");
+  await expect(page.locator("body")).toContainText("Hänsyn/risk");
+  await expect(page.locator("body")).toContainText("Naturhansyn, skador och vilt");
   await expect(page.locator("body")).toContainText("Skogsskötselserien 7 Gallring");
   await expect(page.locator("body")).toContainText("Norra textregler");
   await expect(page.locator("body")).toContainText("Praktiska skötselmallar");
@@ -239,6 +254,7 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("OK");
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Manuellt");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Hänsyn/risk");
   await expect(page.locator("body")).toContainText("Juridiska kontrollflaggor");
   await openSources(page);
   await expect(page.locator("body")).toContainText("Skogskunskap");
@@ -267,10 +283,18 @@ test("Skötselkollen visar forskningsrisker utan att skapa ny kurva", async ({ p
   await page.locator('select[name="snowWindRisk"]').selectOption("ja");
   await page.locator('select[name="damage"]').selectOption("tydliga");
   await page.locator('select[name="bearing"]').selectOption("svag_blot");
+  await page.locator('select[name="insectRisk"]').selectOption("ja");
+  await page.locator('select[name="waterEdge"]').selectOption("ja");
+  await page.locator('select[name="wildlifePressure"]').selectOption("ja");
   await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
 
   await expect(page.locator("body")).toContainText("Forskningsstöd: markerad snö-/vindrisk");
-  await expect(page.locator("body")).toContainText("Kontrollera storm- och snörisk");
+  await expect(page.locator(".skotsel-result-summary").first()).toContainText("Hög risk");
+  await expect(page.locator("body")).toContainText("Hansyn/risk");
+  await expect(page.locator("body")).toContainText("Storm/vind");
+  await expect(page.locator("body")).toContainText("Kantzon/vatten");
+  await expect(page.locator("body")).toContainText("Viltbete/alg");
+  await expect(page.locator("body")).toContainText("Kontrollera vindutsatt lage");
   await expect(page.locator("body")).toContainText("rotröta, svamp, insekter");
   const curveCount = await page.evaluate(async () => {
     const knowledge = await import("/js/calculators/skotselKnowledgeBase.js");

@@ -33,7 +33,9 @@ Kommande steg:
 - NÃ¤sta steg kan vara bonitering/SI frÃ¥n AC/BD eller fÃ¶rdjupade skador/naturhÃ¤nsyn.
 - .24 lagger in bonitering/SI fran AC/BD och B69 som faltmetod, metodbegransning och osakerhetsstod.
 - .24 aktiverar inte auto-SI, digitaliserar inga hojdutvecklingskurvor, lagger inte in diagramvarden och skapar inga harda produktionsgranser.
-- Nasta steg kan vara fordjupade skador/naturhansyn eller ett separat manuellt granskningsflode for SI-tabeller.
+- .25 lagger in naturhansyn, skador, markrisk, kulturmiljo och vilt som risk- och hansynsstod.
+- .25 skapar inga juridiska beslut, harda gransvarden, prisandringar, diagramvarden eller nya kurvor.
+- Nasta steg kan vara rapport-/utskriftslage eller manuell faltguide.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD
@@ -60,6 +62,7 @@ Kommande steg:
 6. Naturhänsyn, skador, vilt och kulturmiljö
    - Risk- och kontrollflaggor.
    - Inte produktionskurvor.
+   - .25 anvands som separat hansyn/risk-lager, inte som juridiskt beslut eller prislogik.
 
 7. Terrängtypschema
    - Kan stödja svårighet och kostnad i kalkyler.

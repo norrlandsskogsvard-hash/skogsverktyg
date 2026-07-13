@@ -25,7 +25,11 @@ const DEFAULT_DRAFT = {
   vitality: "normal",
   bearing: "normal",
   snowWindRisk: "nej",
+  insectRisk: "nej",
+  wildlifePressure: "nej",
   conservation: "nej",
+  waterEdge: "nej",
+  culturalHeritage: "nej",
   reindeerMountain: "nej",
   productiveForestLandAssumption: "assumed_productive",
   soilMoisture: "okand",
@@ -60,6 +64,7 @@ const SOURCE_GROUPS = [
   ["scenario_reference", "Scenarioverktyg"],
   ["practice_guide", "Praktiska skötselmallar"],
   ["field_method", "Fältmetoder"],
+  ["consideration", "Hänsyn/risk"],
   ["field_observation", "Fältobservationer"],
   ["warning", "Fältvarningar"]
 ];
@@ -202,7 +207,9 @@ function riskFields(values) {
     selectField("gaps", "Luckighet", SELECTS.gaps, values.gaps),
     selectField("vitality", "Kronor/vitalitet", SELECTS.vitality, values.vitality),
     selectField("bearing", "Bärighet", SELECTS.bearing, values.bearing),
-    selectField("snowWindRisk", "Snörisk/vindutsatt", SELECTS.yesNo, values.snowWindRisk)
+    selectField("snowWindRisk", "Snörisk/vindutsatt", SELECTS.yesNo, values.snowWindRisk),
+    selectField("insectRisk", "Insekter/färska skador", SELECTS.yesNoUnknown, values.insectRisk),
+    selectField("wildlifePressure", "Viltbete/älgtryck", SELECTS.yesNoUnknown, values.wildlifePressure)
   ];
 }
 
@@ -211,7 +218,11 @@ function legalFields(values) {
 }
 
 function natureFields(values) {
-  return [selectField("conservation", "Naturvärden/kulturmiljö", SELECTS.yesNoUnknown, values.conservation)];
+  return [
+    selectField("conservation", "Naturvärden", SELECTS.yesNoUnknown, values.conservation),
+    selectField("waterEdge", "Kantzon/vatten", SELECTS.yesNoUnknown, values.waterEdge),
+    selectField("culturalHeritage", "Kulturmiljö/fornlämning", SELECTS.yesNoUnknown, values.culturalHeritage)
+  ];
 }
 
 function reindeerFields(values) {
@@ -234,6 +245,7 @@ function resultTemplate(result) {
     "<div class='skotsel-result-summary'>" +
       resultMetric("Skogligt", result.forestryStatus || result.actionLabel) +
       resultMetric("Juridik", result.legalStatus || "OK") +
+      resultMetric("Hänsyn/risk", result.considerationAssessment?.status || "OK") +
       resultMetric("Säkerhet", confidenceLabel(result.confidence)) +
       resultMetric("SI", siStatusLabel(result.siteIndexEstimate)) +
     "</div>" +
@@ -247,6 +259,7 @@ function resultTemplate(result) {
     "</div>" +
     "<div class='skotsel-advanced skotsel-advanced--result'>" +
       advancedDetails("Forskningsstöd", researchSupportTemplate(result)) +
+      advancedDetails("Naturhänsyn, skador och vilt", considerationTemplate(result.considerationAssessment), Boolean(result.considerationAssessment?.flags?.length), "skotsel-hansyn-risk") +
       advancedDetails("Juridisk kontroll", resultBlock("Juridisk kontroll", result.legalAssessment)) +
       advancedDetails("Juridiska kontrollflaggor", legalChecksTemplate(result.legalChecks || []), Boolean(result.legalChecks?.length), "skotsel-legal-flags") +
       advancedDetails("Varningar", listTemplate(result.warnings), hasWarnings) +
@@ -271,6 +284,18 @@ function legalSeverityLabel(severity) {
   if (severity === "critical") return "Kontroll krävs";
   if (severity === "warning") return "Kontroll rekommenderas";
   return "Info";
+}
+
+function considerationTemplate(assessment = {}) {
+  const flags = assessment.flags || [];
+  const header = "<p class='card__text'><strong>Hänsyn/risk: " + escapeHtml(assessment.status || "OK") + "</strong></p>";
+  const disclaimer = "<p class='card__text'>Detta är risk- och fältstöd, inte juridiskt besked, prisregel eller kurvunderlag.</p>";
+  if (!flags.length) {
+    return header + disclaimer + "<p class='card__text'>Inga särskilda hänsyns-/riskflaggor är markerade i snabbkontrollen.</p>";
+  }
+  return header + disclaimer + "<ul class='skotsel-list'>" + flags.map((flag) =>
+    "<li><strong>" + escapeHtml(flag.label) + "</strong> - " + escapeHtml(flag.detail) + "</li>"
+  ).join("") + "</ul>";
 }
 
 function quickProposalTemplate(result) {
@@ -432,6 +457,7 @@ function sourceRoleLabel(type) {
     scenario_reference: "scenarioverktyg",
     practice_guide: "praktisk mall",
     field_method: "fältmetod",
+    consideration: "hänsyn/risk",
     field_observation: "fältvärden",
     warning: "varning"
   }[type] || type;
@@ -442,6 +468,7 @@ function sourceLimitation(item) {
   if (item.type === "scenario_reference") return "långsiktig analys, inte fältgräns";
   if (item.type === "practice_guide") return "förenklad, ej facit";
   if (item.type === "field_method") return "metodstöd, inte auto-SI";
+  if (item.type === "consideration") return "riskstöd, inte juridiskt beslut";
   if (item.type === "skogskunskap_tool") return skogskunskapToolLimitation(item);
   if (item.type === "skogskunskap_guidance") return "ska vägas mot lag/forskning/fält";
   if (item.type === "regional_curve" && item.strength === "pilot") return "pilot, inte full kurva";

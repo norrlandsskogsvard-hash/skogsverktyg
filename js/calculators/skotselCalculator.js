@@ -5,6 +5,7 @@ import {
   findGallringZone,
   findThinningSourceCandidate,
   GALLRING_RESEARCH_SUPPORT_SUMMARY,
+  HANSYN_RISK_SUPPORT_SUMMARY,
   LEGAL_CONTROL_RULES_SUMMARY,
   NORRA_TEXT_RULES_SUMMARY,
   ROJNING_RESEARCH_SUPPORT_SUMMARY,
@@ -151,6 +152,25 @@ export function calculateSkotselRecommendation(input = {}) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
   }
 
+  const considerationAssessment = buildHansynRiskAssessment(normalized, quickAssessment);
+  quickAssessment.fieldChecks = unique([
+    ...considerationAssessment.fieldChecks,
+    ...quickAssessment.fieldChecks
+  ]);
+  quickAssessment.warnings.push(...considerationAssessment.warnings);
+  quickAssessment.sourceNotes = unique([
+    ...(quickAssessment.sourceNotes || []),
+    ...considerationAssessment.sourceNotes
+  ]);
+
+  if (considerationAssessment.explanation) {
+    quickAssessment.why = quickAssessment.why + " " + considerationAssessment.explanation;
+  }
+
+  if (considerationAssessment.lowersConfidence) {
+    quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
+  }
+
   if (legal.hasConservationFlag) {
     quickAssessment.confidence = lowerConfidence(quickAssessment.confidence);
     quickAssessment.fieldChecks.push("Kontrollera juridiska krav och hänsyn innan produktionsåtgärd skrivs som huvudförslag.");
@@ -165,6 +185,7 @@ export function calculateSkotselRecommendation(input = {}) {
     sourceNotes: unique([...sourceNotes, ...(quickAssessment.sourceNotes || [])]),
     legalChecks: legal.checks,
     legalStatus: legal.statusLabel,
+    considerationAssessment,
     siteIndexEstimate
   });
 }
@@ -190,7 +211,11 @@ function normalizeInput(input) {
     vitality: clean(input.vitality),
     bearing: clean(input.bearing),
     snowWindRisk: clean(input.snowWindRisk),
+    insectRisk: clean(input.insectRisk),
+    wildlifePressure: clean(input.wildlifePressure),
     conservation: clean(input.conservation),
+    waterEdge: clean(input.waterEdge),
+    culturalHeritage: clean(input.culturalHeritage),
     reindeerMountain: clean(input.reindeerMountain),
     productiveForest: clean(input.productiveForest),
     productiveForestLandAssumption: normalizeProductiveForestLandAssumption(input),
@@ -509,6 +534,7 @@ function buildResult(input, parts) {
     forestryAssessment: parts.why,
     legalAssessment: parts.legalAssessment,
     legalChecks: parts.legalChecks || [],
+    considerationAssessment: parts.considerationAssessment || emptyConsiderationAssessment(),
     warnings,
     nextChecks: fieldChecks,
     planText,
@@ -898,6 +924,89 @@ function isBjorkLovResearchRelevant(input, assessment) {
     (assessment.actionCode === "curve_missing" && isLovSpecies(input.mainSpecies));
 }
 
+function buildHansynRiskAssessment(input, assessment) {
+  const flags = [];
+  const sourceNotes = [
+    HANSYN_RISK_SUPPORT_SUMMARY.note,
+    "Skogsskotselserien 14 Naturhansyn, Skogsskotselserien 12 Skador del 1-2, Viltanpassad skogsskotsel och kulturmiljoriktlinjer anvands som faltstod.",
+    "Hansyn/risk kan sanka sakerhet och lagga till kontrollpunkter, men ger inte juridiskt besked, ny kurva, prisregel eller hard grans."
+  ];
+
+  if (input.conservation === "ja" || input.conservation === "osakert") {
+    flags.push(considerationFlag("naturhansyn", "Naturhansyn", "warning", "Kontrollera naturvarden, dod ved, lovinslag, aldre trad och hansynsytor fore atgard."));
+  }
+  if (input.waterEdge === "ja" || input.waterEdge === "osakert") {
+    flags.push(considerationFlag("mark", "Kantzon/vatten", "warning", "Kontrollera kantzon, back, sjo, vatmark eller vattennara miljo utan hard metergrans."));
+  }
+  if (input.culturalHeritage === "ja" || input.culturalHeritage === "osakert") {
+    flags.push(considerationFlag("kulturmiljo", "Kulturmiljo", "critical", "Kontrollera fornlamning eller kulturmiljo mot kartunderlag, faltlage och juridisk kontroll."));
+  }
+  if (input.bearing === "svag_blot" || input.soilMoisture === "blot" || input.soilMoisture === "fuktig") {
+    flags.push(considerationFlag("mark", "Mark/korskador", "warning", "Planera barighet, stickvagar och korning sa att mark- och rotskador begransas."));
+  }
+  if (input.snowWindRisk === "ja") {
+    flags.push(considerationFlag("skador", "Storm/vind", "critical", "Kontrollera vindutsatt lage, stabilitet och gallringsstyrka innan atgard."));
+    flags.push(considerationFlag("skador", "Snoskador", "warning", "Kontrollera snorisk, stamform och stabilitet vid rojning eller gallring."));
+  }
+  if (input.damage === "tydliga" || input.damage === "svara" || input.vitality === "svag") {
+    flags.push(considerationFlag("skador", "Rota/svamp/skador", "warning", "Kontrollera vitalitet, skadade trad, rota och svamp innan atgardsforslag anvands."));
+  }
+  if (input.insectRisk === "ja" || input.insectRisk === "osakert") {
+    flags.push(considerationFlag("skador", "Insekter", "warning", "Kontrollera farska skador, barkborre-/insektsrisk och behov av uppfoljning i falt."));
+  }
+  if (input.wildlifePressure === "ja" || input.wildlifePressure === "osakert") {
+    flags.push(considerationFlag("vilt", "Viltbete/alg", "warning", "Kontrollera vilttryck, malbild och tradslagsval, sarskilt for tall och lov."));
+  }
+  if (input.wildlifePressure === "ja" || input.wildlifePressure === "osakert" || input.conservation === "ja" || input.conservation === "osakert" || isLovSpecies(input.mainSpecies) || input.birchShare > 30) {
+    flags.push(considerationFlag("vilt", "RASE/lov", "info", "Kontrollera ronn, asp, salg, ek och annat vardefullt lov som natur- eller viltstod utan automatisk stamregel."));
+  }
+  if (isClearingAction(assessment.actionCode)) {
+    flags.push(considerationFlag("general", "Rojningsanpassning", "info", "Knyt rojningen till malbild for huvudstammar, lov, vilt och naturhansyn."));
+  } else if (assessment.actionCode === "final_felling_check" || assessment.actionCode === "final_felling_possible" || assessment.actionCode === "final_felling_priority") {
+    flags.push(considerationFlag("general", "Slutavverkningskontroll", "warning", "Kontrollera natur, kultur, vatten, foryngring och juridisk kontroll fore slutavverkningsforslag."));
+  } else {
+    flags.push(considerationFlag("general", "Gallringsanpassning", "info", "Vag gallring mot stormrisk, skador, barighet, naturhansyn och viltmalbild."));
+  }
+
+  const uniqueFlags = uniqueBy(flags, (flag) => flag.domain + ":" + flag.label);
+  const activeRiskFlags = uniqueFlags.filter((flag) => flag.severity !== "info");
+  const criticalFlags = uniqueFlags.filter((flag) => flag.severity === "critical");
+  const status = criticalFlags.length ? "Hög risk" : (activeRiskFlags.length ? "Kontrollera" : "OK");
+  const fieldChecks = activeRiskFlags.length
+    ? activeRiskFlags.slice(0, 4).map((flag) => "Hansyn/risk: " + flag.detail)
+    : ["Hansyn/risk: kontrollera naturvarden, skador, mark och vilt i falt innan atgard."];
+  const warnings = activeRiskFlags.map((flag) => "Hansyn/risk: " + flag.label + " ar markerad - " + flag.detail);
+  const explanation = activeRiskFlags.length
+    ? "Hansyn/risk-stodet markerar " + activeRiskFlags.map((flag) => flag.label.toLowerCase()).join(", ") + " som faltkontroll separat fran juridiken."
+    : "Hansyn/risk-stodet ar kontrollerat som separat faltstod.";
+
+  return {
+    status,
+    flags: uniqueFlags,
+    explanation,
+    warnings,
+    fieldChecks,
+    sourceNotes,
+    lowersConfidence: activeRiskFlags.length > 0
+  };
+}
+
+function considerationFlag(domain, label, severity, detail) {
+  return { domain, label, severity, detail };
+}
+
+function emptyConsiderationAssessment() {
+  return {
+    status: "OK",
+    flags: [],
+    explanation: "",
+    warnings: [],
+    fieldChecks: [],
+    sourceNotes: [],
+    lowersConfidence: false
+  };
+}
+
 function emptyResearchAssessment() {
   return {
     explanation: "",
@@ -956,6 +1065,7 @@ function groupSourcesByEvidence(evidenceAssessment) {
     scenario_reference: [],
     practice_guide: [],
     field_method: [],
+    consideration: [],
     field_observation: [],
     warning: []
   };
@@ -1081,4 +1191,14 @@ function normalizeProductiveForestLandAssumption(input) {
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))];
+}
+
+function uniqueBy(values, keyFn) {
+  const seen = new Set();
+  return values.filter((value) => {
+    const key = keyFn(value);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }

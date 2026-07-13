@@ -32,6 +32,7 @@ export const SKOTSEL_SOURCE_DOCUMENTS = [
   "docs/skotselkollen-rojning-forskningsstod.md",
   "docs/skotselkollen-bjork-lov-forskningsstod.md",
   "docs/skotselkollen-bonitering-si-faltstod.md",
+  "docs/skotselkollen-hansyn-risk-faltstod.md",
   "docs/skotselkollen-aktiveringsprotokoll.md",
   "docs/rojningskalkyl-kallstod.md"
 ];
@@ -115,6 +116,25 @@ export const SITE_INDEX_FIELD_SUPPORT_SUMMARY = {
   note: "Bonitering/SI-stöd från AC, BD och B69 används som fältmetod, metodbegränsning och kontrollfrågor. Auto-SI och kurvdigitalisering är spärrade."
 };
 
+export const HANSYN_RISK_SUPPORT_SUMMARY = {
+  sourceIds: [
+    "skogsskotselserien-14-naturhansyn",
+    "skogsskotselserien-12-skador-del-1",
+    "skogsskotselserien-12-skador-del-2",
+    "viltanpassad-skogsskotsel-version-2",
+    "riktlinjer-forn-kulturmiljoer-2016"
+  ],
+  dataFile: "data/hansyn-risk-rules.json",
+  ruleCount: 12,
+  status: "reviewed_field_support",
+  activeUse: "risk_and_consideration_support_only",
+  canMakeLegalDecision: false,
+  canActivateCurves: false,
+  canCreateHardThresholds: false,
+  canChangePricing: false,
+  note: "Naturhansyn, skador och vilt anvands som risk-, hansyns- och faltstod. Det skapar inga juridiska beslut, kurvor, prisandringar eller harda granser."
+};
+
 export const EVIDENCE_TYPE_WEIGHTS = {
   law: 100,
   research: 80,
@@ -125,6 +145,7 @@ export const EVIDENCE_TYPE_WEIGHTS = {
   scenario_reference: 45,
   practice_guide: 35,
   field_method: 65,
+  consideration: 70,
   field_observation: 60,
   warning: 75
 };
@@ -393,6 +414,22 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
     confidence: "medium",
     limitations: ["Auto-SI, diagramdigitalisering, nya kurvor och hårda produktionsgränser är spärrade."],
     notes: ["SI är underlag och osäkerhetsmarkör, inte ensam facitkälla."]
+  },
+  {
+    id: "consideration-hansyn-risk-support",
+    type: "consideration",
+    source: "hansyn-risk-sources",
+    sourceLabel: "Naturhansyn, skador och vilt",
+    area: "considerationRisk",
+    species: "all",
+    region: "all",
+    appliesTo: ["all"],
+    claim: "Naturhansyn, skador, markrisk, kulturmiljo och vilt anvands som separata kontrollflaggor och riskstod.",
+    strength: "fieldSupport",
+    weight: EVIDENCE_TYPE_WEIGHTS.consideration,
+    confidence: "medium",
+    limitations: ["Kan sanka sakerhet eller lagga till kontrollpunkter men ger inte juridiskt besked, ny kurva, prisregel eller hard grans."],
+    notes: ["Hansyn/risk redovisas separat fran skoglig rekommendation och juridisk kontroll."]
   },
   {
     id: "regional-t20-pilot",
@@ -742,6 +779,8 @@ export function sourceNotesForInput(input = {}) {
   notes.push(GALLRING_RESEARCH_SUPPORT_SUMMARY.note);
   notes.push("Skogsskötselserien 7 Gallring används som förklarings- och riskstöd, inte som ny gallringskurva.");
   notes.push(ROJNING_RESEARCH_SUPPORT_SUMMARY.note);
+  notes.push(HANSYN_RISK_SUPPORT_SUMMARY.note);
+  notes.push("Naturhansyn/skador/vilt visas separat fran skoglig rekommendation och juridisk kontroll.");
   notes.push(BJORK_LOV_RESEARCH_SUPPORT_SUMMARY.note);
   notes.push("Björk/löv använder inte tall- eller granmall som facit.");
   notes.push(SITE_INDEX_FIELD_SUPPORT_SUMMARY.note);
@@ -1097,6 +1136,7 @@ function typeLabel(type) {
     scenario_reference: "scenarioverktyg",
     practice_guide: "praktisk skötselmall",
     field_method: "fältmetod",
+    consideration: "hansyn/risk",
     field_observation: "fältobservationer",
     warning: "fältvarningar"
   }[type] || type;

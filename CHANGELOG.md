@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-hansyn-risk.1 - 2026-07-12
+
+### Added - Naturhansyn, skador och vilt
+
+- Naturhansyn, skador och vilt har lagts till som risk- och faltstod.
+- Risk-/hansynsstodet visas separat fran skoglig rekommendation och juridisk kontroll.
+- Stodet kan inte skapa juridiska beslut, kurvor, prisandringar eller harda gransvarden.
+- Validering for hansyn/risk har lagts till.
+- PWA-cache hojd till hansyn-risk.1.
+
 ## v2.0.0-alpha.1-site-index-field.1 - 2026-07-12
 
 ### Added - Bonitering/SI faltstod
