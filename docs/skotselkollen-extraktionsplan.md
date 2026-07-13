@@ -40,6 +40,10 @@ Kommande steg:
 - .27 lagger in faltlage/mobiloptimering for praktisk anvandning fore offertkoppling.
 - .27 sparar endast lokalt pa enheten och kopplar inte till offert eller kundarkiv.
 - Nasta steg kan vara ytterligare falttest/UX eller manuell faltguide, inte automatiskt offert.
+- .28 forsoker kontrollerad aktivering av T18, T22, G20 och G22.
+- .28 aktiverar inga nya kurvor eftersom verifierade punktvarden saknas i kallbank och batchdata.
+- Efter .28 ar endast T20 aktiv; T18, T22, G20 och G22 ar fortsatt sparrade kandidater.
+- Nasta gallringskurvsteg ska vara kallutdrag eller kontrollerad digitalisering med sida/tabell/diagram, enheter och testfall, inte offertkoppling.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD

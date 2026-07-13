@@ -332,7 +332,7 @@ function assessQuickCurve(input, siteIndexEstimate) {
       recommendationDirection: "Använd punkten som fältstöd och jämför mot pappersmall eller annat källstött regionalt underlag.",
       fieldChecks,
       warnings: [sourceCandidate
-        ? "Kurva identifierad i källbank men saknar verifierade värden i appen."
+        ? "Kurvan finns som kandidat men är inte verifierad/aktiv."
         : "Gallringskurva saknas i appen för vald kombination."],
       sourceCandidate
     };
@@ -1035,7 +1035,7 @@ function curveSourceNotes(curveReference) {
 function sourceCandidateNotes(sourceCandidate) {
   if (!sourceCandidate) return [];
   return [
-    `${sourceCandidate.title}: identifierad källa, men inga verifierade kurvdata är aktiverade i appen.`,
+    `${sourceCandidate.title}: Kurvan finns som kandidat men är inte verifierad/aktiv.`,
     ...sourceCandidate.limitations
   ];
 }
@@ -1098,7 +1098,7 @@ function chartNote(actionCode, input, siteIndexEstimate, curveReference, sourceC
     return "Kurvunderlag saknas eller SI saknas. Jämför manuellt mot regional mall.";
   }
   if (!curveReference && sourceCandidate) {
-    return "Kurva identifierad i källbank men saknar verifierade värden i appen.";
+    return "Kurvan finns som kandidat men är inte verifierad/aktiv.";
   }
   if (!curveReference) {
     return "SI finns, men gallringskurva saknas i appens kunskapsbas för vald kombination.";

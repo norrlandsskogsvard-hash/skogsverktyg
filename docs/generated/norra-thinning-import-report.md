@@ -1,31 +1,41 @@
-# Norra gallringsimport - granskningsrapport
+# Norra gallringsimport - batch 02 kontrollerad aktivering
 
-Importfil: `data/norra-thinning-import-batch-01.csv`
+Importfil: `data/norra-thinning-import-batch-02.csv`
 
-Batchimport betyder inte att kurvorna är aktiva.
+Batch 02 forsokte aktivera ett litet urval av Norra gallringsmallar: T18, T22, G20 och G22. Inga av dessa aktiverades eftersom verifierade punktvarden saknas i befintlig kallbank, batchdata och dokumentation.
 
 ## Sammanfattning
 
-- Rader: 5
-- Mallar: 5
-- Active pilot: 0
-- Verified candidate: 0
-- Draft digitized: 0
-- Candidate: 5
-- Rejected: 0
-- Aktiva paket i preview: 0
-- Saknar värden: 5
+- Rader i batch 02: 4
+- Aktiva kurvor efter batch: 1
+- Active codes: T20
+- Nyaktiverade kurvor: inga
+- Sparrade kandidater i batchen: T18, T22, G20, G22
+- T20-integritet: oforandrad, inklusive basalAreaBefore 24.5 for forsta gallringen
+- Auto-SI: fortsatt sparrad
+- SITE_INDEX_CURVES: []
 
-## Mallar
+## Aktiverade kurvor
 
-| SI | Trädslag | Status | Datakvalitet | Värden finns | Aktiv | Nästa kontroll |
-| --- | --- | --- | --- | --- | --- | --- |
-| T22 | tall | candidate | candidate_only | Nej | Nej | Lägg in källa, värden och enheter |
-| G20 | gran | candidate | candidate_only | Nej | Nej | Lägg in källa, värden och enheter |
-| T18 | tall | candidate | candidate_only | Nej | Nej | Lägg in källa, värden och enheter |
-| G22 | gran | candidate | candidate_only | Nej | Nej | Lägg in källa, värden och enheter |
-| T24 | tall | candidate | candidate_only | Nej | Nej | Lägg in källa, värden och enheter |
+| Kod | Tradslag | Status | Anvandning | Kommentar |
+| --- | --- | --- | --- | --- |
+| T20 | tall | active_pilot | chart_reference | Befintlig pilot, oforandrad. |
 
-## Varningar
+## Sparrade kurvor
 
-- Inga CSV-varningar.
+| Kod | Tradslag | Status | Datakvalitet | Aktiv | Orsak |
+| --- | --- | --- | --- | --- | --- |
+| T18 | tall | candidate | candidate_only | Nej | Verifierade punktvarden saknas. |
+| T22 | tall | candidate | candidate_only | Nej | Verifierade punktvarden saknas. |
+| G20 | gran | candidate | candidate_only | Nej | Verifierade punktvarden saknas. |
+| G22 | gran | candidate | candidate_only | Nej | Verifierade punktvarden saknas. |
+
+## Kontrollpunkter
+
+- Kandidater har `activeUse: documentation_only`.
+- Kandidater har `reviewNeeded: true`.
+- Kandidater har tomma `values` och `draftValues`.
+- Inga vardemangder har gissats fran diagram eller bild.
+- Bjork/lov kopplas inte till tall-/granmall.
+- Gallringsmall ar stod, inte facit.
+- Ingen prislogik, juridisk beslutslogik eller offert-/kundarkivkoppling har andrats.

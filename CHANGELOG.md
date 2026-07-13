@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.0.0-alpha.1-active-curves.1 - 2026-07-13
+
+### Added - Kontrollerad aktivering av gallringskurvor
+
+- Batch 02 for Norra gallringskurvor har lagts till for T18, T22, G20 och G22.
+- Inga nya kurvor aktiverades eftersom verifierade punktvarden saknas.
+- T20 ar fortsatt enda aktiva kurva och dess varden ar oforandrade.
+- Valideringen listar active curve count, activeCodes, blockerade kandidater, T20-integritet och auto-SI-status.
+- Skotselkollen visar tydligare nar en kurva finns som kandidat men inte ar verifierad/aktiv.
+- Auto-SI ar fortsatt sparrad och `SITE_INDEX_CURVES` ar fortsatt `[]`.
+- Ingen prislogik, juridisk beslutslogik eller offert-/kundarkivkoppling har andrats.
+- PWA-cache hojd till active-curves.1.
+
 ## v2.0.0-alpha.1-field-mode.1 - 2026-07-13
 
 ### Added - Faltlage

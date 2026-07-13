@@ -429,7 +429,7 @@ test("Skötselkollen visar saknad kurva för tall T22 utan att skapa falsk kurva
   await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
   await expect(page.locator("body")).toContainText(/Kurvunderlag saknas|kurva saknas/i);
   await expect(page.locator("body")).toContainText("Källa är identifierad");
-  await expect(page.locator("body")).toContainText("Kurva identifierad i källbank men saknar verifierade värden i appen");
+  await expect(page.locator("body")).toContainText("Kurvan finns som kandidat men är inte verifierad/aktiv");
   await expect(page.locator("body")).toContainText("Verifierade kurvdata för T22");
   await expect(page.locator("body")).toContainText("Full digitaliserad gallringskurva saknas");
   await expect(page.locator("body")).toContainText("Verifiera och digitalisera rätt kurvdata innan åtgärd");
@@ -452,6 +452,7 @@ test("Skötselkollen visar gran G20 som candidate utan aktiv kurva", async ({ pa
   await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Kurvunderlag saknas");
   await expect(page.locator("body")).toContainText("Källa är identifierad");
+  await expect(page.locator("body")).toContainText("Kurvan finns som kandidat men är inte verifierad/aktiv");
   await expect(page.locator("body")).toContainText("Verifierade kurvdata för G20");
   await expect(page.locator(".skotsel-chart__pilot-line")).toHaveCount(0);
   await expect(page.locator("body")).not.toContainText("Pilotunderlag");
