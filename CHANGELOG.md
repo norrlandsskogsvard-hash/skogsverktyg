@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.0.0-alpha.1-curve-review.1 - 2026-07-13
+
+### Added - Kurvgranskning
+
+- Kurvgranskning for Norra gallringsmallar har lagts till.
+- Manuell inmatning av granskningsutkast kan sparas lokalt i webblasaren.
+- Utkast kan kopieras som CSV-rad for importflode.
+- Lokala utkast aktiverar inte kurvor.
+- Inga nya kurvor eller auto-SI har aktiverats.
+- Validering for kurvgranskningsutkast har lagts till.
+- PWA-cache hojd till curve-review.1.
+
 ## v2.0.0-alpha.1-active-curves.1 - 2026-07-13
 
 ### Added - Kontrollerad aktivering av gallringskurvor

@@ -44,6 +44,10 @@ Kommande steg:
 - .28 aktiverar inga nya kurvor eftersom verifierade punktvarden saknas i kallbank och batchdata.
 - Efter .28 ar endast T20 aktiv; T18, T22, G20 och G22 ar fortsatt sparrade kandidater.
 - Nasta gallringskurvsteg ska vara kallutdrag eller kontrollerad digitalisering med sida/tabell/diagram, enheter och testfall, inte offertkoppling.
+- .29 lagger till Kurvgranskning for manuell digitalisering och lokal granskning av Norra gallringskurvor.
+- .29 sparar endast lokala granskningsutkast i webblasaren och aktiverar inga nya kurvor.
+- .29 aktiverar inte auto-SI och kopplar inte till juridiska beslut, prislogik, offert eller kundarkiv.
+- .30 kan vara forsta riktiga aktiveringsbatchen med granskade varden, men bara efter import, validering och aktiveringsprotokoll.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD

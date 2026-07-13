@@ -5,6 +5,7 @@ const modules = [
   { title: "DGV", href: "#/dgv", status: MODULE_STATUS.dgv, text: "Beräkna diametergrundytevägd medeldiameter med snabb fältinmatning." },
   { title: "Medelhöjd", href: "#/height", status: MODULE_STATUS.height, text: "Mata in provträdshöjder och få medelhöjd och statistik direkt." },
   { title: "Skötselkollen", href: "#/skotselkollen", status: MODULE_STATUS.skotselkollen, text: "Röjning, gallring eller slutavverkning baserat på beståndsvärden, källmatris och lagkontroll." },
+  { title: "Kurvgranskning", href: "#/curve-review", status: MODULE_STATUS.curveReview, text: "Kurvgranskning - för källarbete, inte fältbeslut. Spara manuella utkast lokalt och kopiera CSV-rad." },
   { title: "Röjning", href: "#/rojning", status: MODULE_STATUS.rojning, text: "Beräkna svårighet, tidsåtgång, pris per hektar och offertunderlag." },
   { title: "Planpris", href: "#/forest-plan-pricing", status: MODULE_STATUS.forestPlanPricing, text: "Prissätt skogsbruksplan med fältarbete, kontor, resa och påslag." },
   { title: "Offert", href: "#/quote", status: MODULE_STATUS.quote, text: "Skapa offert, importera kalkyler och skriv ut som PDF." },

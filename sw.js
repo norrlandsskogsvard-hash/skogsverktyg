@@ -1,4 +1,4 @@
-const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-active-curves.1";
+const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-curve-review.1";
 
 const CORE_ASSETS = [
   "./",
@@ -20,6 +20,7 @@ const CORE_ASSETS = [
   "./js/views/dgv.js",
   "./js/views/height.js",
   "./js/views/skotselkollen.js",
+  "./js/views/curve-review.js",
   "./js/views/rojning.js",
   "./js/views/forest-plan-pricing.js",
   "./js/views/quote.js",
@@ -31,11 +32,13 @@ const CORE_ASSETS = [
   "./js/calculators/skotselReport.js",
   "./js/calculators/skotselKnowledgeBase.js",
   "./js/calculators/norraThinningValues.js",
+  "./js/calculators/curveReview.js",
   "./js/calculators/siteIndexCalculator.js",
   "./js/calculators/siteIndexCurves.js",
   "./js/calculators/customerArchive.js",
   "./js/calculators/quoteCalculator.js",
-  "./js/calculators/pricingEngine.js"
+  "./js/calculators/pricingEngine.js",
+  "./data/norra-thinning-review-drafts.json"
 ];
 
 self.addEventListener("install", (event) => {

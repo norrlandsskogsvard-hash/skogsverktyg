@@ -4,6 +4,8 @@ import { startStaticServer } from "./static-server.mjs";
 const SCREENSHOT_DIR = "test-results/screenshots";
 let staticServer;
 
+test.setTimeout(120_000);
+
 const routes = [
   { hash: "/", text: /Skogskalkyl 2\.0|Fältkalkyler/i },
   { hash: "/dgv", text: /DGV|diameter/i },
@@ -13,6 +15,7 @@ const routes = [
   { hash: "/quote", text: /Offert/i },
   { hash: "/customers", text: /Kundregister|Kunder/i },
   { hash: "/skotselkollen", text: /Skötselkollen|Snabb gallringsmall/i },
+  { hash: "/curve-review", text: /Kurvgranskning/i },
   { hash: "/settings", text: /Inställningar/i }
 ];
 
@@ -196,6 +199,31 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.draftCount).toBe(0);
   expect(summary.reviewNeededCount).toBe(16);
   expect(summary.almostActiveBlocked).toBe(true);
+});
+
+test("Kurvgranskning sparar lokalt utkast och skapar CSV utan aktivering", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/curve-review");
+  await expect(page.locator("body")).toContainText("Kurvgranskning");
+  await expect(page.locator("body")).toContainText("Aktiva kurvor");
+  await expect(page.locator("body")).toContainText("T20");
+  await expect(page.locator("body")).toContainText("Auto-SI: sparrad");
+  await expect(page.locator("body")).toContainText("T18");
+  await expect(page.locator("body")).toContainText(/Draft\/spärrad|Draft\/spÃ¤rrad/);
+
+  const draft = page.locator('[data-draft-code="T18"]').first();
+  await expect(draft).toBeVisible();
+  await draft.locator('input[name="sourcePage"]').fill("s. 12");
+  await draft.locator('input[name="topHeight"]').fill("14.2");
+  await draft.locator('input[name="basalAreaBefore"]').fill("23.5");
+  await draft.locator('input[name="basalAreaAfter"]').fill("17.8");
+  await draft.getByRole("button", { name: "Spara lokalt utkast" }).click();
+  await expect(draft.locator("[data-local-status]")).toContainText("Lokalt sparat");
+  await expect(draft.getByRole("button", { name: "Kopiera som CSV-rad" })).toBeVisible();
+  await draft.getByRole("button", { name: "Kopiera som CSV-rad" }).click();
+  await expect(draft.locator("[data-csv-output]")).toHaveValue(/T18,tall,18,first_thinning,14.2,23.5,17.8/);
+  await expect(page.getByRole("button", { name: /Aktivera kurva/i })).toHaveCount(0);
+  await expectNoHorizontalScroll(page);
 });
 
 test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) => {

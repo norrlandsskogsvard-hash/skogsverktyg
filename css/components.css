@@ -1608,6 +1608,98 @@
   gap: var(--space-3);
 }
 
+.curve-review {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.curve-review__workspace {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.curve-review__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--space-3);
+}
+
+.curve-review__stat .card__body {
+  gap: var(--space-2);
+}
+
+.curve-review__stat span {
+  color: var(--color-muted);
+  font-weight: 750;
+}
+
+.curve-review__stat strong {
+  font-size: 1.25rem;
+}
+
+.curve-review__groups,
+.curve-review__group,
+.curve-review__draft-grid,
+.curve-review-form,
+.curve-review-card__meta {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.curve-review__group-heading,
+.curve-review-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.curve-review__group-heading h3,
+.curve-review-card__top h4 {
+  margin: 0;
+}
+
+.curve-review__draft-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr));
+}
+
+.curve-review-card__meta {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.curve-review__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.curve-review__list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-2);
+}
+
+.curve-review-csv {
+  min-height: 3.5rem;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 720px) {
+  .curve-review__group-heading,
+  .curve-review-card__top,
+  .curve-review__list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 .skotsel-curve-bank__group {
   display: grid;
   min-width: 0;

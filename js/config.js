@@ -5,6 +5,7 @@ export const NAV_ITEMS = [
   { id: "dgv", label: "DGV", hash: "#/dgv", icon: "D", primary: true },
   { id: "height", label: "Höjd", hash: "#/height", icon: "H", primary: true },
   { id: "skotselkollen", label: "Skötsel", hash: "#/skotselkollen", icon: "S", primary: true },
+  { id: "curve-review", label: "Kurvor", hash: "#/curve-review", icon: "K" },
   { id: "rojning", label: "Röjning", hash: "#/rojning", icon: "R", primary: true },
   { id: "quote", label: "Offert", hash: "#/quote", icon: "O" },
   { id: "customers", label: "Kunder", hash: "#/customers", icon: "K" },
@@ -27,5 +28,6 @@ export const MODULE_STATUS = {
   rojning: "Proffskalkyl",
   forestPlanPricing: "Proffskalkyl",
   quote: "Offertgenerator",
-  customers: "Lokalt arkiv"
+  customers: "Lokalt arkiv",
+  curveReview: "Källarbete"
 };
