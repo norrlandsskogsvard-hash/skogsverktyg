@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.0.0-alpha.1-field-mode.1 - 2026-07-13
+
+### Added - Faltlage
+
+- Faltlage har lagts till i Skotselkollen.
+- Snabbval for risk/hansyn har lagts till.
+- Faltanteckning och objektnamn/yta har lagts till.
+- Lokalt sparade faltbedomningar har lagts till.
+- Offline-/sparstatus har forbattrats.
+- Faltprotokollet tar med faltanteckningar.
+- Ingen offert- eller kundarkivkoppling har lagts till.
+- PWA-cache hojd till field-mode.1.
+
 ## v2.0.0-alpha.1-field-report.1 - 2026-07-13
 
 ### Added - Faltprotokoll/rapportlage

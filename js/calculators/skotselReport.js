@@ -1,5 +1,5 @@
 const REPORT_TITLE = "Skötselkollen – fältprotokoll";
-const REPORT_CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-field-report.1";
+const REPORT_CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-field-mode.1";
 
 const SPECIES_LABELS = {
   tall: "Tall",
@@ -31,9 +31,11 @@ export function buildSkotselFieldReport({ input = {}, result = {}, generatedAt =
     section("Rubrik", [
       REPORT_TITLE,
       "Skapad: " + generatedAtText,
-      "App/cache: " + REPORT_CACHE_NAME
+      "App/cache: " + REPORT_CACHE_NAME,
+      input.fieldSavedAt ? "Sparad lokalt: " + formatDateTime(normalizeDate(input.fieldSavedAt)) : "Sparad lokalt: inte sparad som fältbedömning"
     ]),
     section("Bestånd/inmatning", buildInputLines(input, result)),
+    section("Fältanteckning", buildFieldNoteLines(input)),
     section("Samlad bedömning", [
       "Skogligt: " + textOr(result.forestryStatus || result.actionLabel),
       "Säkerhet: " + textOr(result.confidence),
@@ -69,6 +71,9 @@ export function buildSkotselFieldReport({ input = {}, result = {}, generatedAt =
 
 function buildInputLines(input, result) {
   const lines = [
+    "Objektnamn/yta: " + textOr(input.objectName),
+    "Platsbeskrivning: " + textOr(input.placeDescription),
+    "Koordinater: " + textOr(input.coordinates),
     "Trädslag: " + label(SPECIES_LABELS, input.mainSpecies),
     "Region: " + label(REGION_LABELS, input.region),
     "SI/bonitet: " + siteIndexValue(result.siteIndexEstimate, input.siteIndex),
@@ -91,6 +96,17 @@ function buildInputLines(input, result) {
   ].filter(Boolean);
   lines.push("Risk-/hänsynsmarkeringar: " + (riskMarks.length ? riskMarks.join(", ") : "Inga särskilda markerade"));
   return lines;
+}
+
+function buildFieldNoteLines(input) {
+  return [
+    "Objektnamn/yta: " + textOr(input.objectName),
+    "Platsbeskrivning: " + textOr(input.placeDescription),
+    "Koordinater: " + textOr(input.coordinates),
+    "Fältanteckning: " + textOr(input.fieldNote, "Ingen anteckning"),
+    "Registrerad: " + (input.fieldRecordedAt ? formatDateTime(normalizeDate(input.fieldRecordedAt)) : "saknas"),
+    "Sparad: " + (input.fieldSavedAt ? formatDateTime(normalizeDate(input.fieldSavedAt)) : "inte sparad som fältbedömning")
+  ];
 }
 
 function buildSilvicultureLines(result) {

@@ -257,6 +257,32 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .skotsel-field-mode,
+  .skotsel-saved-list li {
+    grid-template-columns: 1fr;
+  }
+
+  .skotsel-field-mode [data-field-status] {
+    text-align: left;
+  }
+
+  .skotsel-risk-chips > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .skotsel-risk-chip,
+  .skotsel-save-actions .button,
+  .skotsel-saved-actions .button {
+    min-height: 3rem;
+    width: 100%;
+  }
+
+  .skotsel-saved-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .field-entry-form--keypad {
     grid-template-columns: 1fr;
   }

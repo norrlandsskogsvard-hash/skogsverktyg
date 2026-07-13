@@ -287,6 +287,33 @@ test("Skötselkollen visar fältprotokoll med kopiera och skriv ut", async ({ pa
   await expectNoHorizontalScroll(page);
 });
 
+test("Skötselkollen fältläge sparar lokal fältbedömning och anteckning", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/skotselkollen");
+  await expect(page.locator("body")).toContainText("Fältläge");
+  await fillSkotselkollenPilot(page);
+
+  await page.getByRole("button", { name: "Vindutsatt" }).click();
+  await page.getByRole("button", { name: "Viltbete" }).click();
+  await page.getByRole("button", { name: "Osäker SI" }).click();
+  await expect(page.locator(".skotsel-result-summary").first()).toBeVisible();
+
+  await page.locator('input[name="objectName"]').fill("Testyta 27");
+  await page.locator('textarea[name="fieldNote"]').fill("Kontrollera stickväg och viltbete vid nästa besök.");
+  await page.getByRole("button", { name: "Spara fältbedömning" }).click();
+  await expect(page.locator(".skotsel-saved-assessments")).toContainText("Testyta 27");
+  await expect(page.locator(".skotsel-saved-assessments")).toContainText("Öppna");
+
+  await page.locator("[data-show-field-report]").first().click();
+  const report = page.locator(".field-report").first();
+  await expect(report).toContainText("Testyta 27");
+  await expect(report).toContainText("Kontrollera stickväg och viltbete");
+  await expect(report).toContainText("Samlad bedömning");
+  await expect(report).toContainText("Hänsyn/risk");
+  await expect(report).toContainText("Juridisk kontroll");
+  await expectNoHorizontalScroll(page);
+});
+
 test("Skötselkollen visar forskningsrisker utan att skapa ny kurva", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoRoute(page, "/skotselkollen");

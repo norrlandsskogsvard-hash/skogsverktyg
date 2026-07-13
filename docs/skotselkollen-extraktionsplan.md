@@ -37,7 +37,9 @@ Kommande steg:
 - .25 skapar inga juridiska beslut, harda gransvarden, prisandringar, diagramvarden eller nya kurvor.
 - .26 lagger in faltprotokoll/rapportlage som aterger befintlig bedomning.
 - .26 skapar inga nya kallregler, kurvor, diagramvarden eller harda gransvarden.
-- Nasta steg kan vara export till offert/kundarkiv eller manuell faltguide.
+- .27 lagger in faltlage/mobiloptimering for praktisk anvandning fore offertkoppling.
+- .27 sparar endast lokalt pa enheten och kopplar inte till offert eller kundarkiv.
+- Nasta steg kan vara ytterligare falttest/UX eller manuell faltguide, inte automatiskt offert.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD

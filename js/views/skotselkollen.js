@@ -5,6 +5,8 @@ import { getStoredValue, setStoredValue, removeStoredValue } from "../storage.js
 import { createPageHeader, escapeHtml, showToast } from "../ui.js";
 
 const STORAGE_KEY = "skotselkollenDraft";
+const FIELD_HISTORY_KEY = "skotselkollenFieldAssessments";
+const MAX_FIELD_HISTORY = 10;
 
 const DEFAULT_DRAFT = {
   mainSpecies: "tall",
@@ -37,7 +39,13 @@ const DEFAULT_DRAFT = {
   movingGroundwater: "okand",
   vegetationType: "",
   soilTexture: "",
-  soilDepth: ""
+  soilDepth: "",
+  objectName: "",
+  placeDescription: "",
+  fieldNote: "",
+  coordinates: "",
+  fieldRecordedAt: "",
+  fieldSavedAt: ""
 };
 
 const SELECTS = {
@@ -84,6 +92,8 @@ export function renderSkotselkollenView() {
   const toggleSiButton = page.querySelector("[data-toggle-si]");
   const feedback = page.querySelector("[data-skotsel-feedback]");
   const resetButton = page.querySelector("[data-reset-skotsel]");
+  const fieldStatus = page.querySelector("[data-field-status]");
+  const savedList = page.querySelector("[data-saved-field-assessments]");
 
   function currentInput() {
     return Object.fromEntries(new FormData(form).entries());
@@ -91,12 +101,17 @@ export function renderSkotselkollenView() {
 
   function renderResult() {
     const input = currentInput();
+    if (!input.fieldRecordedAt && form.elements.fieldRecordedAt) {
+      form.elements.fieldRecordedAt.value = new Date().toISOString();
+      input.fieldRecordedAt = form.elements.fieldRecordedAt.value;
+    }
     setStoredValue(STORAGE_KEY, input);
     const recommendation = calculateSkotselRecommendation(input);
     siSummary.innerHTML = siTemplate(recommendation.siteIndexEstimate);
     resultTargets.forEach((target) => {
       target.innerHTML = resultTemplate(recommendation);
     });
+    updateFieldStatus("Utkast sparat lokalt");
     feedback.textContent = "Utkast sparat på enheten.";
   }
 
@@ -117,6 +132,46 @@ export function renderSkotselkollenView() {
     const copyReportButton = event.target.closest("[data-copy-field-report]");
     const printReportButton = event.target.closest("[data-print-field-report]");
     const closeReportButton = event.target.closest("[data-close-field-report]");
+    const quickChip = event.target.closest("[data-risk-chip]");
+    const saveAssessmentButton = event.target.closest("[data-save-field-assessment]");
+    const openAssessmentButton = event.target.closest("[data-open-field-assessment]");
+    const deleteAssessmentButton = event.target.closest("[data-delete-field-assessment]");
+    const clearAssessmentsButton = event.target.closest("[data-clear-field-assessments]");
+    const positionButton = event.target.closest("[data-get-position]");
+
+    if (quickChip) {
+      applyRiskChip(quickChip.dataset.riskChip);
+      renderResult();
+      return;
+    }
+
+    if (saveAssessmentButton) {
+      saveFieldAssessment();
+      return;
+    }
+
+    if (openAssessmentButton) {
+      openSavedAssessment(openAssessmentButton.dataset.openFieldAssessment);
+      return;
+    }
+
+    if (deleteAssessmentButton) {
+      deleteSavedAssessment(deleteAssessmentButton.dataset.deleteFieldAssessment);
+      return;
+    }
+
+    if (clearAssessmentsButton) {
+      if (!window.confirm("Rensa alla lokalt sparade fältbedömningar?")) return;
+      setStoredValue(FIELD_HISTORY_KEY, []);
+      renderSavedAssessments();
+      updateFieldStatus("Sparade bedömningar rensade");
+      return;
+    }
+
+    if (positionButton) {
+      getPosition();
+      return;
+    }
 
     if (copyButton) {
       const recommendation = calculateSkotselRecommendation(currentInput());
@@ -184,20 +239,141 @@ export function renderSkotselkollenView() {
 
   if (draft.siteIndex) manualSi.classList.remove("hidden");
 
+  window.addEventListener("online", () => updateFieldStatus("Online igen"));
+  window.addEventListener("offline", () => updateFieldStatus("Offlineklar"));
+
+  renderSavedAssessments();
   renderResult();
   return page;
+
+  function updateFieldStatus(message) {
+    if (!fieldStatus) return;
+    const savedAt = form.elements.fieldSavedAt?.value;
+    const parts = [
+      navigator.onLine ? "Online" : "Offlineklar",
+      message,
+      savedAt ? "Senast sparad: " + shortTime(savedAt) : "Osparade ändringar"
+    ];
+    fieldStatus.textContent = parts.join(" · ");
+  }
+
+  function applyRiskChip(chip) {
+    const setValue = (name, value) => {
+      if (form.elements[name]) form.elements[name].value = value;
+    };
+    const setIfSoft = (name, value) => {
+      if (!form.elements[name]) return;
+      if (!form.elements[name].value || ["nej", "okand"].includes(form.elements[name].value)) {
+        form.elements[name].value = value;
+      }
+    };
+    const actions = {
+      wet: () => { setValue("bearing", "svag_blot"); setValue("soilMoisture", "blot"); },
+      wind: () => setValue("snowWindRisk", "ja"),
+      snow: () => setValue("snowWindRisk", "ja"),
+      wildlife: () => setValue("wildlifePressure", "ja"),
+      nature: () => setValue("conservation", "ja"),
+      culture: () => { setValue("culturalHeritage", "ja"); setIfSoft("conservation", "osakert"); },
+      water: () => { setValue("waterEdge", "ja"); setIfSoft("conservation", "osakert"); },
+      mixed: () => { setValue("mainSpecies", "blandat"); setIfSoft("birchShare", "35"); },
+      damage: () => { setValue("damage", "tydliga"); setValue("vitality", "svag"); },
+      uncertainSi: () => { setValue("siteIndex", ""); setValue("ageType", "osaker"); manualSi.classList.remove("hidden"); }
+    };
+    actions[chip]?.();
+    updateFieldStatus("Osparade ändringar");
+  }
+
+  function saveFieldAssessment() {
+    const savedAt = new Date().toISOString();
+    if (form.elements.fieldSavedAt) form.elements.fieldSavedAt.value = savedAt;
+    const input = currentInput();
+    const result = calculateSkotselRecommendation(input);
+    const current = getStoredValue(FIELD_HISTORY_KEY, []);
+    const item = {
+      id: "field-" + savedAt,
+      savedAt,
+      objectName: input.objectName || "Namnlös yta",
+      mainSpecies: input.mainSpecies,
+      summary: result.forestryStatus || result.actionLabel,
+      confidence: result.confidence,
+      riskStatus: result.considerationAssessment?.status || "OK",
+      legalStatus: result.legalStatus || "Ingen flagga",
+      input,
+      result,
+      fieldNotes: {
+        objectName: input.objectName,
+        placeDescription: input.placeDescription,
+        fieldNote: input.fieldNote,
+        coordinates: input.coordinates
+      }
+    };
+    const next = [item, ...current.filter((entry) => entry.id !== item.id)].slice(0, MAX_FIELD_HISTORY);
+    setStoredValue(FIELD_HISTORY_KEY, next);
+    setStoredValue(STORAGE_KEY, input);
+    renderSavedAssessments();
+    updateFieldStatus("Sparad lokalt");
+    showToast("Fältbedömning sparad lokalt.");
+  }
+
+  function renderSavedAssessments() {
+    if (!savedList) return;
+    const items = getStoredValue(FIELD_HISTORY_KEY, []);
+    savedList.innerHTML = savedAssessmentsTemplate(items);
+  }
+
+  function openSavedAssessment(id) {
+    const item = getStoredValue(FIELD_HISTORY_KEY, []).find((entry) => entry.id === id);
+    if (!item) return;
+    setFormValues(item.input || {});
+    if (item.input?.siteIndex) manualSi.classList.remove("hidden");
+    renderResult();
+    updateFieldStatus("Sparad bedömning öppnad");
+  }
+
+  function deleteSavedAssessment(id) {
+    const next = getStoredValue(FIELD_HISTORY_KEY, []).filter((entry) => entry.id !== id);
+    setStoredValue(FIELD_HISTORY_KEY, next);
+    renderSavedAssessments();
+    updateFieldStatus("Sparad bedömning borttagen");
+  }
+
+  function setFormValues(values) {
+    Object.entries({ ...DEFAULT_DRAFT, ...values }).forEach(([key, value]) => {
+      if (form.elements[key]) form.elements[key].value = value ?? "";
+    });
+  }
+
+  function getPosition() {
+    if (!navigator.geolocation) {
+      showToast("Position saknas i denna webbläsare.");
+      return;
+    }
+    updateFieldStatus("Hämtar position");
+    navigator.geolocation.getCurrentPosition((position) => {
+      const coords = position.coords.latitude.toFixed(6) + ", " + position.coords.longitude.toFixed(6);
+      if (form.elements.coordinates) form.elements.coordinates.value = coords;
+      renderResult();
+      showToast("Position sparad lokalt i utkastet.");
+    }, () => {
+      showToast("Kunde inte hämta position. Skriv plats manuellt.");
+      updateFieldStatus("Position ej sparad");
+    }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 });
+  }
 }
 
 function viewTemplate(values) {
   return "<section class='skotsel-layout'>" +
     "<form class='form skotsel-form' data-skotsel-form>" +
       "<div class='skotsel-mobile-title'><strong>Skötselkollen</strong><span>Snabb gallringsmall i fält</span></div>" +
+      fieldModeBar(values) +
       card("Snabb gallringskoll", "skotsel-card skotsel-quick-card", quickCardBody(values)) +
       "<div class='field-actions skotsel-actions'>" +
         "<button class='button button--large' type='submit'>Visa i gallringskurva</button>" +
         "<button class='button button--secondary' type='button' data-reset-skotsel>Rensa formulär</button>" +
       "</div>" +
       "<section class='skotsel-mobile-result' aria-live='polite' data-skotsel-result></section>" +
+      card("Fältanteckning", "skotsel-card skotsel-field-note-card", fieldNoteBody(values)) +
+      savedAssessmentsShell() +
       advancedControl(values) +
       "<p class='field-feedback' data-skotsel-feedback></p>" +
     "</form>" +
@@ -215,7 +391,54 @@ function quickCardBody(values) {
     "</div>" +
     "<div class='skotsel-manual-si hidden' data-manual-si>" +
       numberField("siteIndex", "Manuellt SI", values.siteIndex, "0.1") +
-    "</div>";
+    "</div>" +
+    riskQuickChips();
+}
+
+function fieldModeBar() {
+  return "<section class='skotsel-field-mode' aria-label='Fältläge'>" +
+    "<div><p class='pill'>Fältläge</p><strong>Snabb mobilvy för skogen</strong></div>" +
+    "<p data-field-status>Offlineklar · Osparade ändringar</p>" +
+  "</section>";
+}
+
+function riskQuickChips() {
+  const chips = [
+    ["wet", "Blöt mark"],
+    ["wind", "Vindutsatt"],
+    ["snow", "Snörisk"],
+    ["wildlife", "Viltbete"],
+    ["nature", "Naturvärde"],
+    ["culture", "Kulturmiljö"],
+    ["water", "Vatten/kantzon"],
+    ["mixed", "Blandbestånd"],
+    ["damage", "Skador/röta"],
+    ["uncertainSi", "Osäker SI"]
+  ];
+  return "<section class='skotsel-risk-chips'><h4>Snabbval risk/hänsyn</h4><div>" +
+    chips.map(([key, label]) => "<button class='button button--secondary skotsel-risk-chip' type='button' data-risk-chip='" + key + "'>" + escapeHtml(label) + "</button>").join("") +
+  "</div></section>";
+}
+
+function fieldNoteBody(values) {
+  return "<div class='form-grid'>" +
+    textField("objectName", "Objektnamn/yta", values.objectName) +
+    textField("placeDescription", "Platsbeskrivning", values.placeDescription) +
+    textField("coordinates", "Koordinater", values.coordinates) +
+    "<input type='hidden' name='fieldRecordedAt' value='" + escapeHtml(values.fieldRecordedAt || new Date().toISOString()) + "'>" +
+    "<input type='hidden' name='fieldSavedAt' value='" + escapeHtml(values.fieldSavedAt || "") + "'>" +
+    "<div class='field field-position-action'><span>Position</span><button class='button button--secondary' type='button' data-get-position>Hämta position</button><small>Sparas bara lokalt i utkastet.</small></div>" +
+    textareaField("fieldNote", "Anteckning", values.fieldNote, "span-12") +
+  "</div><div class='field-actions skotsel-save-actions'>" +
+    "<button class='button' type='button' data-save-field-assessment>Spara fältbedömning</button>" +
+  "</div>";
+}
+
+function savedAssessmentsShell() {
+  return "<section class='card skotsel-card skotsel-saved-assessments'><div class='card__body'>" +
+    "<div class='skotsel-section-head'><h3 class='card__title'>Sparade fältbedömningar</h3><button class='button button--secondary' type='button' data-clear-field-assessments>Rensa alla</button></div>" +
+    "<div data-saved-field-assessments></div>" +
+  "</div></section>";
 }
 
 function quickFields(values) {
@@ -792,6 +1015,21 @@ function listTemplate(values) {
   return "<ul class='skotsel-list'>" + values.map((value) => "<li>" + escapeHtml(value) + "</li>").join("") + "</ul>";
 }
 
+function savedAssessmentsTemplate(items) {
+  if (!items.length) {
+    return "<p class='card__text'>Inga sparade fältbedömningar på denna enhet ännu.</p>";
+  }
+  return "<ul class='skotsel-saved-list'>" + items.map((item) =>
+    "<li>" +
+      "<div><strong>" + escapeHtml(item.objectName || "Namnlös yta") + "</strong><span>" + escapeHtml(shortTime(item.savedAt)) + " · " + escapeHtml(item.summary || "Bedömning") + " · " + escapeHtml(item.riskStatus || "OK") + "</span></div>" +
+      "<div class='skotsel-saved-actions'>" +
+        "<button class='button button--secondary' type='button' data-open-field-assessment='" + escapeHtml(item.id) + "'>Öppna</button>" +
+        "<button class='button button--secondary' type='button' data-delete-field-assessment='" + escapeHtml(item.id) + "'>Ta bort</button>" +
+      "</div>" +
+    "</li>"
+  ).join("") + "</ul>";
+}
+
 function card(title, className, body) {
   return "<article class='card " + className + "'><div class='card__body'><h3 class='card__title'>" + escapeHtml(title) + "</h3>" + body + "</div></article>";
 }
@@ -816,6 +1054,17 @@ function numberField(name, label, value, step, extraClass = "") {
 
 function textField(name, label, value, extraClass = "") {
   return "<label class='field " + extraClass + "'><span>" + escapeHtml(label) + "</span><input class='input' type='text' name='" + name + "' value='" + escapeHtml(value ?? "") + "'></label>";
+}
+
+function textareaField(name, label, value, extraClass = "") {
+  return "<label class='field " + extraClass + "'><span>" + escapeHtml(label) + "</span><textarea class='textarea' name='" + name + "'>" + escapeHtml(value ?? "") + "</textarea></label>";
+}
+
+function shortTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("sv-SE", { dateStyle: "short", timeStyle: "short" }).format(date);
 }
 
 function confidenceLabel(value) {
