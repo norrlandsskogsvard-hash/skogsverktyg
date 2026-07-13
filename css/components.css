@@ -177,6 +177,139 @@
   display: none !important;
 }
 
+.field-report-entry {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.field-report-shell {
+  min-width: 0;
+}
+
+.field-report {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--space-4);
+}
+
+.field-report__header {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: start;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-3);
+}
+
+.field-report__header h3 {
+  margin: var(--space-2) 0 var(--space-1);
+}
+
+.field-report__header p {
+  margin: 0;
+}
+
+.field-report__actions {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.field-report__section {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2);
+}
+
+.field-report__section h4 {
+  margin: 0;
+}
+
+.field-report__section ul {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.field-report__plain-text {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2);
+  font-weight: 800;
+}
+
+.field-report__plain-text textarea {
+  width: 100%;
+  min-height: 14rem;
+  resize: vertical;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.45;
+  padding: var(--space-3);
+}
+
+@media (max-width: 720px) {
+  .field-report__header {
+    grid-template-columns: 1fr;
+  }
+
+  .field-report__actions {
+    justify-content: stretch;
+  }
+
+  .field-report__actions .button {
+    flex: 1 1 9rem;
+  }
+}
+
+@media print {
+  .app-header,
+  .bottom-nav,
+  .skotsel-form,
+  .skotsel-chart,
+  .skotsel-advanced,
+  .field-report-entry > .button,
+  .field-report__actions,
+  .field-report__plain-text {
+    display: none !important;
+  }
+
+  .skotsel-layout,
+  .skotsel-result,
+  .result-panel,
+  .field-report,
+  .field-report-shell {
+    display: block !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+  }
+
+  .field-report {
+    font-size: 11pt;
+  }
+
+  .field-report__section {
+    break-inside: avoid;
+    margin: 0 0 12pt;
+  }
+}
+
 
 .field-module {
   display: grid;

@@ -35,7 +35,9 @@ Kommande steg:
 - .24 aktiverar inte auto-SI, digitaliserar inga hojdutvecklingskurvor, lagger inte in diagramvarden och skapar inga harda produktionsgranser.
 - .25 lagger in naturhansyn, skador, markrisk, kulturmiljo och vilt som risk- och hansynsstod.
 - .25 skapar inga juridiska beslut, harda gransvarden, prisandringar, diagramvarden eller nya kurvor.
-- Nasta steg kan vara rapport-/utskriftslage eller manuell faltguide.
+- .26 lagger in faltprotokoll/rapportlage som aterger befintlig bedomning.
+- .26 skapar inga nya kallregler, kurvor, diagramvarden eller harda gransvarden.
+- Nasta steg kan vara export till offert/kundarkiv eller manuell faltguide.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD

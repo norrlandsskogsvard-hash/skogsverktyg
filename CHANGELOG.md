@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0-alpha.1-field-report.1 - 2026-07-13
+
+### Added - Faltprotokoll/rapportlage
+
+- Faltprotokoll/rapportlage har lagts till i Skotselkollen.
+- Protokollet sammanfattar inmatning, skoglig bedomning, SI-status, hansyn/risk, juridiska kontrollflaggor och kallor.
+- Protokollet kan kopieras och skrivas ut.
+- Rapporten gor ingen ny juridisk bedomning, aktiverar inga kurvor och andrar inga gransvarden.
+- PWA-cache hojd till field-report.1.
+
 ## v2.0.0-alpha.1-hansyn-risk.1 - 2026-07-12
 
 ### Added - Naturhansyn, skador och vilt

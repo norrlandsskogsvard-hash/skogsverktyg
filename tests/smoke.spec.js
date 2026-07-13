@@ -269,6 +269,24 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-mobile.png`, fullPage: true });
 });
 
+test("Skötselkollen visar fältprotokoll med kopiera och skriv ut", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/skotselkollen");
+  await fillSkotselkollenPilot(page);
+  await page.locator("[data-show-field-report]").first().click();
+
+  const report = page.locator(".field-report").first();
+  await expect(report).toBeVisible();
+  await expect(report).toContainText("Skötselkollen – fältprotokoll");
+  await expect(report).toContainText("Samlad bedömning");
+  await expect(report).toContainText("Hänsyn/risk");
+  await expect(report).toContainText("Juridisk kontroll");
+  await expect(report).toContainText("kontrollstöd, inte juridiskt besked");
+  await expect(report.getByRole("button", { name: "Kopiera protokoll" })).toBeVisible();
+  await expect(report.getByRole("button", { name: "Skriv ut" })).toBeVisible();
+  await expectNoHorizontalScroll(page);
+});
+
 test("Skötselkollen visar forskningsrisker utan att skapa ny kurva", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoRoute(page, "/skotselkollen");

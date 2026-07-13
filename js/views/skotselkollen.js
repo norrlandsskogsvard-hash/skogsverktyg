@@ -1,4 +1,5 @@
 import { calculateSkotselRecommendation } from "../calculators/skotselCalculator.js";
+import { buildSkotselFieldReport } from "../calculators/skotselReport.js";
 import { isActiveCurveSourceValue, NORRA_THINNING_SOURCE_VALUES } from "../calculators/skotselKnowledgeBase.js";
 import { getStoredValue, setStoredValue, removeStoredValue } from "../storage.js";
 import { createPageHeader, escapeHtml, showToast } from "../ui.js";
@@ -112,13 +113,61 @@ export function renderSkotselkollenView() {
 
   page.addEventListener("click", async (event) => {
     const copyButton = event.target.closest("[data-copy-plantext]");
-    if (!copyButton) return;
-    const recommendation = calculateSkotselRecommendation(currentInput());
-    try {
-      await navigator.clipboard.writeText(recommendation.planText);
-      showToast("Plantext kopierad.");
-    } catch (error) {
-      showToast("Kunde inte kopiera plantext automatiskt.");
+    const showReportButton = event.target.closest("[data-show-field-report]");
+    const copyReportButton = event.target.closest("[data-copy-field-report]");
+    const printReportButton = event.target.closest("[data-print-field-report]");
+    const closeReportButton = event.target.closest("[data-close-field-report]");
+
+    if (copyButton) {
+      const recommendation = calculateSkotselRecommendation(currentInput());
+      try {
+        await navigator.clipboard.writeText(recommendation.planText);
+        showToast("Plantext kopierad.");
+      } catch (error) {
+        showToast("Kunde inte kopiera plantext automatiskt.");
+      }
+      return;
+    }
+
+    if (showReportButton) {
+      const card = showReportButton.closest(".skotsel-result-card");
+      const panel = card?.querySelector("[data-field-report-panel]");
+      if (!panel) return;
+      const input = currentInput();
+      const result = calculateSkotselRecommendation(input);
+      const report = buildSkotselFieldReport({ input, result, generatedAt: new Date() });
+      panel.innerHTML = fieldReportTemplate(report);
+      panel.classList.remove("hidden");
+      panel.querySelector("[data-field-report-plain]")?.focus();
+      return;
+    }
+
+    if (copyReportButton) {
+      const panel = copyReportButton.closest("[data-field-report-panel]");
+      const textArea = panel?.querySelector("[data-field-report-plain]");
+      if (!textArea) return;
+      try {
+        await navigator.clipboard.writeText(textArea.value);
+        showToast("Fältprotokoll kopierat.");
+      } catch (error) {
+        textArea.focus();
+        textArea.select();
+        showToast("Kopiera texten manuellt.");
+      }
+      return;
+    }
+
+    if (printReportButton) {
+      window.print();
+      return;
+    }
+
+    if (closeReportButton) {
+      const panel = closeReportButton.closest("[data-field-report-panel]");
+      if (panel) {
+        panel.classList.add("hidden");
+        panel.innerHTML = "";
+      }
     }
   });
 
@@ -257,6 +306,10 @@ function resultTemplate(result) {
       resultBlock("Varför?", result.why) +
       directionBlock(result.recommendationDirection) +
     "</div>" +
+    "<div class='field-report-entry'>" +
+      "<button class='button button--secondary' type='button' data-show-field-report>Visa fältprotokoll</button>" +
+      "<section class='field-report-shell hidden' data-field-report-panel></section>" +
+    "</div>" +
     "<div class='skotsel-advanced skotsel-advanced--result'>" +
       advancedDetails("Forskningsstöd", researchSupportTemplate(result)) +
       advancedDetails("Naturhänsyn, skador och vilt", considerationTemplate(result.considerationAssessment), Boolean(result.considerationAssessment?.flags?.length), "skotsel-hansyn-risk") +
@@ -296,6 +349,27 @@ function considerationTemplate(assessment = {}) {
   return header + disclaimer + "<ul class='skotsel-list'>" + flags.map((flag) =>
     "<li><strong>" + escapeHtml(flag.label) + "</strong> - " + escapeHtml(flag.detail) + "</li>"
   ).join("") + "</ul>";
+}
+
+function fieldReportTemplate(report) {
+  return "<article class='field-report' data-field-report>" +
+    "<div class='field-report__header'>" +
+      "<div><p class='pill'>Fältprotokoll</p><h3>" + escapeHtml(report.title) + "</h3><p>" + escapeHtml(report.summaryText) + "</p></div>" +
+      "<div class='field-report__actions'>" +
+        "<button class='button button--secondary' type='button' data-copy-field-report>Kopiera protokoll</button>" +
+        "<button class='button button--secondary' type='button' data-print-field-report>Skriv ut</button>" +
+        "<button class='button button--secondary' type='button' data-close-field-report>Stäng</button>" +
+      "</div>" +
+    "</div>" +
+    report.sections.map(fieldReportSectionTemplate).join("") +
+    "<label class='field-report__plain-text'><span>Kopierbar text</span><textarea readonly data-field-report-plain>" + escapeHtml(report.plainText) + "</textarea></label>" +
+  "</article>";
+}
+
+function fieldReportSectionTemplate(section) {
+  return "<section class='field-report__section'><h4>" + escapeHtml(section.title) + "</h4><ul>" +
+    section.lines.map((line) => "<li>" + escapeHtml(line) + "</li>").join("") +
+  "</ul></section>";
 }
 
 function quickProposalTemplate(result) {
