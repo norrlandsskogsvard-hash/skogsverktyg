@@ -208,6 +208,10 @@ test("Kurvgranskning sparar lokalt utkast och skapar CSV utan aktivering", async
   await expect(page.locator("body")).toContainText("Aktiva kurvor");
   await expect(page.locator("body")).toContainText("T20");
   await expect(page.locator("body")).toContainText("Auto-SI: sparrad");
+  await expect(page.locator("body")).toContainText("Assisterad PDF-extraktion");
+  await expect(page.locator("body")).toContainText("Assisterad extraktion aktiverar inte kurvor");
+  await expect(page.locator("body")).toContainText("Extraherade rader");
+  await expect(page.locator("body")).toContainText("Low");
   await expect(page.locator("body")).toContainText("T18");
   await expect(page.locator("body")).toContainText(/Draft\/spärrad|Draft\/spÃ¤rrad/);
 
@@ -222,6 +226,8 @@ test("Kurvgranskning sparar lokalt utkast och skapar CSV utan aktivering", async
   await expect(draft.getByRole("button", { name: "Kopiera som CSV-rad" })).toBeVisible();
   await draft.getByRole("button", { name: "Kopiera som CSV-rad" }).click();
   await expect(draft.locator("[data-csv-output]")).toHaveValue(/T18,tall,18,first_thinning,14.2,23.5,17.8/);
+  await page.getByRole("button", { name: "Kopiera assisted CSV-rader" }).click();
+  await expect(page.locator("[data-assisted-csv]")).toHaveValue(/T18,tall,18,assisted_curve_page/);
   await expect(page.getByRole("button", { name: /Aktivera kurva/i })).toHaveCount(0);
   await expectNoHorizontalScroll(page);
 });

@@ -1685,6 +1685,43 @@
   padding-top: var(--space-2);
 }
 
+.curve-review-assisted__stats,
+.curve-review-assisted__rows {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.curve-review-assisted__stats {
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+
+.curve-review-assisted__stats div {
+  display: grid;
+  gap: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.curve-review-assisted__stats span {
+  color: var(--color-muted);
+  font-weight: 750;
+}
+
+.curve-review-assisted__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.curve-review-assisted__rows li {
+  display: grid;
+  grid-template-columns: minmax(4rem, 0.7fr) repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-2);
+}
+
 .curve-review-csv {
   min-height: 3.5rem;
   font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
@@ -1694,9 +1731,14 @@
 @media (max-width: 720px) {
   .curve-review__group-heading,
   .curve-review-card__top,
-  .curve-review__list li {
+  .curve-review__list li,
+  .curve-review-assisted__rows li {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .curve-review-assisted__rows li {
+    display: flex;
   }
 }
 

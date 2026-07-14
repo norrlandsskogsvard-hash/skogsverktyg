@@ -1,12 +1,15 @@
 import {
+  buildAssistedCsv,
   buildCsvRowForDraft,
   clearLocalDraft,
   getBlockedReason,
+  loadAssistedExtraction,
   listCurveDrafts,
   loadCurveReviewWorkspace,
   loadLocalDraft,
   saveLocalDraft,
   summarizeDraft,
+  summarizeAssistedExtraction,
   validateDraftPoint
 } from "../calculators/curveReview.js";
 import { getActiveNorraPackages, getReviewNeededNorraPackages } from "../calculators/norraThinningValues.js";
@@ -57,6 +60,7 @@ function renderWorkspace(page, workspace) {
       "<h3 class='card__title'>Lokal granskning aktiverar inte kurvan.</h3>" +
       "<p class='card__text'>Utkast sparas bara i webblasaren. Aktiv kurva kraver separat import, verifierade kallvarden, validering och aktiveringsprotokoll.</p>" +
     "</div></section>" +
+    "<section class='card curve-review-assisted' data-assisted-extraction><div class='card__body'><h3 class='card__title'>Assisterad PDF-extraktion</h3><p>Laser assisted extraction...</p></div></section>" +
     "<section class='curve-review__groups'>" +
       activeReferenceTemplate(active) +
       draftGroupTemplate("Tall", tall) +
@@ -64,6 +68,7 @@ function renderWorkspace(page, workspace) {
     "</section>";
 
   bindDraftForms(container, drafts);
+  loadAssistedExtraction().then((extraction) => renderAssistedExtraction(container, extraction));
 }
 
 function summaryTemplate(active, drafts, blocked) {
@@ -202,6 +207,54 @@ function bindDraftForms(container, drafts) {
       showToast("CSV-rad kopierad.");
     });
   });
+}
+
+function renderAssistedExtraction(container, extraction) {
+  const host = container.querySelector("[data-assisted-extraction]");
+  if (!host) return;
+  if (!extraction) {
+    host.innerHTML = "<div class='card__body'><span class='pill'>Assisterad PDF-extraktion</span><p>Inget assisted extraction-underlag finns ännu.</p></div>";
+    return;
+  }
+
+  const summary = summarizeAssistedExtraction(extraction);
+  const rows = Array.isArray(extraction.rows) ? extraction.rows : [];
+  host.innerHTML = "<div class='card__body'>" +
+    "<span class='pill'>Assisterad PDF-extraktion</span>" +
+    "<h3 class='card__title'>Assisterad PDF-extraktion</h3>" +
+    "<p class='card__text'>Assisterad extraktion aktiverar inte kurvor.</p>" +
+    "<div class='curve-review-assisted__stats'>" +
+      assistedStat("Extraherade rader", summary.rowCount) +
+      assistedStat("High", summary.confidence.high) +
+      assistedStat("Medium", summary.confidence.medium) +
+      assistedStat("Low", summary.confidence.low) +
+      assistedStat("Kurvor med underlag", summary.curvesWithData.join(", ") || "Inga") +
+      assistedStat("Saknar säkra värden", summary.missingSafeValues.join(", ") || "Inga") +
+    "</div>" +
+    "<ul class='curve-review-assisted__rows'>" + rows.map(assistedRowTemplate).join("") + "</ul>" +
+    "<textarea class='textarea curve-review-csv' data-assisted-csv readonly aria-label='Assisted CSV-rader'></textarea>" +
+    "<div class='button-row'><button class='button button--secondary' type='button' data-copy-assisted-csv>Kopiera assisted CSV-rader</button></div>" +
+  "</div>";
+
+  host.querySelector("[data-copy-assisted-csv]").addEventListener("click", async () => {
+    const csv = buildAssistedCsv(rows);
+    host.querySelector("[data-assisted-csv]").value = csv;
+    await copyText(csv);
+    showToast("Assisted CSV-rader kopierade.");
+  });
+}
+
+function assistedStat(label, value) {
+  return "<div><span>" + escapeHtml(label) + "</span><strong>" + escapeHtml(value) + "</strong></div>";
+}
+
+function assistedRowTemplate(row) {
+  return "<li>" +
+    "<strong>" + escapeHtml(row.code) + "</strong>" +
+    "<span>" + escapeHtml(row.sourcePage || "sida saknas") + "</span>" +
+    "<span>" + escapeHtml(row.confidence) + "</span>" +
+    "<span>" + escapeHtml(row.reviewNeeded ? "reviewNeeded" : "granskad") + "</span>" +
+  "</li>";
 }
 
 function pointFromForm(form) {

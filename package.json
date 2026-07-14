@@ -16,7 +16,9 @@
     "validate:site-index": "node scripts/validate-site-index-field-rules.mjs",
     "validate:hansyn-risk": "node scripts/validate-hansyn-risk-rules.mjs",
     "validate:curve-review": "node scripts/validate-curve-review-drafts.mjs",
-    "test": "npm run validate:curve-review && npm run validate:thinning-data && npm run validate:hansyn-risk && npm run validate:site-index && npm run validate:bjork-lov && npm run validate:rojning-research && npm run validate:gallring-research && npm run validate:legal-rules && npm run validate:norra-text-rules && npm run validate:sources && playwright test",
+    "extract:norra-assisted": "node scripts/extract-norra-curves-assisted.mjs",
+    "validate:norra-assisted": "node scripts/validate-assisted-norra-extraction.mjs",
+    "test": "npm run validate:norra-assisted && npm run validate:curve-review && npm run validate:thinning-data && npm run validate:hansyn-risk && npm run validate:site-index && npm run validate:bjork-lov && npm run validate:rojning-research && npm run validate:gallring-research && npm run validate:legal-rules && npm run validate:norra-text-rules && npm run validate:sources && playwright test",
     "test:headed": "playwright test --headed",
     "test:update": "playwright test --update-snapshots"
   },

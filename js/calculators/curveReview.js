@@ -1,7 +1,9 @@
 const REVIEW_DATA_URL = "./data/norra-thinning-review-drafts.json";
+const ASSISTED_EXTRACTION_URL = "./data/generated/norra-thinning-assisted-extraction.json";
 const LOCAL_STORAGE_PREFIX = "skotselkollen.curveReview.";
 
 let cachedWorkspace = null;
+let cachedAssistedExtraction = null;
 
 export async function loadCurveReviewWorkspace() {
   if (cachedWorkspace) return cachedWorkspace;
@@ -156,6 +158,54 @@ export function buildCsvRowForDraft(draft = {}, point = {}) {
       point.note,
       "local_draft"
   ]);
+}
+
+export async function loadAssistedExtraction() {
+  if (cachedAssistedExtraction) return cachedAssistedExtraction;
+  try {
+    const response = await fetch(ASSISTED_EXTRACTION_URL, { cache: "no-store" });
+    if (!response.ok) return null;
+    cachedAssistedExtraction = await response.json();
+    return cachedAssistedExtraction;
+  } catch {
+    return null;
+  }
+}
+
+export function summarizeAssistedExtraction(extraction = {}) {
+  const rows = Array.isArray(extraction.rows) ? extraction.rows : [];
+  const confidence = rows.reduce((acc, row) => {
+    acc[row.confidence] = (acc[row.confidence] || 0) + 1;
+    return acc;
+  }, { high: 0, medium: 0, low: 0 });
+  return {
+    rowCount: rows.length,
+    confidence,
+    curvesWithData: [...new Set(rows.map((row) => row.code).filter(Boolean))],
+    missingSafeValues: [...new Set(rows.filter((row) => row.reviewNeeded).map((row) => row.code))]
+  };
+}
+
+export function buildAssistedCsv(rows = []) {
+  const header = [
+    "code",
+    "species",
+    "siteIndex",
+    "stage",
+    "topHeight",
+    "basalAreaBefore",
+    "basalAreaAfter",
+    "ageTotal",
+    "stemsBefore",
+    "stemsAfter",
+    "sourcePage",
+    "extractionMethod",
+    "confidence",
+    "reviewNeeded",
+    "activeUse",
+    "note"
+  ];
+  return [header.join(","), ...rows.map((row) => csvRow(header.map((key) => row[key])))].join("\n");
 }
 
 function localKey(code) {

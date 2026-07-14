@@ -1,4 +1,4 @@
-const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-curve-review.1";
+const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-assisted-extraction.1";
 
 const CORE_ASSETS = [
   "./",
@@ -38,7 +38,9 @@ const CORE_ASSETS = [
   "./js/calculators/customerArchive.js",
   "./js/calculators/quoteCalculator.js",
   "./js/calculators/pricingEngine.js",
-  "./data/norra-thinning-review-drafts.json"
+  "./data/norra-thinning-review-drafts.json",
+  "./data/norra-thinning-import-batch-03-assisted.csv",
+  "./data/generated/norra-thinning-assisted-extraction.json"
 ];
 
 self.addEventListener("install", (event) => {

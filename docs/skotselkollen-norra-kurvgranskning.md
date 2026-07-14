@@ -6,6 +6,20 @@ Kurvgranskning ar en manuell arbetsyta for Norra gallringsmallar. Den ska gora d
 
 Vyn ar ett granskningsverktyg. Den aktiverar inte kurvor, tolkar inte diagram automatiskt och gor ingen OCR.
 
+## Assisterad PDF-extraktion
+
+Fran `.30` visar Kurvgranskning aven assisted extraction-underlag fran `data/generated/norra-thinning-assisted-extraction.json`.
+
+Sektionen visar:
+
+- antal extraherade rader
+- antal high, medium och low confidence
+- vilka kurvor som har sidunderlag
+- vilka kurvor som fortfarande saknar sakra varden
+- kopiering av assisted CSV-rader
+
+Assisterad extraktion aktiverar inte kurvor. Alla assisted rader i batch 03 har `activeUse: false`.
+
 ## Manuell avlasning
 
 1. Oppna Norra gallringsmall i primar kallfil.
@@ -58,3 +72,5 @@ En kurva far bara aktiveras i en separat batch nar allt detta finns:
 ## Nasta steg
 
 Nasta steg kan vara en aktiveringsbatch dar manuellt granskade varden importeras, valideras och jamfors mot aktiveringsprotokollet. Forst efter det kan en ny Norra-kurva bli aktiv.
+
+Se aven `docs/skotselkollen-norra-assisted-extraction.md`.

@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.0.0-alpha.1-assisted-extraction.1 - 2026-07-13
+
+### Added - Assisterad Norra-extraktion
+
+- Assisterad PDF-extraktion for Norra gallringskurvor har lagts till.
+- Extraktionen skapar import-/granskningsunderlag, inte aktiva kurvor.
+- Confidence och reviewNeeded anvands for att stoppa osakra varden.
+- Kurvgranskning visar assisterat extraktionsunderlag.
+- T20, auto-SI och aktiva kurvor paverkas inte.
+- Validering for assisted extraction har lagts till.
+- PWA-cache hojd till assisted-extraction.1.
+
 ## v2.0.0-alpha.1-curve-review.1 - 2026-07-13
 
 ### Added - Kurvgranskning

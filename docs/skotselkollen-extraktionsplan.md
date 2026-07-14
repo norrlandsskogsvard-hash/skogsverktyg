@@ -47,7 +47,9 @@ Kommande steg:
 - .29 lagger till Kurvgranskning for manuell digitalisering och lokal granskning av Norra gallringskurvor.
 - .29 sparar endast lokala granskningsutkast i webblasaren och aktiverar inga nya kurvor.
 - .29 aktiverar inte auto-SI och kopplar inte till juridiska beslut, prislogik, offert eller kundarkiv.
-- .30 kan vara forsta riktiga aktiveringsbatchen med granskade varden, men bara efter import, validering och aktiveringsprotokoll.
+- .30 lagger till assisterad PDF-extraktion fran Norra-PDF:en till import-/granskningsunderlag.
+- .30 skapar batch 03 med T18, T22, G20 och G22 som low-confidence assisted rader med `activeUse: false`.
+- .30 aktiverar inga nya kurvor; nasta steg kan vara separat aktiveringsbatch forst efter verifierade punktvarden.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD

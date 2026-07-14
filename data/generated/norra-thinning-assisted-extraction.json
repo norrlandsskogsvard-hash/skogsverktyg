@@ -1,0 +1,122 @@
+{
+  "title": "Norra gallringskurvor - assisterad PDF-extraktion",
+  "status": "assisted_review_batch",
+  "sourceId": "norra-gallringsriktlinjer-gallringsmallar",
+  "sourceFile": "Gallringsriktlinjer & gallringsmallar norra Sverige.pdf",
+  "sourcePath": "D:\\GitHub\\skogsverktyg\\sources\\Gallringsriktlinjer & gallringsmallar norra Sverige.pdf",
+  "extractionMethod": "pdfplumber_text",
+  "canActivateCurves": false,
+  "canChangeProductionRules": false,
+  "canAutoDigitize": false,
+  "activeUseDefault": false,
+  "targetCodes": [
+    "T18",
+    "T22",
+    "G20",
+    "G22"
+  ],
+  "generatedAt": "2026-07-13T19:49:48.168Z",
+  "summary": {
+    "rowCount": 4,
+    "confidence": {
+      "high": 0,
+      "medium": 0,
+      "low": 4
+    },
+    "curvesWithAssistedSourcePage": [
+      "T18",
+      "T22",
+      "G20",
+      "G22"
+    ],
+    "curvesMissingSafeValues": [
+      "T18",
+      "T22",
+      "G20",
+      "G22"
+    ],
+    "activeUseTrueCount": 0
+  },
+  "t20Integrity": {
+    "status": "ok",
+    "activeCode": "T20",
+    "expectedFirstBasalAreaBefore": 24.5,
+    "foundFirstBasalAreaBefore": 24.5,
+    "sourcePage": "s. 36",
+    "note": "T20 normalexempel hittades i PDF-text och matchar befintlig basalAreaBefore 24.5."
+  },
+  "rows": [
+    {
+      "code": "T18",
+      "species": "tall",
+      "siteIndex": 18,
+      "stage": "assisted_curve_page",
+      "topHeight": "",
+      "basalAreaBefore": "",
+      "basalAreaAfter": "",
+      "ageTotal": "",
+      "stemsBefore": "",
+      "stemsAfter": "",
+      "sourcePage": "s. 12",
+      "extractionMethod": "diagram_manual_assisted",
+      "confidence": "low",
+      "reviewNeeded": true,
+      "activeUse": false,
+      "note": "PDF-text identifierar kurvsida. Slutavverkningsalder kunde inte lasas sakert. Stamintervall i text: efter gallring 1000. Diagrammets grundyte-/hojdkoordinater ar inte sakra text-/tabellvarden och maste granskas manuellt."
+    },
+    {
+      "code": "T22",
+      "species": "tall",
+      "siteIndex": 22,
+      "stage": "assisted_curve_page",
+      "topHeight": "",
+      "basalAreaBefore": "",
+      "basalAreaAfter": "",
+      "ageTotal": "",
+      "stemsBefore": "",
+      "stemsAfter": "",
+      "sourcePage": "s. 14",
+      "extractionMethod": "diagram_manual_assisted",
+      "confidence": "low",
+      "reviewNeeded": true,
+      "activeUse": false,
+      "note": "PDF-text identifierar kurvsida. Slutavverkningsalder kunde inte lasas sakert. Stamintervall i text: efter gallring 1300. Diagrammets grundyte-/hojdkoordinater ar inte sakra text-/tabellvarden och maste granskas manuellt."
+    },
+    {
+      "code": "G20",
+      "species": "gran",
+      "siteIndex": 20,
+      "stage": "assisted_curve_page",
+      "topHeight": "",
+      "basalAreaBefore": "",
+      "basalAreaAfter": "",
+      "ageTotal": "",
+      "stemsBefore": "",
+      "stemsAfter": "",
+      "sourcePage": "s. 21",
+      "extractionMethod": "diagram_manual_assisted",
+      "confidence": "low",
+      "reviewNeeded": true,
+      "activeUse": false,
+      "note": "PDF-text identifierar kurvsida. Slutavverkningsalder kunde inte lasas sakert. Stamintervall i text: efter gallring 1200. Diagrammets grundyte-/hojdkoordinater ar inte sakra text-/tabellvarden och maste granskas manuellt."
+    },
+    {
+      "code": "G22",
+      "species": "gran",
+      "siteIndex": 22,
+      "stage": "assisted_curve_page",
+      "topHeight": "",
+      "basalAreaBefore": "",
+      "basalAreaAfter": "",
+      "ageTotal": "",
+      "stemsBefore": "",
+      "stemsAfter": "",
+      "sourcePage": "s. 22",
+      "extractionMethod": "diagram_manual_assisted",
+      "confidence": "low",
+      "reviewNeeded": true,
+      "activeUse": false,
+      "note": "PDF-text identifierar kurvsida. Slutavverkningsalder kunde inte lasas sakert. Stamintervall i text: efter gallring 1300. Diagrammets grundyte-/hojdkoordinater ar inte sakra text-/tabellvarden och maste granskas manuellt."
+    }
+  ]
+}

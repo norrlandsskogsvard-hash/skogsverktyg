@@ -59,6 +59,18 @@ Efter batch 02:
 - T18, T22, G20 och G22 ar fortsatt `candidate`, `activeUse: documentation_only` och `reviewNeeded: true`.
 - Auto-SI ar fortsatt sparrad och `SITE_INDEX_CURVES` ar `[]`.
 
+## Batch 03 assisted extraction
+
+`.30` skapade assisted extraction-underlag fran Norra-PDF:en for T18, T22, G20 och G22. Underlaget identifierar kurvsidor men ger inte sakra diagramkoordinater for fulla gallringspunkter.
+
+Batch 03 far darfor inte ga direkt till aktiv kurva:
+
+- Alla assisted rader har `activeUse: false`.
+- Alla assisted rader har `reviewNeeded: true`.
+- Alla assisted rader med `confidence: low` maste granskas manuellt.
+- T20 anvands endast som integritetskontroll och andras inte.
+- Aktiv kurva kraver separat batch efter verifierade punktvarden.
+
 ## Aktiveringsflode
 
 1. Lagg in posten som `candidate` med `activeUse: documentation_only`, `dataQuality: candidate_only`, tomma `values` och `reviewNeeded: true`.
