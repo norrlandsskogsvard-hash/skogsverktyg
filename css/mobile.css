@@ -800,6 +800,10 @@
     font-size: 0.48rem;
   }
 
+  .skotsel-chart__age-axis text {
+    font-size: 0.5rem;
+  }
+
   .skotsel-chart__legend {
     gap: 0.35rem 0.55rem;
     font-size: 0.76rem;
@@ -837,6 +841,24 @@
   .skotsel-reference-table table {
     min-width: 35rem;
     font-size: 0.78rem;
+  }
+
+  .skotsel-template-modal {
+    align-items: stretch;
+    padding: 0.5rem;
+  }
+
+  .skotsel-template-modal__panel {
+    max-height: calc(100vh - 1rem);
+    padding: var(--space-2);
+  }
+
+  .skotsel-digital-template--large {
+    padding: var(--space-2);
+  }
+
+  .skotsel-digital-template--large svg {
+    min-height: 58vh;
   }
 
   .skotsel-si-box {

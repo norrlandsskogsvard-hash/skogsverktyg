@@ -292,6 +292,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   const desktopTemplate = page.locator(".skotsel-result .skotsel-digital-template").first();
   await expect(desktopTemplate).toBeVisible();
   await expect(desktopTemplate).toContainText("Digital gallringsmall");
+  await expect(desktopTemplate).toContainText("Ålder, år");
+  await expect(desktopTemplate.getByRole("button", { name: "Öppna stor gallringsmall" })).toBeVisible();
   await expect(desktopTemplate).toContainText("Bedömning");
   await expect(desktopTemplate).toContainText("Läge i kurvan");
   await expect(desktopTemplate).toContainText("Nästa steg");
@@ -358,6 +360,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   const mobileTemplate = page.locator(".skotsel-mobile-result .skotsel-digital-template").first();
   await expect(mobileTemplate).toBeVisible();
   await expect(mobileTemplate).toContainText("Digital gallringsmall");
+  await expect(mobileTemplate).toContainText("Ålder, år");
+  await expect(mobileTemplate.getByRole("button", { name: "Öppna stor gallringsmall" })).toBeVisible();
   await expect(mobileTemplate).toContainText("Bedömning");
   await expect(mobileTemplate).toContainText("Läge i kurvan");
   await expect(mobileTemplate).toContainText("Nästa steg");
@@ -397,6 +401,7 @@ test("Skötselkollen använder T18 som manuell fälttestkurva för tall", async 
   await expect(page.locator("body")).toContainText("fälttest");
   const t18Template = page.locator(".skotsel-mobile-result .skotsel-digital-template").first();
   await expect(t18Template).toContainText("Digital gallringsmall");
+  await expect(t18Template).toContainText("Ålder, år");
   await expect(t18Template).toContainText("Visuell malltolkning");
   await expect(t18Template).toContainText("Ej fullständigt verifierad");
   await expect(t18Template).toContainText("Fältstöd");
@@ -408,6 +413,14 @@ test("Skötselkollen använder T18 som manuell fälttestkurva för tall", async 
   await expect(t18Template).toContainText("Nära 1:a gallring");
   await expect(t18Template).toContainText("saknas i pilotunderlag");
   await expect(t18Template).toContainText("135 år");
+  await t18Template.getByRole("button", { name: "Öppna stor gallringsmall" }).click();
+  const largeTemplate = page.locator(".skotsel-template-modal:not(.hidden)").first();
+  await expect(largeTemplate).toBeVisible();
+  await expect(largeTemplate).toContainText("Digital gallringsmall");
+  await expect(largeTemplate).toContainText("Referenspunkter");
+  await expect(largeTemplate).toContainText("saknas i pilotunderlag");
+  await largeTemplate.getByRole("button", { name: "Stäng" }).click();
+  await expect(page.locator(".skotsel-template-modal:not(.hidden)")).toHaveCount(0);
   const t18LineCount = await page.locator(".skotsel-chart__pilot-line").count();
   expect(t18LineCount).toBeGreaterThanOrEqual(1);
   await page.locator("[data-show-field-report]").first().click();

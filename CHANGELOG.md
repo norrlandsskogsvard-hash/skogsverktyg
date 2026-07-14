@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-digital-thinning-template.3 - 2026-07-14
+
+### Changed - Skotselmall-layout
+
+- Digital gallringsmall har putsats visuellt med `skogsagare_skotselmallar-2024.pdf` sida 6 som layoutreferens.
+- Diagrammet har renare pappersmallskansla med oversta aldersaxel, tydligare orange gallringsfalt och ljusare stam-/efterfalt.
+- Mallpunkterna har kortare etiketter i grafen och alder visas dar den finns.
+- Knappen "Oppna stor gallringsmall" visar diagram, kort slutsats och referenstabell i storvy.
+- T18/T20-varden, aktiveringsstatus, auto-SI, juridik och prislogik ar oforandrade.
+- PWA-cache hojd till digital-thinning-template.3.
+
 ## v2.0.0-alpha.1-digital-thinning-template.2 - 2026-07-14
 
 ### Changed - Tydligare gallringsmall i fältläge

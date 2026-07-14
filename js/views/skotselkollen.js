@@ -223,6 +223,19 @@ export function renderSkotselkollenView() {
         panel.classList.add("hidden");
         panel.innerHTML = "";
       }
+      return;
+    }
+
+    const openTemplateButton = event.target.closest("[data-open-thinning-template]");
+    const closeTemplateButton = event.target.closest("[data-close-thinning-template]");
+    if (openTemplateButton) {
+      openLargeThinningTemplate(openTemplateButton);
+      return;
+    }
+
+    if (closeTemplateButton) {
+      closeLargeThinningTemplate(closeTemplateButton);
+      return;
     }
   });
 
@@ -358,6 +371,30 @@ export function renderSkotselkollenView() {
       showToast("Kunde inte hämta position. Skriv plats manuellt.");
       updateFieldStatus("Position ej sparad");
     }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 });
+  }
+
+  function openLargeThinningTemplate(button) {
+    const card = button.closest(".skotsel-result-card");
+    const source = card?.querySelector(".skotsel-digital-template");
+    const modal = card?.querySelector("[data-thinning-template-modal]");
+    if (!source || !modal) return;
+    const clone = source.cloneNode(true);
+    clone.classList.add("skotsel-digital-template--large");
+    clone.querySelector("[data-open-thinning-template]")?.remove();
+    modal.innerHTML = "<div class='skotsel-template-modal__panel' role='dialog' aria-modal='true' aria-label='Stor gallringsmall'>" +
+      "<button class='button button--secondary' type='button' data-close-thinning-template>Stäng</button>" +
+      "<div data-thinning-template-large-body></div>" +
+    "</div>";
+    modal.querySelector("[data-thinning-template-large-body]")?.appendChild(clone);
+    modal.classList.remove("hidden");
+    modal.querySelector("[data-close-thinning-template]")?.focus();
+  }
+
+  function closeLargeThinningTemplate(button) {
+    const modal = button.closest("[data-thinning-template-modal]");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.innerHTML = "";
   }
 }
 
@@ -522,6 +559,7 @@ function resultTemplate(result) {
       resultMetric("SI", siStatusLabel(result.siteIndexEstimate)) +
     "</div>" +
     chartTemplate(result) +
+    "<section class='skotsel-template-modal hidden' data-thinning-template-modal></section>" +
     regionWarningTemplate(result.regionWarning) +
     "<div class='field-report-entry'>" +
       "<button class='button button--secondary' type='button' data-show-field-report>Visa fältprotokoll</button>" +
@@ -914,8 +952,10 @@ function chartTemplate(result) {
   return "<article class='skotsel-chart skotsel-digital-template' role='img' aria-label='Digital gallringsmall med beståndets punkt'>" +
     "<div class='skotsel-chart__head'><div><p class='pill'>Digital gallringsmall</p><h3>Gallringsmall</h3></div>" + badge + "</div>" +
     chartStatusBadges(curveReference, hasFieldPilot, hasPilot) +
+    "<button class='button button--secondary button--compact skotsel-chart__large-button' type='button' data-open-thinning-template>Öppna stor gallringsmall</button>" +
     "<svg viewBox='0 0 520 360' focusable='false'>" +
       gridTemplate() +
+      ageAxisTemplate(curveReference?.curve) +
       zones +
       pilot +
       "<line class='skotsel-chart__axis' x1='62' y1='306' x2='488' y2='306'></line>" +
@@ -1064,6 +1104,23 @@ function gridTemplate() {
   return yTicks + xTicks;
 }
 
+function ageAxisTemplate(curve) {
+  const events = curve?.points?.thinningEvents || [];
+  const ageTicks = events
+    .filter((event) => Number.isFinite(event.ageTotal))
+    .map((event) =>
+      "<g class='skotsel-chart__age-tick'>" +
+        "<line x1='" + chartX(event.topHeight) + "' y1='28' x2='" + chartX(event.topHeight) + "' y2='38'></line>" +
+        "<text x='" + (chartX(event.topHeight) - 10) + "' y='22'>" + escapeHtml(formatAgeNumber(event.ageTotal)) + "</text>" +
+      "</g>"
+    ).join("");
+  if (!ageTicks) return "";
+  return "<g class='skotsel-chart__age-axis'>" +
+    "<text x='235' y='22'>Ålder, år</text>" +
+    ageTicks +
+  "</g>";
+}
+
 function pointTemplate(x, y, height, basal) {
   const labelX = clamp(x + 14, 92, 386);
   const labelY = clamp(y - 16, 54, 286);
@@ -1109,11 +1166,18 @@ function pilotCurveTemplate(curve) {
   const dots = events.map((event) =>
     "<g class='skotsel-chart__pilot-point'>" +
       "<circle cx='" + chartX(event.topHeight) + "' cy='" + chartY(event.basalAreaBefore) + "' r='7'></circle>" +
-      "<text x='" + (chartX(event.topHeight) + 9) + "' y='" + (chartY(event.basalAreaBefore) - 9) + "'>" + escapeHtml(event.label) + "</text>" +
+      "<text x='" + (chartX(event.topHeight) + 9) + "' y='" + (chartY(event.basalAreaBefore) - 9) + "'>" + escapeHtml(shortEventLabel(event.label)) + "</text>" +
       "<text class='skotsel-chart__pilot-age' x='" + (chartX(event.topHeight) + 9) + "' y='" + (chartY(event.basalAreaBefore) + 4) + "'>" + escapeHtml(shortAgeText(event.ageTotal)) + "</text>" +
     "</g>"
   ).join("");
   return "<polyline class='skotsel-chart__pilot-line' points='" + beforePoints + "'></polyline>" + thinningSegments + dots;
+}
+
+function shortEventLabel(label = "") {
+  if (/1:a/i.test(label)) return "1:a";
+  if (/2:a/i.test(label)) return "2:a";
+  if (/slut/i.test(label)) return "Slut";
+  return label;
 }
 
 function shortAgeText(value) {
@@ -1125,12 +1189,11 @@ function formatAgeNumber(value) {
 }
 
 function visualZonesTemplate() {
-  return "<polygon class='skotsel-chart__zone skotsel-chart__zone--low' points='" +
-      chartX(10) + "," + chartY(19) + " " + chartX(15.7) + "," + chartY(26.5) + " " + chartX(15.7) + "," + chartY(22.5) + " " + chartX(10) + "," + chartY(15.5) + "'></polygon>" +
-    "<polygon class='skotsel-chart__zone skotsel-chart__zone--mid' points='" +
-      chartX(14.5) + "," + chartY(20) + " " + chartX(19.2) + "," + chartY(29.5) + " " + chartX(19.2) + "," + chartY(24.8) + " " + chartX(14.5) + "," + chartY(16.5) + "'></polygon>" +
-    "<polygon class='skotsel-chart__zone skotsel-chart__zone--high' points='" +
-      chartX(18.8) + "," + chartY(26.5) + " " + chartX(22.4) + "," + chartY(32.2) + " " + chartX(22.4) + "," + chartY(28.4) + " " + chartX(18.8) + "," + chartY(22.5) + "'></polygon>" +
+  return "<rect class='skotsel-chart__zone skotsel-chart__zone--low' x='" + chartX(10.8) + "' y='" + chartY(26.8) + "' width='" + (chartX(15.4) - chartX(10.8)) + "' height='" + (chartY(18.2) - chartY(26.8)) + "'></rect>" +
+    "<rect class='skotsel-chart__zone skotsel-chart__zone--mid' x='" + chartX(13.5) + "' y='" + chartY(28.6) + "' width='" + (chartX(18.2) - chartX(13.5)) + "' height='" + (chartY(20.2) - chartY(28.6)) + "'></rect>" +
+    "<rect class='skotsel-chart__zone skotsel-chart__zone--high' x='" + chartX(16.0) + "' y='" + chartY(31.5) + "' width='" + (chartX(21.0) - chartX(16.0)) + "' height='" + (chartY(23.8) - chartY(31.5)) + "'></rect>" +
+    "<rect class='skotsel-chart__zone skotsel-chart__zone--stem skotsel-chart__zone--stem-low' x='" + chartX(10.8) + "' y='" + chartY(16.5) + "' width='" + (chartX(15.4) - chartX(10.8)) + "' height='" + (chartY(12.2) - chartY(16.5)) + "'></rect>" +
+    "<rect class='skotsel-chart__zone skotsel-chart__zone--stem skotsel-chart__zone--stem-mid' x='" + chartX(13.5) + "' y='" + chartY(17.5) + "' width='" + (chartX(18.2) - chartX(13.5)) + "' height='" + (chartY(13.3) - chartY(17.5)) + "'></rect>" +
     "<text class='skotsel-chart__zone-label' x='" + chartX(11.2) + "' y='" + chartY(17.2) + "'>1:a gallring</text>" +
     "<text class='skotsel-chart__zone-label' x='" + chartX(16.1) + "' y='" + chartY(20.2) + "'>2:a gallring</text>" +
     "<text class='skotsel-chart__zone-label' x='" + chartX(19.4) + "' y='" + chartY(24.5) + "'>Slutläge</text>";
