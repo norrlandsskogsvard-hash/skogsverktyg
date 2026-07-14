@@ -182,11 +182,11 @@ async function validateNoForbiddenCodeCoupling() {
 
 function validateOnlyT20Active() {
   const active = NORRA_THINNING_VALUE_PACKAGES.filter(isActiveNorraPackage);
-  const activeCodes = active.map((item) => `${item.speciesCode}${item.siteIndex}`);
+  const activeCodes = active.map((item) => `${item.speciesCode}${item.siteIndex}`).sort();
   const t20 = active.find((item) => item.id === "norra-tall-t20-pilot");
 
-  if (active.length !== 1 || !t20) {
-    errors.push(`forvantade endast T20 som aktiv gallringskurva, hittade: ${activeCodes.join(", ") || "inga"}.`);
+  if (JSON.stringify(activeCodes) !== JSON.stringify(["T18", "T20"]) || !t20) {
+    errors.push(`forvantade endast T18 och T20 som aktiva gallringskurvor, hittade: ${activeCodes.join(", ") || "inga"}.`);
   }
 
   if (t20 && t20.values?.thinningEvents?.[0]?.basalAreaBefore !== 24.5) {

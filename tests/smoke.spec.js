@@ -107,7 +107,7 @@ test("mobil UX är kompakt för röjning, planpris, offert och bottom-nav", asyn
   expect(navInfo.scrollable || navInfo.fullWidth <= navInfo.visibleWidth + 1).toBeTruthy();
 });
 
-test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
+test("Norra massimport har T20 pilot och T18 fälttest som enda aktiva", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoRoute(page, "/skotselkollen");
   const summary = await page.evaluate(async () => {
@@ -115,12 +115,14 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
     const siteIndex = await import("/js/calculators/siteIndexCurves.js");
     const active = knowledge.NORRA_THINNING_SOURCE_VALUES.filter(knowledge.isActiveCurveSourceValue);
     const t20 = knowledge.NORRA_THINNING_SOURCE_VALUES.find((item) => item.id === "norra-tall-t20-pilot");
+    const t18 = knowledge.NORRA_THINNING_SOURCE_VALUES.find((item) => item.id === "norra-tall-t18-field-pilot");
     const t22 = knowledge.NORRA_THINNING_SOURCE_VALUES.find((item) => item.id === "norra-tall-t22-candidate");
     const g20 = knowledge.NORRA_THINNING_SOURCE_VALUES.find((item) => item.id === "norra-gran-g20-candidate");
     return {
       total: knowledge.NORRA_THINNING_SOURCE_VALUES.length,
       activeCount: active.length,
-      activeCodes: active.map((item) => item.speciesCode + item.siteIndex),
+      activeCodes: active.map((item) => item.speciesCode + item.siteIndex).sort(),
+      fieldPilotCodes: active.filter((item) => item.status === "active_field_pilot").map((item) => item.speciesCode + item.siteIndex).sort(),
       curveCount: knowledge.THINNING_CURVES.length,
       researchRuleCount: knowledge.GALLRING_RESEARCH_SUPPORT_SUMMARY.ruleCount,
       researchCanActivateCurves: knowledge.GALLRING_RESEARCH_SUPPORT_SUMMARY.canActivateCurves,
@@ -143,6 +145,15 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
       t20DataQuality: t20?.dataQuality,
       t20ReviewNeeded: t20?.reviewNeeded,
       t20FirstBasalBefore: t20?.values?.thinningEvents?.[0]?.basalAreaBefore,
+      t18Status: t18?.status,
+      t18DataQuality: t18?.dataQuality,
+      t18ActiveUse: t18?.activeUse,
+      t18ReviewNeeded: t18?.reviewNeeded,
+      t18FieldTest: t18?.fieldTest,
+      t18CanBeUsedForFinalDecision: t18?.canBeUsedForFinalDecision,
+      t18FirstTopHeight: t18?.values?.thinningEvents?.[0]?.topHeight,
+      t18FirstBasalBefore: t18?.values?.thinningEvents?.[0]?.basalAreaBefore,
+      t18FirstBasalAfter: t18?.values?.thinningEvents?.[0]?.basalAreaAfter,
       t22Status: t22?.status,
       t22ActiveUse: t22?.activeUse,
       t22ReviewNeeded: t22?.reviewNeeded,
@@ -159,13 +170,27 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
         dataQuality: "verified_table",
         activeUse: "full_curve",
         reviewNeeded: true
+      }) === false,
+      wrongFieldPilotBlocked: knowledge.isActiveCurveSourceValue({
+        id: "norra-tall-t22-field-pilot",
+        species: "tall",
+        speciesCode: "T",
+        siteIndex: 22,
+        status: "active_field_pilot",
+        dataQuality: "visual_estimate_from_source",
+        precision: "field_test_visual_reading",
+        activeUse: true,
+        reviewNeeded: true,
+        fieldTest: true,
+        canBeUsedForFinalDecision: false
       }) === false
     };
   });
   expect(summary.total).toBe(17);
-  expect(summary.activeCount).toBe(1);
-  expect(summary.activeCodes).toEqual(["T20"]);
-  expect(summary.curveCount).toBe(1);
+  expect(summary.activeCount).toBe(2);
+  expect(summary.activeCodes).toEqual(["T18", "T20"]);
+  expect(summary.fieldPilotCodes).toEqual(["T18"]);
+  expect(summary.curveCount).toBe(2);
   expect(summary.researchRuleCount).toBe(12);
   expect(summary.researchCanActivateCurves).toBe(false);
   expect(summary.clearingResearchRuleCount).toBe(12);
@@ -187,6 +212,15 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.t20DataQuality).toBe("pilot_example");
   expect(summary.t20ReviewNeeded).toBe(false);
   expect(summary.t20FirstBasalBefore).toBe(24.5);
+  expect(summary.t18Status).toBe("active_field_pilot");
+  expect(summary.t18DataQuality).toBe("visual_estimate_from_source");
+  expect(summary.t18ActiveUse).toBe(true);
+  expect(summary.t18ReviewNeeded).toBe(true);
+  expect(summary.t18FieldTest).toBe(true);
+  expect(summary.t18CanBeUsedForFinalDecision).toBe(false);
+  expect(summary.t18FirstTopHeight).toBe(15);
+  expect(summary.t18FirstBasalBefore).toBe(25.8);
+  expect(summary.t18FirstBasalAfter).toBe(16);
   expect(summary.t22Status).toBe("candidate");
   expect(summary.t22ActiveUse).toBe("documentation_only");
   expect(summary.t22ReviewNeeded).toBe(true);
@@ -199,6 +233,7 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.draftCount).toBe(0);
   expect(summary.reviewNeededCount).toBe(16);
   expect(summary.almostActiveBlocked).toBe(true);
+  expect(summary.wrongFieldPilotBlocked).toBe(true);
 });
 
 test("Kurvgranskning sparar lokalt utkast och skapar aktiveringskandidat utan aktivering", async ({ page }) => {
@@ -280,6 +315,8 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   const curveBank = page.locator(".skotsel-curve-bank").first();
   await expect(curveBank).toContainText("T20");
   await expect(curveBank).toContainText(/Aktiv pilot/i);
+  await expect(curveBank).toContainText("T18");
+  await expect(curveBank).toContainText("Aktiv fälttest");
   await expect(curveBank).toContainText("T22");
   await expect(curveBank).toContainText("G20");
   await expect(curveBank).toContainText("Ej aktiv kandidat");
@@ -315,6 +352,23 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Norra Skog 2024");
   await expectNoHorizontalScroll(page);
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-mobile.png`, fullPage: true });
+});
+
+test("Skötselkollen använder T18 som manuell fälttestkurva för tall", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoRoute(page, "/skotselkollen");
+  await fillSkotselkollenT18(page);
+  await expect(page.locator("body")).toContainText("T18");
+  await expect(page.locator("body")).toContainText("fälttest");
+  await expect(page.locator("body")).toContainText("visuellt avläst");
+  await expect(page.locator("body")).toContainText("Inte fullständigt verifierad kurva");
+  await expect(page.locator("body")).toContainText("Använd som stöd och kontrollera utfallet i fält");
+  const t18LineCount = await page.locator(".skotsel-chart__pilot-line").count();
+  expect(t18LineCount).toBeGreaterThanOrEqual(1);
+  await page.locator("[data-show-field-report]").first().click();
+  const report = page.locator(".field-report").first();
+  await expect(report).toContainText("Kurvunderlag: T18, fälttest/visuell avläsning, behöver praktisk kontroll.");
+  await expectNoHorizontalScroll(page);
 });
 
 test("Skötselkollen visar fältprotokoll med kopiera och skriv ut", async ({ page }) => {
@@ -393,7 +447,7 @@ test("Skötselkollen visar forskningsrisker utan att skapa ny kurva", async ({ p
     const knowledge = await import("/js/calculators/skotselKnowledgeBase.js");
     return knowledge.THINNING_CURVES.length;
   });
-  expect(curveCount).toBe(1);
+  expect(curveCount).toBe(2);
   await expect(page.locator(".skotsel-result-summary").first()).toContainText("Låg");
 });
 
@@ -431,7 +485,7 @@ test("Skötselkollen visar röjningsforskning för ungskog utan pris- eller kurv
       canChangePricing: knowledge.ROJNING_RESEARCH_SUPPORT_SUMMARY.canChangePricing
     };
   });
-  expect(summary.curveCount).toBe(1);
+  expect(summary.curveCount).toBe(2);
   expect(summary.canChangePricing).toBe(false);
 });
 
@@ -572,6 +626,20 @@ async function fillSkotselkollenPilot(page) {
     await page.getByRole("button", { name: "Ändra SI manuellt" }).click();
   }
   await fillNumber(page, 'input[name="siteIndex"]', "20");
+  await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
+}
+
+async function fillSkotselkollenT18(page) {
+  await page.locator('select[name="mainSpecies"]').selectOption("tall");
+  await page.locator('select[name="region"]').selectOption("norrland_inland");
+  await fillNumber(page, 'input[name="heightMeters"]', "15");
+  await fillNumber(page, 'input[name="basalArea"]', "25.8");
+  await fillNumber(page, 'input[name="ageYears"]', "65");
+  const manualSi = page.locator("[data-manual-si]");
+  if (await manualSi.evaluate((node) => node.classList.contains("hidden"))) {
+    await page.getByRole("button", { name: "Ändra SI manuellt" }).click();
+  }
+  await fillNumber(page, 'input[name="siteIndex"]', "18");
   await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
 }
 

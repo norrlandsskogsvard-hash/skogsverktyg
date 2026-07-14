@@ -111,11 +111,11 @@ function validateRule(rule, index) {
 function validateT20IsNotApplicableToBroadleaf() {
   const activePackages = NORRA_THINNING_VALUE_PACKAGES.filter(isActiveNorraPackage);
   const activeBroadleaf = activePackages.filter((item) => BROADLEAF_SPECIES.has(item.species));
-  const activeCodes = activePackages.map((item) => `${item.speciesCode}${item.siteIndex}`);
+  const activeCodes = activePackages.map((item) => `${item.speciesCode}${item.siteIndex}`).sort();
   const t20 = activePackages.find((item) => item.id === "norra-tall-t20-pilot");
 
-  if (activePackages.length !== 1 || !t20) {
-    errors.push(`forvantade endast T20 som aktiv Norra-kurva, hittade: ${activeCodes.join(", ") || "inga"}.`);
+  if (JSON.stringify(activeCodes) !== JSON.stringify(["T18", "T20"]) || !t20) {
+    errors.push(`forvantade endast T18 och T20 som aktiva Norra-kurvor, hittade: ${activeCodes.join(", ") || "inga"}.`);
   }
 
   if (t20 && t20.species !== "tall") {

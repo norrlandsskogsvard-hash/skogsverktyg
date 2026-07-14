@@ -432,7 +432,7 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
     notes: ["Hansyn/risk redovisas separat fran skoglig rekommendation och juridisk kontroll."]
   },
   {
-    id: "regional-t20-pilot",
+    id: "regional-norra-active-pilot",
     type: "regional_curve",
     source: "gallringsmallar-norra-sverige",
     sourceLabel: "Gallringsriktlinjer & gallringsmallar norra Sverige",
@@ -440,12 +440,12 @@ export const SKOTSEL_EVIDENCE_ITEMS = [
     species: "tall",
     region: "norra-sverige",
     appliesTo: ["curve_reference_pilot"],
-    claim: "T20-exempel för tall i norra Sverige kan användas som källstött pilotunderlag.",
+    claim: "Aktivt Norra-underlag for tall i norra Sverige kan anvandas som pilot- eller faltteststod.",
     strength: "pilot",
     weight: EVIDENCE_TYPE_WEIGHTS.regional_curve,
     confidence: "medium",
-    limitations: ["Pilot/exempel, inte full digitaliserad gallringskurva."],
-    notes: ["Ska användas som jämförelse och inte som facit."]
+    limitations: ["Pilot/falttest, inte full digitaliserad gallringskurva."],
+    notes: ["Ska anvandas som jamforelse och inte som facit."]
   },
   {
     id: "norra-text-rules-control-flags",
@@ -677,16 +677,21 @@ export function findGallringZone(input = {}, siteIndexEstimate = {}) {
   if (!curve) return null;
 
   if (isPilotCurveStatus(curve.status)) {
+    const isFieldPilot = curve.status === "active_field_pilot";
     return {
       type: "thinningCurve",
       actionCode: "curve_reference_pilot",
-      actionLabel: "Pilotunderlag",
+      actionLabel: isFieldPilot ? "Fälttestkurva" : "Pilotunderlag",
       confidence: curve.confidence,
       status: curve.status,
       precision: curve.precision,
       curve,
-      explanation: "Källstött T20-exempel finns för tall i norra Sverige. Det är ett pilot-/exempelprogram, inte en full gallringskurva.",
-      recommendation: "Använd som jämförelse mot T20-exemplet. Kontrollera full regional gallringsmall innan åtgärdsförslag."
+      explanation: isFieldPilot
+        ? "Aktiv kurva: T18 - fälttest, visuellt avläst från Norra gallringsmall. Inte fullständigt verifierad kurva."
+        : "Källstött T20-exempel finns för tall i norra Sverige. Det är ett pilot-/exempelprogram, inte en full gallringskurva.",
+      recommendation: isFieldPilot
+        ? "Använd som stöd och kontrollera utfallet i fält. Inte fullständigt verifierad kurva."
+        : "Använd som jämförelse mot T20-exemplet. Kontrollera full regional gallringsmall innan åtgärdsförslag."
     };
   }
 
@@ -719,7 +724,7 @@ export function findThinningSourceCandidate(input = {}, siteIndexEstimate = {}) 
 }
 
 function isPilotCurveStatus(status) {
-  return status === "active_pilot" || status === "pilot";
+  return status === "active_pilot" || status === "active_field_pilot" || status === "pilot";
 }
 
 export function buildEvidenceAssessment(input = {}, baseRecommendation = {}) {
@@ -939,6 +944,9 @@ function buildEvidenceSummary(baseRecommendation, supportingEvidence, conflictin
   }
 
   if (baseRecommendation.actionCode === "curve_reference_pilot") {
+    if (baseRecommendation.curveReference?.status === "active_field_pilot") {
+      return "Bedömningen bygger på T18 fälttest/visuell avläsning och principer från gallringsbeslutsstöd. Full verifierad gallringskurva och forskningsmatris saknas ännu, därför hålls säkerheten på " + confidenceLabel(combinedConfidence) + ".";
+    }
     return "Bedömningen bygger på pilotunderlag från T20-exempel och principer från gallringsbeslutsstöd. Full digitaliserad gallringskurva och forskningsmatris saknas ännu, därför hålls säkerheten på " + confidenceLabel(combinedConfidence) + ".";
   }
 
@@ -955,8 +963,11 @@ function buildFieldSummary(input, baseRecommendation, supportingEvidence, confli
   const regionSuffix = input.region === "okand" ? " Välj region för säkrare regional jämförelse." : "";
 
   if (actionCode === "curve_reference_pilot") {
+    const fieldPilotText = baseRecommendation.curveReference?.status === "active_field_pilot"
+      ? "Beståndet kan jämföras mot T18 fälttest/visuell avläsning, men full verifierad gallringskurva saknas."
+      : "Beståndet kan jämföras mot T20-pilotunderlag, men full gallringskurva saknas.";
     return {
-      assessment: legalPrefix + "Beståndet kan jämföras mot T20-pilotunderlag, men full gallringskurva saknas." + regionSuffix,
+      assessment: legalPrefix + fieldPilotText + regionSuffix,
       evidence,
       missing
     };
@@ -999,7 +1010,8 @@ function shortEvidence(input, actionCode, supportingEvidence) {
   const hasPracticeGuide = supportingEvidence.some((item) => item.type === "practice_guide");
 
   if (actionCode === "curve_reference_pilot") {
-    return withPracticeGuide(withSkogskunskap(["T20-exempel", "gallringsbeslutsstöd", "praktiskt fältstöd"], hasSkogskunskapTool, hasSkogskunskapGuidance), hasPracticeGuide);
+    const curveLabel = input.mainSpecies === "tall" && Number(input.siteIndex) === 18 ? "T18 fälttest" : "T20-exempel";
+    return withPracticeGuide(withSkogskunskap([curveLabel, "gallringsbeslutsstöd", "praktiskt fältstöd"], hasSkogskunskapTool, hasSkogskunskapGuidance), hasPracticeGuide);
   }
 
   if (isBroadleafMainSpecies(input.mainSpecies)) {

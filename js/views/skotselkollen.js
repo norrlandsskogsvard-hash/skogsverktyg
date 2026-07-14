@@ -610,6 +610,14 @@ function quickProposalTemplate(result) {
 
 function quickProposal(result) {
   if (result.actionCode === "curve_reference_pilot") {
+    if (isFieldPilotCurve(result.chartData?.curveReference)) {
+      return {
+        proposal: "Använd T18 som fälttest och kontrollera utfallet i fält.",
+        why: "Aktiv kurva: T18 - fälttest, visuellt avläst från Norra gallringsmall.",
+        checks: (result.quickChecks || []).slice(0, 3),
+        nextStep: "Inte fullständigt verifierad kurva. Jämför mot fältbilden innan åtgärd."
+      };
+    }
     return {
       proposal: "Använd T20-exemplet som jämförelse, inte som färdigt åtgärdsbeslut.",
       why: "Beståndspunkten kan jämföras mot källstött pilotunderlag, men full kurva saknas.",
@@ -826,6 +834,7 @@ function curveBankItem(item, activeGroup) {
 }
 
 function activeCurveStatusLabel(item) {
+  if (item.status === "active_field_pilot") return "Aktiv fälttest - visuell avläsning, behöver praktisk kontroll";
   if (item.status === "active_pilot") return "Aktiv pilot - T20-exempel, ej full kurva";
   if (item.activeUse === "full_curve") return "Verifierad full kurva";
   return "Verifierad kurvreferens";
@@ -859,7 +868,11 @@ function sourceCandidateStatusText(sourceCandidate) {
 }
 
 function isPilotCurveStatus(status) {
-  return status === "active_pilot" || status === "pilot";
+  return status === "active_pilot" || status === "active_field_pilot" || status === "pilot";
+}
+
+function isFieldPilotCurve(curveReference) {
+  return curveReference?.status === "active_field_pilot" || curveReference?.curve?.status === "active_field_pilot";
 }
 
 function isClearingAction(actionCode) {
@@ -890,10 +903,13 @@ function chartTemplate(chartData) {
   const label = hasPoint ? escapeHtml("Bestånd: " + formatNumber(height) + " m / " + formatNumber(basal) + " m²/ha") : "Ange höjd och grundyta";
   const curveReference = chartData.curveReference;
   const hasPilot = isPilotCurveStatus(curveReference?.status);
+  const hasFieldPilot = isFieldPilotCurve(curveReference);
   const hasComplete = curveReference?.status === "complete";
   const zones = hasComplete ? completeZonesTemplate() : "";
   const pilot = hasPilot ? pilotCurveTemplate(curveReference.curve) : "";
-  const badge = hasPilot ? "<span>Pilot: T20-exempel, ej full kurva</span>" : "<span>" + escapeHtml(chartData.status || "") + "</span>";
+  const badge = hasFieldPilot
+    ? "<span>T18 fälttest: visuell avläsning</span>"
+    : (hasPilot ? "<span>Pilot: T20-exempel, ej full kurva</span>" : "<span>" + escapeHtml(chartData.status || "") + "</span>");
 
   return "<article class='skotsel-chart' role='img' aria-label='Gallringskurva med beståndets punkt'>" +
     "<div class='skotsel-chart__head'><h3>Gallringskurva</h3>" + badge + "</div>" +
@@ -907,8 +923,8 @@ function chartTemplate(chartData) {
       "<text x='8' y='116' class='skotsel-chart__axis-title' transform='rotate(-90 8 116)'>Grundyta, m²/ha</text>" +
       point +
     "</svg>" +
-    chartLegendTemplate(hasPoint, hasPilot, hasComplete) +
-    "<p class='card__text skotsel-chart__note'><strong>" + label + "</strong><br>" + escapeHtml(chartStatusText(chartData, hasPilot, hasComplete)) + "</p>" +
+    chartLegendTemplate(hasPoint, hasPilot, hasComplete, hasFieldPilot) +
+    "<p class='card__text skotsel-chart__note'><strong>" + label + "</strong><br>" + escapeHtml(chartStatusText(chartData, hasPilot, hasComplete, hasFieldPilot)) + "</p>" +
   "</article>";
 }
 
@@ -931,21 +947,23 @@ function pointTemplate(x, y, height, basal) {
   "</g>";
 }
 
-function chartLegendTemplate(hasPoint, hasPilot, hasComplete) {
+function chartLegendTemplate(hasPoint, hasPilot, hasComplete, hasFieldPilot = false) {
   const items = [];
   if (hasPoint) items.push("<span><i class='skotsel-chart__legend-dot skotsel-chart__legend-dot--stand'></i>Beståndspunkt</span>");
   if (hasPilot) {
-    items.push("<span><i class='skotsel-chart__legend-dot skotsel-chart__legend-dot--pilot'></i>T20-pilotpunkter</span>");
-    items.push("<span><i class='skotsel-chart__legend-line'></i>Exempellinje</span>");
+    items.push("<span><i class='skotsel-chart__legend-dot skotsel-chart__legend-dot--pilot'></i>" + (hasFieldPilot ? "T18-fälttestpunkter" : "T20-pilotpunkter") + "</span>");
+    items.push("<span><i class='skotsel-chart__legend-line'></i>" + (hasFieldPilot ? "Visuell testlinje" : "Exempellinje") + "</span>");
   }
   if (hasComplete) items.push("<span><i class='skotsel-chart__legend-zone'></i>Källstödd zon</span>");
   if (!items.length) return "";
   return "<div class='skotsel-chart__legend'>" + items.join("") + "</div>";
 }
 
-function chartStatusText(chartData, hasPilot, hasComplete) {
+function chartStatusText(chartData, hasPilot, hasComplete, hasFieldPilot = false) {
   const parts = [];
-  if (hasPilot) {
+  if (hasFieldPilot) {
+    parts.push("Aktiv kurva: T18 - fälttest, visuellt avläst från Norra gallringsmall. Använd som stöd och kontrollera utfallet i fält. Inte fullständigt verifierad kurva.");
+  } else if (hasPilot) {
     parts.push("T20-exempel, ej full kurva. Full digitaliserad gallringskurva saknas.");
   } else if (!hasComplete) {
     parts.push("Full digitaliserad gallringskurva saknas.");

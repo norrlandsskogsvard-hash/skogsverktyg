@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.0.0-alpha.1-t18-field-pilot.1 - 2026-07-14
+
+### Added - T18 faltpilot
+
+- T18 har aktiverats som falttest/pilot for tall med manuellt SI T18.
+- T18-varden ar visuellt avlasta fran Norra gallringsmall s. 12 och markeras som testvarden.
+- T18 visas som fälttest/visuell avläsning och inte som fullstandigt verifierad kurva.
+- T20 ar oforandrad och fortsatter som befintlig aktiv pilot.
+- Auto-SI ar fortsatt sparrad och `SITE_INDEX_CURVES` ar fortsatt `[]`.
+- T22, G20, G22 och ovriga kurvor ar fortsatt inte aktiva.
+- Bjork/lov anvander inte T18 eller annan tall-/granmall som facit.
+- Ingen juridisk beslutslogik, prislogik, offertkoppling eller kundarkivkoppling har andrats.
+- PWA-cache hojd till t18-field-pilot.1.
+
 ## v2.0.0-alpha.1-reviewed-candidates.1 - 2026-07-14
 
 ### Added - Reviewed candidates

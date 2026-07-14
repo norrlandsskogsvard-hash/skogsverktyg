@@ -288,18 +288,25 @@ function assessQuickCurve(input, siteIndexEstimate) {
   }
 
   if (isPilotCurveStatus(curveReference?.status)) {
+    const fieldPilot = isFieldPilotCurve(curveReference);
     return {
       actionCode: curveReference.actionCode,
       confidence: curveReference.confidence,
       why: curveReference.explanation,
       recommendationDirection: curveReference.recommendation,
       fieldChecks: [
-        "Jämför beståndspunkten mot T20-exemplets höjd och grundyta.",
-        "Kontrollera full regional gallringsmall innan åtgärdsförslag.",
+        fieldPilot
+          ? "Jämför beståndspunkten mot T18-fälttestets visuellt avlästa höjd och grundyta."
+          : "Jämför beståndspunkten mot T20-exemplets höjd och grundyta.",
+        fieldPilot
+          ? "Kontrollera utfallet praktiskt i fält innan åtgärdsförslag."
+          : "Kontrollera full regional gallringsmall innan åtgärdsförslag.",
         ...fieldChecks
       ],
       warnings: [
-        "Pilotunderlaget är ett textbaserat exempel, inte en komplett digitaliserad kurva.",
+        fieldPilot
+          ? "T18 är fälttest/visuell avläsning och inte fullständigt verifierad kurva."
+          : "Pilotunderlaget är ett textbaserat exempel, inte en komplett digitaliserad kurva.",
         ...curveReference.curve.limitations
       ],
       curveReference
@@ -636,7 +643,7 @@ function buildNorraTextRuleAssessment(input, assessment) {
   }
 
   if (assessment.actionCode === "curve_reference_pilot") {
-    fieldChecks.push("När T20-pilot visas: lägg störst vikt vid kontroll av grundyta efter gallring och fältbild.");
+    fieldChecks.push("När aktiv pilot- eller fälttestkurva visas: lägg störst vikt vid kontroll av grundyta efter gallring och fältbild.");
   }
 
   fieldChecks.push("Vid noggrann bedömning: använd systematiska provytor, mät grundyta på varje yta och kontrollera SI/övre höjd där det går.");
@@ -729,7 +736,7 @@ function buildGallringResearchAssessment(input, assessment) {
   }
 
   if (assessment.actionCode === "curve_reference_pilot") {
-    fieldChecks.push("Väg T20-jämförelsen mot fältbilden: gallring kan gynna dimensionsutveckling utan att vara ett exakt facit.");
+    fieldChecks.push("Väg kurvjämförelsen mot fältbilden: gallring kan gynna dimensionsutveckling utan att vara ett exakt facit.");
   }
 
   if (input.snowWindRisk === "ja") {
@@ -1089,6 +1096,9 @@ function chartNote(actionCode, input, siteIndexEstimate, curveReference, sourceC
     return "Lövspår: kurvunderlag saknas eller är ofullständigt. Punkten visas utan tall-/granmall som facit.";
   }
   if (actionCode === "curve_reference_pilot") {
+    if (isFieldPilotCurve(curveReference)) {
+      return "Aktiv kurva: T18 - fälttest, visuellt avläst från Norra gallringsmall. Använd som stöd och kontrollera utfallet i fält. Inte fullständigt verifierad kurva.";
+    }
     return "Källstött T20-exempel finns. Jämför mot full gallringsmall innan åtgärd.";
   }
   if (actionCode === "insufficient_data") {
@@ -1138,6 +1148,9 @@ function buildPlanText(actionCode, recommendationDirection) {
   }
 
   if (actionCode === "curve_reference_pilot") {
+    if (recommendationDirection?.includes("T18")) {
+      return "Beståndet har jämförts mot T18 som fälttest/visuell avläsning från Norra gallringsmall. Använd som stöd och kontrollera utfallet i fält innan åtgärd skrivs in i planen.";
+    }
     return "Beståndet har jämförts mot källstött T20-exempel för norra Sverige. Underlaget är ett pilotstöd och bör kontrolleras mot full gallringsmall innan åtgärd skrivs in i planen.";
   }
 
@@ -1159,7 +1172,11 @@ function lowerConfidence(confidence) {
 }
 
 function isPilotCurveStatus(status) {
-  return status === "active_pilot" || status === "pilot";
+  return status === "active_pilot" || status === "active_field_pilot" || status === "pilot";
+}
+
+function isFieldPilotCurve(curveReference) {
+  return curveReference?.status === "active_field_pilot" || curveReference?.curve?.status === "active_field_pilot";
 }
 
 function isClearingAction(actionCode) {

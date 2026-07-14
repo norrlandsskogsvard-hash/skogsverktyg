@@ -35,6 +35,7 @@ const text = await readFile("data/norra-thinning-review-drafts.json", "utf8");
 const workspace = JSON.parse(text);
 const drafts = Array.isArray(workspace.drafts) ? workspace.drafts : [];
 const active = getActiveNorraPackages();
+const activeCodes = active.map((item) => `${item.speciesCode}${item.siteIndex}`).sort();
 const t20 = NORRA_THINNING_VALUE_PACKAGES.find((item) => item.id === "norra-tall-t20-pilot");
 const draftCodes = drafts.map((draft) => draft.code);
 
@@ -54,8 +55,8 @@ if (draftCodes.includes("T20")) {
 
 drafts.forEach(validateDraft);
 
-if (active.length !== 1 || active[0]?.id !== "norra-tall-t20-pilot") {
-  errors.push(`T20 maste vara enda aktiva Norra-kurva, hittade ${active.length}.`);
+if (JSON.stringify(activeCodes) !== JSON.stringify(["T18", "T20"])) {
+  errors.push(`Endast T18 och T20 far vara aktiva Norra-kurvor, hittade ${activeCodes.join(", ") || "inga"}.`);
 }
 
 if (!t20) {
@@ -74,7 +75,7 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`Kurvgranskningsutkast OK: ${drafts.length} draftkurvor, 0 aktiveringar, T20 oforandrad, auto-SI sparrad.`);
+console.log(`Kurvgranskningsutkast OK: ${drafts.length} draftkurvor, aktiva kurvor T18/T20, T20 oforandrad, auto-SI sparrad.`);
 
 function validateDraft(draft) {
   if (!draft.code || !draft.species || !draft.siteIndex || !draft.status || !draft.reviewStatus) {

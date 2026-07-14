@@ -52,7 +52,10 @@ Kommande steg:
 - .30 aktiverar inga nya kurvor; nasta steg kan vara separat aktiveringsbatch forst efter verifierade punktvarden.
 - .31 lagger till manuell dubbelkontroll och lokal export av `reviewed_candidate`.
 - .31 aktiverar inga kurvor; reviewed candidates ar endast underlag for separat aktiveringsbatch.
-- Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
+- .32 aktiverar T18 som falttest/pilot efter visuell avlasning fran Norra gallringsmall s. 12.
+- .32 markerar T18 som `active_field_pilot`, `visual_estimate_from_source`, `reviewNeeded: true`, `fieldTest: true` och `canBeUsedForFinalDecision: false`.
+- .32 andrar inte T20, aktiverar inte auto-SI och aktiverar inte T22, G20, G22 eller andra kurvor.
+- Senare steg kan hantera mer exakt diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD
    - SI-regler och begränsningar extraheras först.

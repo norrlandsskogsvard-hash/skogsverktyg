@@ -31,6 +31,7 @@ const rows = existsSync(CSV_PATH) ? parseCsv(await readFile(CSV_PATH, "utf8")) :
 const extraction = existsSync(JSON_PATH) ? JSON.parse(await readFile(JSON_PATH, "utf8")) : {};
 const report = existsSync(REPORT_PATH) ? await readFile(REPORT_PATH, "utf8") : "";
 const active = getActiveNorraPackages();
+const activeCodes = active.map((item) => `${item.speciesCode}${item.siteIndex}`).sort();
 const t20 = NORRA_THINNING_VALUE_PACKAGES.find((item) => item.id === "norra-tall-t20-pilot");
 
 if (rows.length < 1) errors.push("CSV maste innehalla minst en assisted rad.");
@@ -46,8 +47,8 @@ if (/juridiskt beslut|legalDecision|price|pricing|prisandring/i.test(JSON.string
   errors.push("Assisted extraction far inte innehalla juridiskt beslut eller prisandring.");
 }
 
-if (active.length !== 1 || active[0]?.id !== "norra-tall-t20-pilot") {
-  errors.push(`T20 maste vara enda aktiva kurva, hittade ${active.length}.`);
+if (JSON.stringify(activeCodes) !== JSON.stringify(["T18", "T20"])) {
+  errors.push(`Endast T18 och T20 far vara aktiva kurvor, hittade ${activeCodes.join(", ") || "inga"}.`);
 }
 
 if (!t20) {

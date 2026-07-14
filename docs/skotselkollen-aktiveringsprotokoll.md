@@ -10,6 +10,7 @@ Detta protokoll styr hur en identifierad eller digitaliserad gallringsmall far g
 - `verified_candidate`: text- eller tabellvarden finns i kallbanken, men separat aktiveringsbeslut saknas.
 - `draft_digitized`: varden finns som digitaliseringsutkast men ar inte fardiggranskade.
 - `active_pilot`: begransat, kallstott exempel som far visas som pilot men inte som full kurva.
+- `active_field_pilot`: visuellt avlast falttest som far visas for praktisk kontroll men inte som fullstandigt verifierad kurva.
 - `verified`: kallvarden ar kontrollerade och far anvandas enligt `activeUse`.
 - `rejected`: posten ar granskad och ska inte aktiveras.
 
@@ -25,6 +26,21 @@ En post raknas bara som aktivt kurvunderlag nar allt detta stammer:
 - `reviewNeeded` ar `false`
 
 Om nagon del saknas ska posten bara raknas som identifierad kalla, candidate, draft eller dokumentation.
+
+Separat fältpilotgrind för T18 i `.32`:
+
+- `id` ar `norra-tall-t18-field-pilot`
+- `status` ar `active_field_pilot`
+- `dataQuality` ar `visual_estimate_from_source`
+- `precision` ar `field_test_visual_reading`
+- `activeUse` ar `true`
+- `reviewNeeded` ar `true`
+- `fieldTest` ar `true`
+- `canBeUsedForFinalDecision` ar `false`
+- `sourcePage` eller `sourceSection` finns
+- begransningar anger visuell avlasning, falttest och att kurvan inte ar fullstandigt verifierad
+
+Denna grind galler endast T18. T22, G20, G22 och ovriga kurvor far inte anvanda den.
 
 ## Obligatoriska krav fore aktivering
 
@@ -82,6 +98,19 @@ En reviewed candidate far inte aktiveras direkt:
 - `activeUse` ska vara `false`.
 - Kandidaten ska exporteras till separat import- och valideringsbatch innan eventuell `active_verified`.
 - T20, auto-SI, juridik och prislogik far inte paverkas.
+
+## Batch 05 T18 fälttest
+
+`.32` aktiverar T18 som fälttest/pilot från Norra gallringsmall s. 12.
+
+- T18 ar visuellt avlast fran diagram och markeras som `visual_estimate_from_source`.
+- T18 har `reviewNeeded: true`, `fieldTest: true` och `canBeUsedForFinalDecision: false`.
+- T18 far anvandas nar tradslag ar tall och SI valjs manuellt som T18.
+- T18 ar inte fullstandigt verifierad och ska kontrolleras praktiskt i falt.
+- T20 ar oforandrad.
+- Auto-SI ar fortsatt sparrad och `SITE_INDEX_CURVES` ar `[]`.
+- T22, G20, G22 och ovriga kurvor ar fortsatt inte aktiva.
+- Ingen juridisk beslutslogik, prislogik, offertkoppling eller kundarkivkoppling har andrats.
 
 ## Aktiveringsflode
 

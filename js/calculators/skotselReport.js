@@ -1,5 +1,5 @@
 const REPORT_TITLE = "Skötselkollen – fältprotokoll";
-const REPORT_CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-field-mode.1";
+const REPORT_CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-t18-field-pilot.1";
 
 const SPECIES_LABELS = {
   tall: "Tall",
@@ -110,10 +110,14 @@ function buildFieldNoteLines(input) {
 }
 
 function buildSilvicultureLines(result) {
+  const curveReference = result.chartData?.curveReference;
+  const curveLine = curveReference?.status === "active_field_pilot"
+    ? "Kurvunderlag: T18, fälttest/visuell avläsning, behöver praktisk kontroll."
+    : (curveReference ? "Norra/T20: T20-pilot eller källstött jämförelse visas när aktiv." : "Norra/T20: ingen aktiv full kurva för vald kombination.");
   return [
     textOr(result.why),
     "Rekommenderad riktning: " + textOr(result.recommendationDirection),
-    result.chartData?.curveReference ? "Norra/T20: T20-pilot eller källstött jämförelse visas när aktiv." : "Norra/T20: ingen aktiv full kurva för vald kombination.",
+    curveLine,
     "Forsknings-/textstöd: se fältkontroller och källor nedan."
   ];
 }

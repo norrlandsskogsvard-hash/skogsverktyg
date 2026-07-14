@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import {
   getActiveNorraPackages,
+  isFieldPilotNorraPackage,
   isActiveNorraPackage,
   NORRA_THINNING_VALUE_PACKAGES
 } from "../js/calculators/norraThinningValues.js";
@@ -15,6 +16,7 @@ const EXPECTED_T20_EVENTS = [
 const ACTIVE_USES = new Set(["chart_reference", "full_curve"]);
 const ACTIVE_STATUSES = new Set(["active_pilot", "verified"]);
 const ACTIVE_QUALITIES = new Set(["pilot_example", "verified_text", "verified_table", "chart_digitized_verified"]);
+const FIELD_PILOT_USES = new Set([true]);
 const NON_ACTIVE_STATUSES = new Set(["candidate", "draft_digitized", "verified_candidate"]);
 const FORBIDDEN_FIELDS = new Set([
   "price",
@@ -28,23 +30,40 @@ const FORBIDDEN_FIELDS = new Set([
 
 const errors = [];
 const active = getActiveNorraPackages();
-const activeCodes = active.map(curveCode);
+const activeCodes = active.map(curveCode).sort();
+const fieldPilotCodes = active.filter(isFieldPilotNorraPackage).map(curveCode).sort();
+const ordinaryActiveCodes = active.filter((item) => !isFieldPilotNorraPackage(item)).map(curveCode).sort();
 const blockedCandidates = NORRA_THINNING_VALUE_PACKAGES.filter((item) => item.reviewNeeded === true);
 const t20 = NORRA_THINNING_VALUE_PACKAGES.find((item) => item.id === "norra-tall-t20-pilot");
+const t18 = NORRA_THINNING_VALUE_PACKAGES.find((item) => item.id === "norra-tall-t18-field-pilot");
 const codeCounts = new Map();
 
-if (active.length !== 1) {
-  errors.push(`Exakt en aktiv Norra-post kravs i denna batch, hittade ${active.length}.`);
+if (active.length !== 2) {
+  errors.push(`Exakt tva aktiva Norra-poster kravs i denna batch, hittade ${active.length}.`);
 }
 
-if (active[0]?.id !== "norra-tall-t20-pilot") {
-  errors.push("T20 maste vara enda aktiva Norra-post tills fler kallvarden ar verifierade.");
+if (JSON.stringify(activeCodes) !== JSON.stringify(["T18", "T20"])) {
+  errors.push(`Endast T18 och T20 far vara aktiva i denna batch, hittade ${activeCodes.join(", ") || "inga"}.`);
+}
+
+if (JSON.stringify(fieldPilotCodes) !== JSON.stringify(["T18"])) {
+  errors.push(`fieldPilotCodes ska vara T18, hittade ${fieldPilotCodes.join(", ") || "inga"}.`);
+}
+
+if (JSON.stringify(ordinaryActiveCodes) !== JSON.stringify(["T20"])) {
+  errors.push(`Ordinarie aktiv pilot ska vara T20, hittade ${ordinaryActiveCodes.join(", ") || "inga"}.`);
 }
 
 if (!t20) {
   errors.push("T20-piloten saknas.");
 } else {
   assertDeepEqual(t20.values?.thinningEvents, EXPECTED_T20_EVENTS, "T20-vardena har andrats.");
+}
+
+if (!t18) {
+  errors.push("T18-faltpiloten saknas.");
+} else {
+  validateFieldPilot(t18, "koddata");
 }
 
 if (SITE_INDEX_CURVES.length !== 0) {
@@ -76,12 +95,16 @@ console.log([
   `${NORRA_THINNING_VALUE_PACKAGES.length} paket`,
   `active curve count ${active.length}`,
   `activeCodes ${activeCodes.join(", ") || "inga"}`,
+  `fieldPilotCodes ${fieldPilotCodes.join(", ") || "inga"}`,
+  `ordinaryActiveCodes ${ordinaryActiveCodes.join(", ") || "inga"}`,
   `blocked candidates ${blockedCandidates.length}`,
   "T20 integrity OK",
   "auto-SI sparrad"
 ].join(" "));
 
 function validatePackage(item, isActive, scope) {
+  const isFieldPilot = isFieldPilotNorraPackage(item);
+
   if (!item.species || !item.speciesCode || !item.siteIndex || !item.region || !item.sourceName) {
     errors.push(`${scope}/${item.id}: tradslag, SI, region eller sourceName saknas.`);
   }
@@ -96,19 +119,21 @@ function validatePackage(item, isActive, scope) {
 
   validateForbiddenFields(item, scope);
 
-  if (isActive && !ACTIVE_STATUSES.has(item.status)) {
+  if (isActive && isFieldPilot) {
+    validateFieldPilot(item, scope);
+  } else if (isActive && !ACTIVE_STATUSES.has(item.status)) {
     errors.push(`${scope}/${item.id}: aktiv post har otillaten status ${item.status}.`);
   }
 
-  if (isActive && !ACTIVE_QUALITIES.has(item.dataQuality)) {
+  if (isActive && !isFieldPilot && !ACTIVE_QUALITIES.has(item.dataQuality)) {
     errors.push(`${scope}/${item.id}: aktiv post har otillaten dataQuality ${item.dataQuality}.`);
   }
 
-  if (isActive && !ACTIVE_USES.has(item.activeUse)) {
+  if (isActive && !isFieldPilot && !ACTIVE_USES.has(item.activeUse)) {
     errors.push(`${scope}/${item.id}: aktiv post har otillaten activeUse ${item.activeUse}.`);
   }
 
-  if (isActive && item.reviewNeeded !== false) {
+  if (isActive && !isFieldPilot && item.reviewNeeded !== false) {
     errors.push(`${scope}/${item.id}: aktiva poster maste ha reviewNeeded false.`);
   }
 
@@ -120,7 +145,7 @@ function validatePackage(item, isActive, scope) {
     errors.push(`${scope}/${item.id}: aktiv post saknar verifierad gallringspunkt i values.`);
   }
 
-  if (NON_ACTIVE_STATUSES.has(item.status) && ACTIVE_USES.has(item.activeUse)) {
+  if (NON_ACTIVE_STATUSES.has(item.status) && (ACTIVE_USES.has(item.activeUse) || FIELD_PILOT_USES.has(item.activeUse))) {
     errors.push(`${scope}/${item.id}: ${item.status} far inte ha activeUse ${item.activeUse}.`);
   }
 
@@ -160,13 +185,13 @@ async function validatePreviewIfExists() {
     const preview = JSON.parse(previewText);
     const previewRows = Array.isArray(preview) ? preview : (preview.packages || []);
     const previewActive = previewRows.filter(isActiveNorraPackage);
-    const activeNonT20 = previewActive.filter((item) => item.id !== "norra-tall-t20-pilot");
+    const invalidPreviewActive = previewActive.filter((item) => !["norra-tall-t20-pilot", "norra-tall-t18-field-pilot"].includes(item.id));
 
-    if (previewActive.length > 1) {
-      errors.push(`preview: hogst en aktiv preview-post tillats i denna batch, hittade ${previewActive.length}.`);
+    if (previewActive.length > 2) {
+      errors.push(`preview: hogst tva aktiva preview-poster tillats i denna batch, hittade ${previewActive.length}.`);
     }
-    if (activeNonT20.length) {
-      errors.push("preview: import-preview forsoker aktivera annan mall an T20.");
+    if (invalidPreviewActive.length) {
+      errors.push("preview: import-preview forsoker aktivera annan mall an T18/T20.");
     }
 
     const previewT20 = previewRows.find((item) => item.id === "norra-tall-t20-pilot");
@@ -205,6 +230,32 @@ function hasVerifiedThinningEvents(values) {
       Number.isFinite(event.basalAreaBefore) &&
       Number.isFinite(event.basalAreaAfter)
     );
+}
+
+function validateFieldPilot(item, scope) {
+  if (!isFieldPilotNorraPackage(item)) {
+    errors.push(`${scope}/${item.id}: faltpilot maste vara exakt T18 med aktiv faltpilotmetadata.`);
+    return;
+  }
+
+  if (!item.sourcePage && !item.sourceSection) {
+    errors.push(`${scope}/${item.id}: T18-faltpilot saknar sourcePage/sourceSection.`);
+  }
+
+  if (!hasVerifiedThinningEvents(item.values)) {
+    errors.push(`${scope}/${item.id}: T18-faltpilot saknar visuellt avlast gallringspunkt i values.`);
+  }
+
+  const limitationText = [...(item.limitations || []), ...(item.extractionNotes || [])].join(" ").toLowerCase();
+  if (!limitationText.includes("visuell") && !limitationText.includes("visuellt")) {
+    errors.push(`${scope}/${item.id}: T18-faltpilot maste markeras som visuell avlasning.`);
+  }
+  if (!limitationText.includes("fält") && !limitationText.includes("falt")) {
+    errors.push(`${scope}/${item.id}: T18-faltpilot maste markeras som faltkontroll/falttest.`);
+  }
+  if (!limitationText.includes("inte full")) {
+    errors.push(`${scope}/${item.id}: T18-faltpilot maste markeras som inte fullstandigt verifierad.`);
+  }
 }
 
 function validateForbiddenFields(item, scope) {
