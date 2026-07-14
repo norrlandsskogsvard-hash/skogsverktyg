@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-digital-thinning-template.2 - 2026-07-14
+
+### Changed - Tydligare gallringsmall i fältläge
+
+- Digital gallringsmall visar nu alder i mallpunkter och referenstabell dar underlaget har alder.
+- Saknad alder i pilotunderlag visas som "saknas i pilotunderlag".
+- Lagesrutan visar tydligare faser: fore/nara 1:a gallring, mellan 1:a och 2:a gallring, nara 2:a gallring och mot slutavverkning.
+- Grafen har mer pappersmallskansla med tydligare mallpunkter, axlar, grid och kompakt referenstabell.
+- T18/T20-varden, aktiveringsstatus, auto-SI, juridik och prislogik ar oforandrade.
+- PWA-cache hojd till digital-thinning-template.2.
+
 ## v2.0.0-alpha.1-digital-thinning-template.1 - 2026-07-14
 
 ### Changed - Digital gallringsmall

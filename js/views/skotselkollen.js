@@ -949,13 +949,13 @@ function curveInterpretationTemplate(result) {
   const proposal = quickProposal(result);
   const chartData = result.chartData || {};
   const curveReference = chartData.curveReference;
-  const position = curvePositionText(chartData, curveReference);
+  const position = curvePosition(chartData, curveReference);
   return "<section class='skotsel-curve-brief' aria-label='Kort tolkning av gallringsmall'>" +
     briefBlock("Bedömning", [
       proposal.proposal,
       curveReference?.curve ? "Kurvunderlaget är pilot/fälttest och ska användas som stöd i fält." : "Kurvunderlag saknas för vald kombination."
     ]) +
-    briefBlock("Läge i kurvan", [position]) +
+    briefBlock("Läge i kurvan", [position.label, position.text]) +
     briefBlock("Nästa steg", [
       proposal.nextStep,
       (proposal.checks || [])[0]
@@ -970,19 +970,59 @@ function briefBlock(title, lines) {
   "</div>";
 }
 
-function curvePositionText(chartData, curveReference) {
+function curvePosition(chartData, curveReference) {
   const height = Number(chartData.heightMeters);
   const basal = Number(chartData.basalArea);
-  if (!Number.isFinite(height) || !Number.isFinite(basal)) return "Ange höjd och grundyta för att placera beståndet i mallen.";
+  if (!Number.isFinite(height) || !Number.isFinite(basal)) {
+    return {
+      label: "Punkt saknas",
+      text: "Ange höjd och grundyta för att placera beståndet i mallen."
+    };
+  }
   const events = curveReference?.curve?.points?.thinningEvents || [];
   const first = events[0];
   const second = events[1];
   const final = events[2];
-  if (!first) return "Beståndspunkten visas utan aktiv referenskurva.";
-  if (height <= first.topHeight + 0.8) return "Beståndet ligger nära första gallring.";
-  if (second && height <= second.topHeight + 0.8) return "Beståndet ligger efter första gallring men före andra gallring.";
-  if (final && height >= final.topHeight - 0.8) return "Beståndet ligger högt i kurvan och bör kontrolleras mot slutavverkningsläge.";
-  return "Beståndet ligger mellan senare gallringsläge och slutläge.";
+  if (!first) {
+    return {
+      label: "Ingen aktiv referens",
+      text: "Beståndspunkten visas utan aktiv referenskurva."
+    };
+  }
+  if (height < first.topHeight - 0.8) {
+    return {
+      label: "Före 1:a gallring",
+      text: "Beståndet ligger före första mallpunkten. Kontrollera höjd, grundyta och beståndsfas i fält."
+    };
+  }
+  if (height <= first.topHeight + 0.8) {
+    return {
+      label: "Nära 1:a gallring",
+      text: "Beståndet ligger nära första gallring i den aktiva mallen."
+    };
+  }
+  if (second && height < second.topHeight - 0.8) {
+    return {
+      label: "Mellan 1:a och 2:a gallring",
+      text: "Beståndet ligger efter första gallring men före andra gallring."
+    };
+  }
+  if (second && height <= second.topHeight + 0.8) {
+    return {
+      label: "Nära 2:a gallring",
+      text: "Beståndet ligger nära andra gallring i den aktiva mallen."
+    };
+  }
+  if (final && height >= final.topHeight - 0.8) {
+    return {
+      label: "Mot slutavverkning",
+      text: "Beståndet ligger högt i kurvan och bör kontrolleras mot slutavverkningsläge."
+    };
+  }
+  return {
+    label: "Mellan 2:a och slutavverkning",
+    text: "Beståndet ligger mellan senare gallringsläge och slutläge."
+  };
 }
 
 function referenceTableTemplate(curveReference) {
@@ -991,7 +1031,7 @@ function referenceTableTemplate(curveReference) {
     return "<section class='skotsel-reference-table'><h4>Referenspunkter</h4><p>Inga aktiva referenspunkter för vald kombination.</p></section>";
   }
   return "<section class='skotsel-reference-table'><h4>Referenspunkter</h4>" +
-    "<table><thead><tr><th>Punkt</th><th>Höjd</th><th>Grundyta före</th><th>Grundyta efter</th><th>Stamantal</th></tr></thead><tbody>" +
+    "<table><thead><tr><th>Åtgärd</th><th>Höjd</th><th>Grundyta före</th><th>Grundyta efter</th><th>Ålder</th><th>Stammar före/efter</th></tr></thead><tbody>" +
       events.map(referenceRowTemplate).join("") +
     "</tbody></table></section>";
 }
@@ -1005,8 +1045,13 @@ function referenceRowTemplate(event) {
     "<td>" + escapeHtml(formatNumber(event.topHeight)) + " m</td>" +
     "<td>" + escapeHtml(formatNumber(event.basalAreaBefore)) + "</td>" +
     "<td>" + escapeHtml(formatNumber(event.basalAreaAfter)) + "</td>" +
+    "<td>" + escapeHtml(ageText(event.ageTotal)) + "</td>" +
     "<td>" + escapeHtml(stems || "saknas") + "</td>" +
   "</tr>";
+}
+
+function ageText(value) {
+  return Number.isFinite(value) ? formatAgeNumber(value) + " år" : "saknas i pilotunderlag";
 }
 
 function gridTemplate() {
@@ -1065,9 +1110,18 @@ function pilotCurveTemplate(curve) {
     "<g class='skotsel-chart__pilot-point'>" +
       "<circle cx='" + chartX(event.topHeight) + "' cy='" + chartY(event.basalAreaBefore) + "' r='7'></circle>" +
       "<text x='" + (chartX(event.topHeight) + 9) + "' y='" + (chartY(event.basalAreaBefore) - 9) + "'>" + escapeHtml(event.label) + "</text>" +
+      "<text class='skotsel-chart__pilot-age' x='" + (chartX(event.topHeight) + 9) + "' y='" + (chartY(event.basalAreaBefore) + 4) + "'>" + escapeHtml(shortAgeText(event.ageTotal)) + "</text>" +
     "</g>"
   ).join("");
   return "<polyline class='skotsel-chart__pilot-line' points='" + beforePoints + "'></polyline>" + thinningSegments + dots;
+}
+
+function shortAgeText(value) {
+  return Number.isFinite(value) ? formatAgeNumber(value) + " år" : "ålder saknas";
+}
+
+function formatAgeNumber(value) {
+  return Number.isInteger(value) ? String(value) : formatNumber(value);
 }
 
 function visualZonesTemplate() {

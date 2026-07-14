@@ -796,6 +796,10 @@
     font-size: 0.54rem;
   }
 
+  .skotsel-chart__pilot-age {
+    font-size: 0.48rem;
+  }
+
   .skotsel-chart__legend {
     gap: 0.35rem 0.55rem;
     font-size: 0.76rem;
@@ -831,8 +835,8 @@
   }
 
   .skotsel-reference-table table {
-    min-width: 28rem;
-    font-size: 0.8rem;
+    min-width: 35rem;
+    font-size: 0.78rem;
   }
 
   .skotsel-si-box {

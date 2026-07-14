@@ -296,9 +296,13 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(desktopTemplate).toContainText("Läge i kurvan");
   await expect(desktopTemplate).toContainText("Nästa steg");
   await expect(desktopTemplate).toContainText("Referenspunkter");
+  await expect(desktopTemplate).toContainText("Ålder");
+  await expect(desktopTemplate).toContainText("Stammar före/efter");
   await expect(desktopTemplate).toContainText("1:a gallring");
   await expect(desktopTemplate).toContainText("2:a gallring");
   await expect(desktopTemplate).toContainText("Slutavverkning");
+  await expect(desktopTemplate).toContainText("Nära 1:a gallring");
+  await expect(desktopTemplate).toContainText("59 år");
   await expect(page.locator(".skotsel-advanced--result details").first()).not.toHaveAttribute("open", "");
   const desktopTemplateSize = await desktopTemplate.locator("svg").evaluate((node) => {
     const box = node.getBoundingClientRect();
@@ -358,6 +362,10 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(mobileTemplate).toContainText("Läge i kurvan");
   await expect(mobileTemplate).toContainText("Nästa steg");
   await expect(mobileTemplate).toContainText("Referenspunkter");
+  await expect(mobileTemplate).toContainText("Ålder");
+  await expect(mobileTemplate).toContainText("Stammar före/efter");
+  await expect(mobileTemplate).toContainText("Nära 1:a gallring");
+  await expect(mobileTemplate).toContainText("59 år");
   await expect(page.locator(".skotsel-advanced--result details").first()).not.toHaveAttribute("open", "");
   const mobileTemplateSize = await mobileTemplate.locator("svg").evaluate((node) => {
     const box = node.getBoundingClientRect();
@@ -396,6 +404,10 @@ test("Skötselkollen använder T18 som manuell fälttestkurva för tall", async 
   await expect(t18Template).toContainText("Läge i kurvan");
   await expect(t18Template).toContainText("Nästa steg");
   await expect(t18Template).toContainText("Referenspunkter");
+  await expect(t18Template).toContainText("Ålder");
+  await expect(t18Template).toContainText("Nära 1:a gallring");
+  await expect(t18Template).toContainText("saknas i pilotunderlag");
+  await expect(t18Template).toContainText("135 år");
   const t18LineCount = await page.locator(".skotsel-chart__pilot-line").count();
   expect(t18LineCount).toBeGreaterThanOrEqual(1);
   await page.locator("[data-show-field-report]").first().click();
