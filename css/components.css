@@ -1074,50 +1074,62 @@
 .skotsel-chart {
   display: grid;
   min-width: 0;
-  gap: var(--space-2);
+  gap: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface-muted);
-  padding: var(--space-3);
+  background: #fbfcf8;
+  padding: var(--space-4);
 }
 
 .skotsel-chart svg {
   width: 100%;
-  max-height: 14rem;
+  max-height: none;
+  aspect-ratio: 13 / 9;
   min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--color-border) 78%, #111827);
+  border-radius: var(--radius-sm);
+  background: #fffef8;
 }
 
 .skotsel-chart line {
-  stroke: var(--color-border);
+  stroke: color-mix(in srgb, var(--color-border) 82%, #1f2937);
   stroke-width: 2;
 }
 
 .skotsel-chart .skotsel-chart__grid {
-  opacity: 0.65;
+  opacity: 0.76;
   stroke-width: 1;
+}
+
+.skotsel-chart .skotsel-chart__grid--major,
+.skotsel-chart .skotsel-chart__axis {
+  opacity: 0.95;
+  stroke: color-mix(in srgb, var(--color-text) 42%, var(--color-border));
+  stroke-width: 1.5;
 }
 
 .skotsel-chart text {
   fill: var(--color-muted);
-  font-size: 0.8rem;
+  font-size: 0.66rem;
   font-weight: 700;
 }
 
 .skotsel-chart__axis-title {
   fill: var(--color-text);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 850;
 }
 
 .skotsel-chart__point {
   fill: var(--color-primary);
   stroke: #ffffff;
-  stroke-width: 3;
+  stroke-width: 4;
+  filter: drop-shadow(0 0.12rem 0.18rem rgba(15, 23, 42, 0.28));
 }
 
 .skotsel-chart__stand-point text {
   fill: var(--color-primary-strong);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 900;
 }
 
@@ -1135,9 +1147,22 @@
   stroke-width: 2;
 }
 
+.skotsel-chart__after-point {
+  fill: #ffffff;
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+}
+
+.skotsel-chart__thinning-drop {
+  stroke: color-mix(in srgb, var(--color-accent) 78%, var(--color-text));
+  stroke-dasharray: 4 4;
+  stroke-linecap: round;
+  stroke-width: 2.5;
+}
+
 .skotsel-chart__pilot-point text {
   fill: var(--color-text);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 800;
 }
 
@@ -1368,8 +1393,15 @@
 }
 
 .skotsel-chart__head h3,
+.skotsel-chart__head p,
 .skotsel-chart__head span {
   margin: 0;
+}
+
+.skotsel-chart__head h3 {
+  color: var(--color-text);
+  font-size: 1.45rem;
+  line-height: 1.05;
 }
 
 .skotsel-chart__head span {
@@ -1381,20 +1413,115 @@
   padding: 0.25rem 0.65rem;
 }
 
+.skotsel-chart__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.skotsel-chart__status span {
+  border: 1px solid color-mix(in srgb, var(--color-border) 75%, var(--color-primary));
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--color-text);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.25rem 0.6rem;
+}
+
 .skotsel-chart__zone {
-  opacity: 0.34;
+  opacity: 0.22;
 }
 
 .skotsel-chart__zone--low {
-  fill: var(--color-info);
+  fill: #4fb3c8;
 }
 
 .skotsel-chart__zone--mid {
-  fill: var(--color-primary);
+  fill: #68b984;
 }
 
 .skotsel-chart__zone--high {
-  fill: var(--color-accent);
+  fill: #f4a261;
+}
+
+.skotsel-chart__zone-label {
+  fill: color-mix(in srgb, var(--color-text) 82%, var(--color-muted));
+  font-size: 0.64rem;
+  font-weight: 900;
+}
+
+.skotsel-curve-brief {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  padding: var(--space-3);
+}
+
+.skotsel-curve-brief div {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.skotsel-curve-brief h4,
+.skotsel-curve-brief p {
+  margin: 0;
+}
+
+.skotsel-curve-brief h4 {
+  color: var(--color-primary-strong);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.skotsel-curve-brief p {
+  color: var(--color-text);
+  font-size: 0.92rem;
+  line-height: 1.32;
+}
+
+.skotsel-reference-table {
+  display: grid;
+  gap: var(--space-2);
+  overflow-x: auto;
+}
+
+.skotsel-reference-table h4,
+.skotsel-reference-table p {
+  margin: 0;
+}
+
+.skotsel-reference-table h4 {
+  font-size: 0.95rem;
+}
+
+.skotsel-reference-table table {
+  width: 100%;
+  min-width: 31rem;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.skotsel-reference-table th,
+.skotsel-reference-table td {
+  border-top: 1px solid var(--color-border);
+  padding: 0.5rem 0.45rem;
+  text-align: left;
+}
+
+.skotsel-reference-table thead th {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.skotsel-reference-table tbody th {
+  color: var(--color-text);
+  font-weight: 850;
 }
 
 .skotsel-fast-proposal {

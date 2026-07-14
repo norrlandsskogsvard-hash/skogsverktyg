@@ -521,19 +521,16 @@ function resultTemplate(result) {
       resultMetric("Säkerhet", confidenceLabel(result.confidence)) +
       resultMetric("SI", siStatusLabel(result.siteIndexEstimate)) +
     "</div>" +
-    chartTemplate(result.chartData) +
+    chartTemplate(result) +
     regionWarningTemplate(result.regionWarning) +
-    quickProposalTemplate(result) +
-    evidenceSummaryTemplate(result.evidenceAssessment) +
-    "<div class='skotsel-result-core'>" +
-      resultBlock("Varför?", result.why) +
-      directionBlock(result.recommendationDirection) +
-    "</div>" +
     "<div class='field-report-entry'>" +
       "<button class='button button--secondary' type='button' data-show-field-report>Visa fältprotokoll</button>" +
       "<section class='field-report-shell hidden' data-field-report-panel></section>" +
     "</div>" +
     "<div class='skotsel-advanced skotsel-advanced--result'>" +
+      advancedDetails("Kort förslag", quickProposalTemplate(result)) +
+      advancedDetails("Samlad bedömning", evidenceSummaryTemplate(result.evidenceAssessment)) +
+      advancedDetails("Varför och riktning", resultBlock("Varför?", result.why) + directionBlock(result.recommendationDirection)) +
       advancedDetails("Forskningsstöd", researchSupportTemplate(result)) +
       advancedDetails("Naturhänsyn, skador och vilt", considerationTemplate(result.considerationAssessment), Boolean(result.considerationAssessment?.flags?.length), "skotsel-hansyn-risk") +
       advancedDetails("Juridisk kontroll", resultBlock("Juridisk kontroll", result.legalAssessment)) +
@@ -893,56 +890,140 @@ function siTemplate(siteIndexEstimate) {
   return "<div class='skotsel-si-summary'><span>Beräknat SI</span><strong>" + escapeHtml(value) + "</strong>" + warning + "</div>";
 }
 
-function chartTemplate(chartData) {
+function chartTemplate(result) {
+  const chartData = result.chartData;
   const height = chartData.heightMeters;
   const basal = chartData.basalArea;
   const hasPoint = height !== null && basal !== null;
-  const x = hasPoint ? chartX(height) : 44;
-  const y = hasPoint ? chartY(basal) : 188;
+  const x = hasPoint ? chartX(height) : 62;
+  const y = hasPoint ? chartY(basal) : 306;
   const point = hasPoint ? pointTemplate(x, y, height, basal) : "";
   const label = hasPoint ? escapeHtml("Bestånd: " + formatNumber(height) + " m / " + formatNumber(basal) + " m²/ha") : "Ange höjd och grundyta";
   const curveReference = chartData.curveReference;
   const hasPilot = isPilotCurveStatus(curveReference?.status);
   const hasFieldPilot = isFieldPilotCurve(curveReference);
   const hasComplete = curveReference?.status === "complete";
-  const zones = hasComplete ? completeZonesTemplate() : "";
+  const hasCurve = Boolean(curveReference?.curve);
+  const zones = hasCurve ? visualZonesTemplate() : "";
   const pilot = hasPilot ? pilotCurveTemplate(curveReference.curve) : "";
-  const badge = hasFieldPilot
-    ? "<span>T18 fälttest: visuell avläsning</span>"
-    : (hasPilot ? "<span>Pilot: T20-exempel, ej full kurva</span>" : "<span>" + escapeHtml(chartData.status || "") + "</span>");
+  const curveCode = curveReference?.curve ? curveReference.curve.speciesCode + curveReference.curve.siteIndex : "";
+  const badge = curveCode
+    ? "<span>Aktiv kurva: " + escapeHtml(curveCode) + "</span>"
+    : "<span>Kurvunderlag saknas</span>";
 
-  return "<article class='skotsel-chart' role='img' aria-label='Gallringskurva med beståndets punkt'>" +
-    "<div class='skotsel-chart__head'><h3>Gallringskurva</h3>" + badge + "</div>" +
-    "<svg viewBox='0 0 340 230' focusable='false'>" +
+  return "<article class='skotsel-chart skotsel-digital-template' role='img' aria-label='Digital gallringsmall med beståndets punkt'>" +
+    "<div class='skotsel-chart__head'><div><p class='pill'>Digital gallringsmall</p><h3>Gallringsmall</h3></div>" + badge + "</div>" +
+    chartStatusBadges(curveReference, hasFieldPilot, hasPilot) +
+    "<svg viewBox='0 0 520 360' focusable='false'>" +
       gridTemplate() +
       zones +
       pilot +
-      "<line x1='38' y1='192' x2='305' y2='192'></line>" +
-      "<line x1='38' y1='18' x2='38' y2='192'></line>" +
-      "<text x='160' y='224' class='skotsel-chart__axis-title'>Höjd, m</text>" +
-      "<text x='8' y='116' class='skotsel-chart__axis-title' transform='rotate(-90 8 116)'>Grundyta, m²/ha</text>" +
+      "<line class='skotsel-chart__axis' x1='62' y1='306' x2='488' y2='306'></line>" +
+      "<line class='skotsel-chart__axis' x1='62' y1='38' x2='62' y2='306'></line>" +
+      "<text x='250' y='346' class='skotsel-chart__axis-title'>Övre höjd / medelhöjd, m</text>" +
+      "<text x='16' y='190' class='skotsel-chart__axis-title' transform='rotate(-90 16 190)'>Grundyta, m²/ha</text>" +
       point +
     "</svg>" +
     chartLegendTemplate(hasPoint, hasPilot, hasComplete, hasFieldPilot) +
     "<p class='card__text skotsel-chart__note'><strong>" + label + "</strong><br>" + escapeHtml(chartStatusText(chartData, hasPilot, hasComplete, hasFieldPilot)) + "</p>" +
+    curveInterpretationTemplate(result) +
+    referenceTableTemplate(curveReference) +
   "</article>";
 }
 
+function chartStatusBadges(curveReference, hasFieldPilot, hasPilot) {
+  const values = [];
+  if (curveReference?.curve) {
+    values.push(hasFieldPilot ? "Fälttest/pilot" : (hasPilot ? "Pilot/exempel" : "Kurvunderlag"));
+    if (hasPilot || hasFieldPilot || curveReference.curve.reviewNeeded) values.push("Ej fullständigt verifierad");
+    values.push("Fältstöd - inte facit");
+    if (curveReference.curve.precision === "field_test_visual_reading") values.push("Visuell malltolkning");
+  } else {
+    values.push("Ingen aktiv mall för vald kombination");
+    values.push("Punkten visas som fältstöd");
+  }
+  return "<div class='skotsel-chart__status'>" + values.map((value) => "<span>" + escapeHtml(value) + "</span>").join("") + "</div>";
+}
+
+function curveInterpretationTemplate(result) {
+  const proposal = quickProposal(result);
+  const chartData = result.chartData || {};
+  const curveReference = chartData.curveReference;
+  const position = curvePositionText(chartData, curveReference);
+  return "<section class='skotsel-curve-brief' aria-label='Kort tolkning av gallringsmall'>" +
+    briefBlock("Bedömning", [
+      proposal.proposal,
+      curveReference?.curve ? "Kurvunderlaget är pilot/fälttest och ska användas som stöd i fält." : "Kurvunderlag saknas för vald kombination."
+    ]) +
+    briefBlock("Läge i kurvan", [position]) +
+    briefBlock("Nästa steg", [
+      proposal.nextStep,
+      (proposal.checks || [])[0]
+    ]) +
+  "</section>";
+}
+
+function briefBlock(title, lines) {
+  const safeLines = lines.filter(Boolean).slice(0, 4);
+  return "<div><h4>" + escapeHtml(title) + "</h4>" +
+    safeLines.map((line) => "<p>" + escapeHtml(line) + "</p>").join("") +
+  "</div>";
+}
+
+function curvePositionText(chartData, curveReference) {
+  const height = Number(chartData.heightMeters);
+  const basal = Number(chartData.basalArea);
+  if (!Number.isFinite(height) || !Number.isFinite(basal)) return "Ange höjd och grundyta för att placera beståndet i mallen.";
+  const events = curveReference?.curve?.points?.thinningEvents || [];
+  const first = events[0];
+  const second = events[1];
+  const final = events[2];
+  if (!first) return "Beståndspunkten visas utan aktiv referenskurva.";
+  if (height <= first.topHeight + 0.8) return "Beståndet ligger nära första gallring.";
+  if (second && height <= second.topHeight + 0.8) return "Beståndet ligger efter första gallring men före andra gallring.";
+  if (final && height >= final.topHeight - 0.8) return "Beståndet ligger högt i kurvan och bör kontrolleras mot slutavverkningsläge.";
+  return "Beståndet ligger mellan senare gallringsläge och slutläge.";
+}
+
+function referenceTableTemplate(curveReference) {
+  const events = curveReference?.curve?.points?.thinningEvents || [];
+  if (!events.length) {
+    return "<section class='skotsel-reference-table'><h4>Referenspunkter</h4><p>Inga aktiva referenspunkter för vald kombination.</p></section>";
+  }
+  return "<section class='skotsel-reference-table'><h4>Referenspunkter</h4>" +
+    "<table><thead><tr><th>Punkt</th><th>Höjd</th><th>Grundyta före</th><th>Grundyta efter</th><th>Stamantal</th></tr></thead><tbody>" +
+      events.map(referenceRowTemplate).join("") +
+    "</tbody></table></section>";
+}
+
+function referenceRowTemplate(event) {
+  const stems = [event.stemsBefore, event.stemsAfter]
+    .filter((value) => value !== null && value !== undefined && value !== "")
+    .join(" -> ");
+  return "<tr>" +
+    "<th scope='row'>" + escapeHtml(event.label || "Punkt") + "</th>" +
+    "<td>" + escapeHtml(formatNumber(event.topHeight)) + " m</td>" +
+    "<td>" + escapeHtml(formatNumber(event.basalAreaBefore)) + "</td>" +
+    "<td>" + escapeHtml(formatNumber(event.basalAreaAfter)) + "</td>" +
+    "<td>" + escapeHtml(stems || "saknas") + "</td>" +
+  "</tr>";
+}
+
 function gridTemplate() {
-  const yTicks = [10, 20, 30, 40].map((value) =>
-    "<g class='skotsel-chart__tick'><line class='skotsel-chart__grid' x1='38' y1='" + chartY(value) + "' x2='305' y2='" + chartY(value) + "'></line><text x='18' y='" + (chartY(value) + 4) + "'>" + value + "</text></g>"
+  const yTicks = [10, 15, 20, 25, 30, 35, 40].map((value) =>
+    "<g class='skotsel-chart__tick'><line class='skotsel-chart__grid" + (value % 10 === 0 ? " skotsel-chart__grid--major" : "") + "' x1='62' y1='" + chartY(value) + "' x2='488' y2='" + chartY(value) + "'></line><text x='34' y='" + (chartY(value) + 4) + "'>" + value + "</text></g>"
   ).join("");
-  const xTicks = [10, 20, 30].map((value) =>
-    "<g class='skotsel-chart__tick'><line class='skotsel-chart__grid' x1='" + chartX(value) + "' y1='18' x2='" + chartX(value) + "' y2='192'></line><text x='" + (chartX(value) - 6) + "' y='207'>" + value + "</text></g>"
+  const xTicks = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30].map((value) =>
+    "<g class='skotsel-chart__tick'><line class='skotsel-chart__grid" + (value % 10 === 0 ? " skotsel-chart__grid--major" : "") + "' x1='" + chartX(value) + "' y1='38' x2='" + chartX(value) + "' y2='306'></line><text x='" + (chartX(value) - 6) + "' y='324'>" + value + "</text></g>"
   ).join("");
   return yTicks + xTicks;
 }
 
 function pointTemplate(x, y, height, basal) {
-  const labelX = clamp(x + 10, 64, 222);
-  const labelY = clamp(y - 12, 30, 178);
+  const labelX = clamp(x + 14, 92, 386);
+  const labelY = clamp(y - 16, 54, 286);
   return "<g class='skotsel-chart__stand-point'>" +
-    "<circle cx='" + x + "' cy='" + y + "' r='8' class='skotsel-chart__point'></circle>" +
+    "<circle cx='" + x + "' cy='" + y + "' r='12' class='skotsel-chart__point'></circle>" +
     "<text x='" + labelX + "' y='" + labelY + "'>Bestånd: " + escapeHtml(formatNumber(height)) + " m / " + escapeHtml(formatNumber(basal)) + " m²/ha</text>" +
   "</g>";
 }
@@ -962,13 +1043,12 @@ function chartLegendTemplate(hasPoint, hasPilot, hasComplete, hasFieldPilot = fa
 function chartStatusText(chartData, hasPilot, hasComplete, hasFieldPilot = false) {
   const parts = [];
   if (hasFieldPilot) {
-    parts.push("Aktiv kurva: T18 - fälttest, visuellt avläst från Norra gallringsmall. Använd som stöd och kontrollera utfallet i fält. Inte fullständigt verifierad kurva.");
+    parts.push("Visuell malltolkning: fältstöd, inte facit.");
   } else if (hasPilot) {
-    parts.push("T20-exempel, ej full kurva. Full digitaliserad gallringskurva saknas.");
+    parts.push("Pilot/exempel: fältstöd, inte full kurva.");
   } else if (!hasComplete) {
     parts.push("Full digitaliserad gallringskurva saknas.");
   }
-  if (chartData.note) parts.push(chartData.note);
   if (chartData.regionWarning) parts.push(chartData.regionWarning);
   return [...new Set(parts)].join(" ");
 }
@@ -977,27 +1057,37 @@ function pilotCurveTemplate(curve) {
   const events = curve?.points?.thinningEvents || [];
   if (!events.length) return "";
   const beforePoints = events.map((event) => chartX(event.topHeight) + "," + chartY(event.basalAreaBefore)).join(" ");
+  const thinningSegments = events.filter((event) => Number.isFinite(event.basalAreaAfter) && event.basalAreaAfter > 0).map((event) =>
+    "<line class='skotsel-chart__thinning-drop' x1='" + chartX(event.topHeight) + "' y1='" + chartY(event.basalAreaBefore) + "' x2='" + chartX(event.topHeight) + "' y2='" + chartY(event.basalAreaAfter) + "'></line>" +
+    "<circle class='skotsel-chart__after-point' cx='" + chartX(event.topHeight) + "' cy='" + chartY(event.basalAreaAfter) + "' r='5'></circle>"
+  ).join("");
   const dots = events.map((event) =>
     "<g class='skotsel-chart__pilot-point'>" +
-      "<circle cx='" + chartX(event.topHeight) + "' cy='" + chartY(event.basalAreaBefore) + "' r='5'></circle>" +
-      "<text x='" + (chartX(event.topHeight) + 7) + "' y='" + (chartY(event.basalAreaBefore) - 7) + "'>" + escapeHtml(event.label) + "</text>" +
+      "<circle cx='" + chartX(event.topHeight) + "' cy='" + chartY(event.basalAreaBefore) + "' r='7'></circle>" +
+      "<text x='" + (chartX(event.topHeight) + 9) + "' y='" + (chartY(event.basalAreaBefore) - 9) + "'>" + escapeHtml(event.label) + "</text>" +
     "</g>"
   ).join("");
-  return "<polyline class='skotsel-chart__pilot-line' points='" + beforePoints + "'></polyline>" + dots;
+  return "<polyline class='skotsel-chart__pilot-line' points='" + beforePoints + "'></polyline>" + thinningSegments + dots;
 }
 
-function completeZonesTemplate() {
-  return "<rect x='38' y='126' width='267' height='34' class='skotsel-chart__zone skotsel-chart__zone--low'></rect>" +
-    "<rect x='38' y='82' width='267' height='44' class='skotsel-chart__zone skotsel-chart__zone--mid'></rect>" +
-    "<rect x='38' y='38' width='267' height='44' class='skotsel-chart__zone skotsel-chart__zone--high'></rect>";
+function visualZonesTemplate() {
+  return "<polygon class='skotsel-chart__zone skotsel-chart__zone--low' points='" +
+      chartX(10) + "," + chartY(19) + " " + chartX(15.7) + "," + chartY(26.5) + " " + chartX(15.7) + "," + chartY(22.5) + " " + chartX(10) + "," + chartY(15.5) + "'></polygon>" +
+    "<polygon class='skotsel-chart__zone skotsel-chart__zone--mid' points='" +
+      chartX(14.5) + "," + chartY(20) + " " + chartX(19.2) + "," + chartY(29.5) + " " + chartX(19.2) + "," + chartY(24.8) + " " + chartX(14.5) + "," + chartY(16.5) + "'></polygon>" +
+    "<polygon class='skotsel-chart__zone skotsel-chart__zone--high' points='" +
+      chartX(18.8) + "," + chartY(26.5) + " " + chartX(22.4) + "," + chartY(32.2) + " " + chartX(22.4) + "," + chartY(28.4) + " " + chartX(18.8) + "," + chartY(22.5) + "'></polygon>" +
+    "<text class='skotsel-chart__zone-label' x='" + chartX(11.2) + "' y='" + chartY(17.2) + "'>1:a gallring</text>" +
+    "<text class='skotsel-chart__zone-label' x='" + chartX(16.1) + "' y='" + chartY(20.2) + "'>2:a gallring</text>" +
+    "<text class='skotsel-chart__zone-label' x='" + chartX(19.4) + "' y='" + chartY(24.5) + "'>Slutläge</text>";
 }
 
 function chartX(height) {
-  return clamp(44 + height * 7, 44, 288);
+  return clamp(62 + (Number(height) - 8) * 17, 62, 488);
 }
 
 function chartY(basalArea) {
-  return clamp(188 - basalArea * 4, 24, 188);
+  return clamp(306 - Number(basalArea) * 6.6, 38, 306);
 }
 
 function methodLabel(method) {

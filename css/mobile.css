@@ -774,20 +774,22 @@
 
   .skotsel-chart {
     max-height: none;
-    padding: var(--space-2);
+    gap: var(--space-2);
+    padding: var(--space-3);
     overflow: visible;
   }
 
   .skotsel-chart svg {
-    max-height: 11.5rem;
+    max-height: none;
+    min-height: 17.5rem;
   }
 
   .skotsel-chart text {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
   }
 
   .skotsel-chart__stand-point text {
-    font-size: 0.56rem;
+    font-size: 0.58rem;
   }
 
   .skotsel-chart__pilot-point text {
@@ -803,6 +805,34 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 0.35rem;
+  }
+
+  .skotsel-chart__head h3 {
+    font-size: 1.25rem;
+  }
+
+  .skotsel-chart__status {
+    gap: 0.35rem;
+  }
+
+  .skotsel-chart__status span {
+    font-size: 0.72rem;
+    padding: 0.22rem 0.5rem;
+  }
+
+  .skotsel-curve-brief {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .skotsel-curve-brief p {
+    font-size: 0.88rem;
+  }
+
+  .skotsel-reference-table table {
+    min-width: 28rem;
+    font-size: 0.8rem;
   }
 
   .skotsel-si-box {

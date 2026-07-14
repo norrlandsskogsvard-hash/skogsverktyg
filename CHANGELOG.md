@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-digital-thinning-template.1 - 2026-07-14
+
+### Changed - Digital gallringsmall
+
+- Skotselkollen visar nu gallringskurvan som en stor digital gallringsmall med tydliga axlar, grid, mallzoner, beståndspunkt och referenspunkter.
+- Kort bedomning, lage i kurvan och nasta steg visas direkt under grafen.
+- T18/T20-referenspunkter visas i kompakt tabell under grafen.
+- Langre forklaringar, kallor, forskning, plantext och kontrollflaggor ligger i utfällbara sektioner.
+- T18/T20-varden, aktiveringsstatus, auto-SI, juridik och prislogik ar oforandrade.
+- PWA-cache hojd till digital-thinning-template.1.
+
 ## v2.0.0-alpha.1-t18-field-pilot.1 - 2026-07-14
 
 ### Added - T18 faltpilot
