@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0-alpha.1-reviewed-candidates.1 - 2026-07-14
+
+### Added - Reviewed candidates
+
+- Kurvgranskning kan nu skapa lokala aktiveringskandidater.
+- Manuell dubbelkontroll kravs innan export.
+- Aktiveringskandidater ar inte aktiva kurvor och har alltid activeUse false.
+- Validering for reviewed candidates har lagts till.
+- T20, auto-SI och aktiva kurvor paverkas inte.
+- PWA-cache hojd till reviewed-candidates.1.
+
 ## v2.0.0-alpha.1-assisted-extraction.1 - 2026-07-13
 
 ### Added - Assisterad Norra-extraktion

@@ -201,7 +201,7 @@ test("Norra massimport har bara T20 som aktiv pilot", async ({ page }) => {
   expect(summary.almostActiveBlocked).toBe(true);
 });
 
-test("Kurvgranskning sparar lokalt utkast och skapar CSV utan aktivering", async ({ page }) => {
+test("Kurvgranskning sparar lokalt utkast och skapar aktiveringskandidat utan aktivering", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoRoute(page, "/curve-review");
   await expect(page.locator("body")).toContainText("Kurvgranskning");
@@ -213,7 +213,7 @@ test("Kurvgranskning sparar lokalt utkast och skapar CSV utan aktivering", async
   await expect(page.locator("body")).toContainText("Extraherade rader");
   await expect(page.locator("body")).toContainText("Low");
   await expect(page.locator("body")).toContainText("T18");
-  await expect(page.locator("body")).toContainText(/Draft\/spärrad|Draft\/spÃ¤rrad/);
+  await expect(page.locator("body")).toContainText("Draft/sparrad");
 
   const draft = page.locator('[data-draft-code="T18"]').first();
   await expect(draft).toBeVisible();
@@ -221,6 +221,14 @@ test("Kurvgranskning sparar lokalt utkast och skapar CSV utan aktivering", async
   await draft.locator('input[name="topHeight"]').fill("14.2");
   await draft.locator('input[name="basalAreaBefore"]').fill("23.5");
   await draft.locator('input[name="basalAreaAfter"]').fill("17.8");
+  await draft.locator('input[name="ageTotal"]').fill("58");
+  await draft.locator('input[name="stemsBefore"]').fill("1600");
+  await draft.locator('input[name="stemsAfter"]').fill("1100");
+  await expect(draft.locator("[data-readiness-label]")).toContainText(/Klar|Behover|Behöver/);
+  await draft.locator('input[name="manualSourceCheck"]').check();
+  await draft.locator('input[name="reviewedBy"]').fill("CN");
+  await draft.locator('textarea[name="reviewNote"]').fill("Testvarden for smoke-test, kontrollerade mot originaldiagram i lokalt UI-flode.");
+  await expect(draft.locator("[data-readiness-label]")).toContainText("Klar for export");
   await draft.getByRole("button", { name: "Spara lokalt utkast" }).click();
   await expect(draft.locator("[data-local-status]")).toContainText("Lokalt sparat");
   await expect(draft.getByRole("button", { name: "Kopiera som CSV-rad" })).toBeVisible();
@@ -228,6 +236,12 @@ test("Kurvgranskning sparar lokalt utkast och skapar CSV utan aktivering", async
   await expect(draft.locator("[data-csv-output]")).toHaveValue(/T18,tall,18,first_thinning,14.2,23.5,17.8/);
   await page.getByRole("button", { name: "Kopiera assisted CSV-rader" }).click();
   await expect(page.locator("[data-assisted-csv]")).toHaveValue(/T18,tall,18,assisted_curve_page/);
+  await draft.getByRole("button", { name: "Skapa aktiveringskandidat" }).click();
+  await expect(draft.locator("[data-candidate-status]")).toContainText("Sparad som lokal kandidat");
+  await expect(draft.locator("[data-candidate-json]")).toHaveValue(/"status": "reviewed_candidate"/);
+  await expect(draft.locator("[data-candidate-json]")).toHaveValue(/"activeUse": false/);
+  await expect(draft.locator("[data-candidate-csv]")).toHaveValue(/T18,tall,18,first_thinning,14.2,23.5,17.8,58,1600,1100,s. 12,manually_reviewed_from_source,CN/);
+  await expect(page.locator("body")).toContainText("Detta skapar bara en aktiveringskandidat");
   await expect(page.getByRole("button", { name: /Aktivera kurva/i })).toHaveCount(0);
   await expectNoHorizontalScroll(page);
 });

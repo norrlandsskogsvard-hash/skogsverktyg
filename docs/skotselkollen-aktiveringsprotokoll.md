@@ -71,6 +71,18 @@ Batch 03 far darfor inte ga direkt till aktiv kurva:
 - T20 anvands endast som integritetskontroll och andras inte.
 - Aktiv kurva kraver separat batch efter verifierade punktvarden.
 
+## Batch 04 reviewed candidates-forarbete
+
+`.31` lagger till lokala aktiveringskandidater fran Kurvgranskning. Dessa kandidater kan vara manuellt dubbelkontrollerade och ha `reviewNeeded: false`, men de ar fortfarande inte aktiva kurvor.
+
+En reviewed candidate far inte aktiveras direkt:
+
+- `status` ska vara `reviewed_candidate`.
+- `dataQuality` ska vara `manually_reviewed_from_source`.
+- `activeUse` ska vara `false`.
+- Kandidaten ska exporteras till separat import- och valideringsbatch innan eventuell `active_verified`.
+- T20, auto-SI, juridik och prislogik far inte paverkas.
+
 ## Aktiveringsflode
 
 1. Lagg in posten som `candidate` med `activeUse: documentation_only`, `dataQuality: candidate_only`, tomma `values` och `reviewNeeded: true`.

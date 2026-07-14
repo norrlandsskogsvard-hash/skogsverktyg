@@ -50,6 +50,8 @@ Kommande steg:
 - .30 lagger till assisterad PDF-extraktion fran Norra-PDF:en till import-/granskningsunderlag.
 - .30 skapar batch 03 med T18, T22, G20 och G22 som low-confidence assisted rader med `activeUse: false`.
 - .30 aktiverar inga nya kurvor; nasta steg kan vara separat aktiveringsbatch forst efter verifierade punktvarden.
+- .31 lagger till manuell dubbelkontroll och lokal export av `reviewed_candidate`.
+- .31 aktiverar inga kurvor; reviewed candidates ar endast underlag for separat aktiveringsbatch.
 - Senare steg kan hantera diagramdigitalisering under separat granskning, testfall och aktiveringsprotokoll.
 
 2. Bonitering AC/BD

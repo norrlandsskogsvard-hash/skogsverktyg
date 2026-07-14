@@ -36,6 +36,19 @@ Knappen `Spara lokalt utkast` sparar endast i webblasaren via localStorage. Det 
 
 Lokal granskning betyder att en anvandare har arbetat med ett utkast pa sin enhet. Det ar inte samma sak som verifierad kallimport.
 
+## Lokala aktiveringskandidater
+
+Fran `.31` kan Kurvgranskning skapa en lokal aktiveringskandidat. Det kraver:
+
+- komplett punkt med ovre hojd, grundyta fore och grundyta efter
+- kallsida
+- rimlighetskontroller utan varningar
+- checkboxen `Jag har kontrollerat vardena mot originaldiagrammet`
+- granskare/initialer
+- granskningsanteckning nar assisted extraction hade low confidence
+
+Aktiveringskandidaten sparas bara i localStorage och kan kopieras som JSON/CSV. Den har alltid `activeUse: false`.
+
 ## CSV-rad
 
 Knappen `Kopiera som CSV-rad` skapar raden:
@@ -74,3 +87,4 @@ En kurva far bara aktiveras i en separat batch nar allt detta finns:
 Nasta steg kan vara en aktiveringsbatch dar manuellt granskade varden importeras, valideras och jamfors mot aktiveringsprotokollet. Forst efter det kan en ny Norra-kurva bli aktiv.
 
 Se aven `docs/skotselkollen-norra-assisted-extraction.md`.
+Se aven `docs/skotselkollen-norra-reviewed-candidates.md`.
