@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.0.0-alpha.1-field-app-flow.1 - 2026-07-20
+
+### Changed - Tydligare faltapp i Skotselkollen
+
+- Skotselkollen har fatt ett tydligare faltapp-flode inspirerat av referensbilderna: Indata/Kalkyl, stor mall, Data och Mal.
+- Indata/Kalkyl visar bara befintliga indata och kalkylvarden som redan finns i appen; saknade varden markeras som saknas eller ej beraknat.
+- Ny Data-panel visar aktuell faltpunkt, narmaste mallstod och status utan att hitta pa SI, volym, period eller huggningsklass.
+- Ny Mal-panel sammanfattar kortsiktigt, medellangt och langsiktigt faltstod med tydlig "inte facit"-markering.
+- Stor gallringsmall visar nu aven kompakt Mal och Data i storvy.
+- T18/T20-varden, aktiveringsstatus, auto-SI, juridik och prislogik ar oforandrade.
+- PWA-cache hojd till field-app-flow.1.
+
 ## v2.0.0-alpha.1-digital-thinning-template.3 - 2026-07-14
 
 ### Changed - Skotselmall-layout

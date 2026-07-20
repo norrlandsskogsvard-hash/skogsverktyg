@@ -289,6 +289,13 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Samlad bedömning");
   await expect(page.locator("body")).toContainText("T20");
   await expect(page.locator("body")).toContainText("T20-exempel, ej full kurva");
+  const desktopCard = page.locator(".skotsel-result .skotsel-result-card").first();
+  await expect(desktopCard).toContainText("Indata och kalkyl");
+  await expect(desktopCard).toContainText("Fältapp");
+  await expect(desktopCard).toContainText("Kalkyl");
+  await expect(desktopCard).toContainText("Mål/förslag");
+  await expect(desktopCard.getByRole("button", { name: /Data/ })).toBeVisible();
+  await expect(desktopCard.getByRole("button", { name: /Mål/ })).toBeVisible();
   const desktopTemplate = page.locator(".skotsel-result .skotsel-digital-template").first();
   await expect(desktopTemplate).toBeVisible();
   await expect(desktopTemplate).toContainText("Digital gallringsmall");
@@ -305,6 +312,12 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(desktopTemplate).toContainText("Slutavverkning");
   await expect(desktopTemplate).toContainText("Nära 1:a gallring");
   await expect(desktopTemplate).toContainText("59 år");
+  await desktopCard.getByRole("button", { name: /Data/ }).click();
+  const desktopData = desktopCard.locator("[data-skotsel-field-data]");
+  await expect(desktopData).toBeVisible();
+  await expect(desktopData).toContainText("Data för aktuell fältpunkt");
+  await expect(desktopData).toContainText("Huggningsklass");
+  await expect(desktopData).toContainText("ej beräknat");
   await expect(page.locator(".skotsel-advanced--result details").first()).not.toHaveAttribute("open", "");
   const desktopTemplateSize = await desktopTemplate.locator("svg").evaluate((node) => {
     const box = node.getBoundingClientRect();
@@ -357,6 +370,13 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(page.locator("body")).toContainText("Samlad bedömning");
   await expect(page.locator("body")).toContainText("T20");
   await expect(page.locator("body")).toContainText("T20-exempel, ej full kurva");
+  const mobileCard = page.locator(".skotsel-mobile-result .skotsel-result-card").first();
+  await expect(mobileCard).toContainText("Indata och kalkyl");
+  await expect(mobileCard).toContainText("Fältapp");
+  await expect(mobileCard).toContainText("Kalkyl");
+  await expect(mobileCard).toContainText("Mål/förslag");
+  await expect(mobileCard.getByRole("button", { name: /Data/ })).toBeVisible();
+  await expect(mobileCard.getByRole("button", { name: /Mål/ })).toBeVisible();
   const mobileTemplate = page.locator(".skotsel-mobile-result .skotsel-digital-template").first();
   await expect(mobileTemplate).toBeVisible();
   await expect(mobileTemplate).toContainText("Digital gallringsmall");
@@ -370,6 +390,11 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await expect(mobileTemplate).toContainText("Stammar före/efter");
   await expect(mobileTemplate).toContainText("Nära 1:a gallring");
   await expect(mobileTemplate).toContainText("59 år");
+  await mobileCard.getByRole("button", { name: /Data/ }).click();
+  const mobileData = mobileCard.locator("[data-skotsel-field-data]");
+  await expect(mobileData).toBeVisible();
+  await expect(mobileData).toContainText("Data för aktuell fältpunkt");
+  await expect(mobileData).toContainText("Huggningsklass");
   await expect(page.locator(".skotsel-advanced--result details").first()).not.toHaveAttribute("open", "");
   const mobileTemplateSize = await mobileTemplate.locator("svg").evaluate((node) => {
     const box = node.getBoundingClientRect();
@@ -399,6 +424,9 @@ test("Skötselkollen använder T18 som manuell fälttestkurva för tall", async 
   await fillSkotselkollenT18(page);
   await expect(page.locator("body")).toContainText("T18");
   await expect(page.locator("body")).toContainText("fälttest");
+  const t18Card = page.locator(".skotsel-mobile-result .skotsel-result-card").first();
+  await expect(t18Card).toContainText("Indata och kalkyl");
+  await expect(t18Card).toContainText("Mål/förslag");
   const t18Template = page.locator(".skotsel-mobile-result .skotsel-digital-template").first();
   await expect(t18Template).toContainText("Digital gallringsmall");
   await expect(t18Template).toContainText("Ålder, år");
@@ -413,11 +441,16 @@ test("Skötselkollen använder T18 som manuell fälttestkurva för tall", async 
   await expect(t18Template).toContainText("Nära 1:a gallring");
   await expect(t18Template).toContainText("saknas i pilotunderlag");
   await expect(t18Template).toContainText("135 år");
+  await t18Card.getByRole("button", { name: /Data/ }).click();
+  await expect(t18Card.locator("[data-skotsel-field-data]")).toBeVisible();
+  await expect(t18Card.locator("[data-skotsel-field-data]")).toContainText("T18 fälttest/pilot");
   await t18Template.getByRole("button", { name: "Öppna stor gallringsmall" }).click();
   const largeTemplate = page.locator(".skotsel-template-modal:not(.hidden)").first();
   await expect(largeTemplate).toBeVisible();
   await expect(largeTemplate).toContainText("Digital gallringsmall");
   await expect(largeTemplate).toContainText("Referenspunkter");
+  await expect(largeTemplate).toContainText("Mål/förslag");
+  await expect(largeTemplate).toContainText("Data för aktuell fältpunkt");
   await expect(largeTemplate).toContainText("saknas i pilotunderlag");
   await largeTemplate.getByRole("button", { name: "Stäng" }).click();
   await expect(page.locator(".skotsel-template-modal:not(.hidden)")).toHaveCount(0);

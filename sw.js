@@ -1,4 +1,4 @@
-const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-digital-thinning-template.3";
+const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-field-app-flow.1";
 
 const CORE_ASSETS = [
   "./",

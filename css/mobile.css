@@ -861,6 +861,61 @@
     min-height: 58vh;
   }
 
+  .skotsel-field-app-flow,
+  .skotsel-field-goals,
+  .skotsel-field-data {
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .skotsel-field-app-flow__head,
+  .skotsel-field-goals__head,
+  .skotsel-field-data__head {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .skotsel-input-calc,
+  .skotsel-field-goals__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .skotsel-input-calc__row {
+    grid-template-columns: minmax(6.5rem, 1fr) minmax(5rem, auto);
+    min-height: 2.85rem;
+    padding: 0.5rem;
+  }
+
+  .skotsel-input-calc__row strong {
+    font-size: 0.95rem;
+  }
+
+  .skotsel-field-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .skotsel-field-nav__button {
+    min-height: 4rem;
+    padding: 0.45rem 0.25rem;
+    font-size: 0.82rem;
+  }
+
+  .skotsel-field-nav__button span {
+    width: 1.8rem;
+    height: 1.8rem;
+    font-size: 0.74rem;
+  }
+
+  .skotsel-field-data table {
+    font-size: 0.84rem;
+  }
+
+  .skotsel-field-data th,
+  .skotsel-field-data td {
+    padding: 0.5rem 0.25rem;
+  }
+
   .skotsel-si-box {
     grid-template-columns: 1fr;
     gap: var(--space-2);

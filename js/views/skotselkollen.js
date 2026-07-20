@@ -228,6 +228,7 @@ export function renderSkotselkollenView() {
 
     const openTemplateButton = event.target.closest("[data-open-thinning-template]");
     const closeTemplateButton = event.target.closest("[data-close-thinning-template]");
+    const fieldJumpButton = event.target.closest("[data-skotsel-jump]");
     if (openTemplateButton) {
       openLargeThinningTemplate(openTemplateButton);
       return;
@@ -235,6 +236,11 @@ export function renderSkotselkollenView() {
 
     if (closeTemplateButton) {
       closeLargeThinningTemplate(closeTemplateButton);
+      return;
+    }
+
+    if (fieldJumpButton) {
+      handleFieldAppJump(fieldJumpButton);
       return;
     }
   });
@@ -379,13 +385,21 @@ export function renderSkotselkollenView() {
     const modal = card?.querySelector("[data-thinning-template-modal]");
     if (!source || !modal) return;
     const clone = source.cloneNode(true);
+    const dataClone = card.querySelector("[data-skotsel-field-data]")?.cloneNode(true);
+    const goalsClone = card.querySelector("[data-skotsel-field-goals]")?.cloneNode(true);
     clone.classList.add("skotsel-digital-template--large");
     clone.querySelector("[data-open-thinning-template]")?.remove();
     modal.innerHTML = "<div class='skotsel-template-modal__panel' role='dialog' aria-modal='true' aria-label='Stor gallringsmall'>" +
       "<button class='button button--secondary' type='button' data-close-thinning-template>Stäng</button>" +
       "<div data-thinning-template-large-body></div>" +
     "</div>";
-    modal.querySelector("[data-thinning-template-large-body]")?.appendChild(clone);
+    const body = modal.querySelector("[data-thinning-template-large-body]");
+    body?.appendChild(clone);
+    if (goalsClone) body?.appendChild(goalsClone);
+    if (dataClone) {
+      dataClone.classList.remove("hidden");
+      body?.appendChild(dataClone);
+    }
     modal.classList.remove("hidden");
     modal.querySelector("[data-close-thinning-template]")?.focus();
   }
@@ -395,6 +409,25 @@ export function renderSkotselkollenView() {
     if (!modal) return;
     modal.classList.add("hidden");
     modal.innerHTML = "";
+  }
+
+  function handleFieldAppJump(button) {
+    const target = button.dataset.skotselJump;
+    if (target === "input") {
+      form.querySelector(".skotsel-quick-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    const card = button.closest(".skotsel-result-card");
+    if (!card) return;
+    const selectors = {
+      mall: ".skotsel-digital-template",
+      data: "[data-skotsel-field-data]",
+      goals: "[data-skotsel-field-goals]"
+    };
+    const section = card.querySelector(selectors[target]);
+    if (!section) return;
+    section.classList.remove("hidden");
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
@@ -558,7 +591,11 @@ function resultTemplate(result) {
       resultMetric("Säkerhet", confidenceLabel(result.confidence)) +
       resultMetric("SI", siStatusLabel(result.siteIndexEstimate)) +
     "</div>" +
+    fieldAppOverviewTemplate(result) +
     chartTemplate(result) +
+    fieldAppNavTemplate() +
+    fieldGoalsTemplate(result) +
+    fieldDataPanelTemplate(result) +
     "<section class='skotsel-template-modal hidden' data-thinning-template-modal></section>" +
     regionWarningTemplate(result.regionWarning) +
     "<div class='field-report-entry'>" +
@@ -579,6 +616,172 @@ function resultTemplate(result) {
       advancedDetails("Identifierade kurvor i källbank", curveBankTemplate(), false, "skotsel-curve-bank") +
     "</div>" +
   "</section>";
+}
+
+function fieldAppOverviewTemplate(result) {
+  const input = result.debug?.normalizedInput || {};
+  const chartData = result.chartData || {};
+  const siteIndex = result.siteIndexEstimate || {};
+  const curveReference = chartData.curveReference;
+  const curve = curveReference?.curve;
+  const curveCode = curve ? curve.speciesCode + curve.siteIndex : "saknas";
+  const inputRows = [
+    ["Ålder", valueWithUnit(input.ageYears, "år"), ageSourceLabel(input.ageType)],
+    ["Övre höjd", valueWithUnit(input.heightMeters, "m"), "fältvärde"],
+    ["Grundyta", valueWithUnit(input.basalArea, "m²/ha"), "fältvärde"],
+    ["Ståndortsindex", valueOrMissing(input.siteIndex), siteIndex.method === "manual" ? "manuellt" : "ej auto"],
+    ["Volym", valueWithUnit(input.volumeM3, "m³sk/ha"), "om känt"],
+    ["Trädslag", speciesLabel(input.mainSpecies), "indata"]
+  ];
+  const calcRows = [
+    ["Ålder", closestCurveAgeText(curveReference, chartData.heightMeters), curve ? curveCode : "ingen mall"],
+    ["Övre höjd", valueWithUnit(chartData.heightMeters, "m"), "i diagram"],
+    ["Grundyta", valueWithUnit(chartData.basalArea, "m²/ha"), "i diagram"],
+    ["Ståndortsindex", siteIndex.siteIndex || "saknas", methodLabel(siteIndex.method) || "spärrad auto-SI"],
+    ["Volym", valueWithUnit(input.volumeM3, "m³sk/ha"), Number.isFinite(input.volumeM3) ? "angivet" : "ej beräknat"],
+    ["Trädslag/kurva", curve ? curveCode : "saknas", curveStatusLabel(curveReference)]
+  ];
+  return "<section class='skotsel-field-app-flow' aria-label='Fältappens indata och kalkyl'>" +
+    "<div class='skotsel-field-app-flow__head'><div><p class='pill'>Fältapp</p><h3>Indata och kalkyl</h3></div><span>Värden visas utan nya antaganden</span></div>" +
+    "<div class='skotsel-input-calc'>" +
+      fieldAppColumnTemplate("Indata", inputRows) +
+      fieldAppColumnTemplate("Kalkyl", calcRows) +
+    "</div>" +
+  "</section>";
+}
+
+function fieldAppColumnTemplate(title, rows) {
+  return "<section class='skotsel-input-calc__column'><h4>" + escapeHtml(title) + "</h4>" +
+    rows.map(([label, value, note]) =>
+      "<div class='skotsel-input-calc__row'><span>" + escapeHtml(label) + "</span><strong>" + escapeHtml(value) + "</strong><small>" + escapeHtml(note || "") + "</small></div>"
+    ).join("") +
+  "</section>";
+}
+
+function fieldAppNavTemplate() {
+  const items = [
+    ["input", "Indata", "In"],
+    ["mall", "Mall", "M"],
+    ["data", "Data", "D"],
+    ["goals", "Mål", "M"]
+  ];
+  return "<nav class='skotsel-field-nav' aria-label='Snabbval i fält'>" +
+    items.map(([target, label, icon]) =>
+      "<button class='button button--secondary skotsel-field-nav__button' type='button' data-skotsel-jump='" + target + "'><span>" + escapeHtml(icon) + "</span>" + escapeHtml(label) + "</button>"
+    ).join("") +
+  "</nav>";
+}
+
+function fieldGoalsTemplate(result) {
+  const proposal = quickProposal(result);
+  const position = curvePosition(result.chartData || {}, result.chartData?.curveReference);
+  const curveReference = result.chartData?.curveReference;
+  const finalEvent = curveReference?.curve?.points?.thinningEvents?.find((event) => /slut/i.test(event.label || ""));
+  const finalText = finalEvent
+    ? "Jämför långsiktigt mot " + (finalEvent.label || "slutläge") + ", " + valueWithUnit(finalEvent.topHeight, "m") + "."
+    : "Långsiktigt mål kräver manuell målbild och källstödd kurva.";
+  return "<section class='skotsel-field-goals' data-skotsel-field-goals>" +
+    "<div class='skotsel-field-goals__head'><p class='pill'>Mål/förslag</p><h3>Kort, medel och lång sikt</h3></div>" +
+    "<div class='skotsel-field-goals__grid'>" +
+      goalBlock("Kortsiktigt", proposal.nextStep) +
+      goalBlock("Medellångt", position.label + ". " + position.text) +
+      goalBlock("Långsiktigt", finalText + " Fältstöd - inte facit.") +
+    "</div>" +
+  "</section>";
+}
+
+function goalBlock(title, text) {
+  return "<section><h4>" + escapeHtml(title) + "</h4><p>" + escapeHtml(text || "saknas") + "</p></section>";
+}
+
+function fieldDataPanelTemplate(result) {
+  const chartData = result.chartData || {};
+  const input = result.debug?.normalizedInput || {};
+  const curveReference = chartData.curveReference;
+  const rows = [
+    ["Åtgärd", result.actionLabel || result.forestryStatus || "saknas"],
+    ["Ålder", valueWithUnit(input.ageYears, "år")],
+    ["Period", "ej beräknat"],
+    ["Övre höjd", valueWithUnit(chartData.heightMeters, "m")],
+    ["Grundyta före", valueWithUnit(chartData.basalArea, "m²/ha")],
+    ["Grundyta efter/uttag", closestAfterBasalText(curveReference, chartData.heightMeters)],
+    ["Stamantal före/efter", closestStemsText(curveReference, chartData.heightMeters, input.stemsPerHa)],
+    ["Volym", valueWithUnit(input.volumeM3, "m³sk/ha")],
+    ["Huggningsklass", "ej beräknat"],
+    ["Status/källa", curveStatusLabel(curveReference)]
+  ];
+  return "<section class='skotsel-field-data hidden' data-skotsel-field-data>" +
+    "<div class='skotsel-field-data__head'><p class='pill'>Data</p><h3>Data för aktuell fältpunkt</h3></div>" +
+    "<table><tbody>" +
+      rows.map(([label, value]) => "<tr><th scope='row'>" + escapeHtml(label) + "</th><td>" + escapeHtml(value || "saknas") + "</td></tr>").join("") +
+    "</tbody></table>" +
+    "<p>Tabellen visar befintliga indata och aktivt pilotunderlag. Saknade värden hittas inte på.</p>" +
+  "</section>";
+}
+
+function valueWithUnit(value, unit) {
+  return Number.isFinite(value) ? formatNumber(value) + " " + unit : "saknas";
+}
+
+function valueOrMissing(value) {
+  if (value === null || value === undefined || value === "") return "saknas";
+  return String(value);
+}
+
+function ageSourceLabel(ageType) {
+  if (ageType === "total") return "totalålder";
+  if (ageType === "breast") return "brösthöjdsålder";
+  if (ageType === "osaker") return "osäker";
+  return "indata";
+}
+
+function speciesLabel(species) {
+  const labels = {
+    tall: "Tall",
+    gran: "Gran",
+    bjork: "Björk",
+    lov: "Löv",
+    blandat: "Blandat"
+  };
+  return labels[species] || "saknas";
+}
+
+function curveStatusLabel(curveReference) {
+  if (!curveReference?.curve) return "ingen aktiv kurva";
+  const code = curveReference.curve.speciesCode + curveReference.curve.siteIndex;
+  if (isFieldPilotCurve(curveReference)) return code + " fälttest/pilot";
+  if (isPilotCurveStatus(curveReference.status)) return code + " pilot/exempel";
+  return code + " kurvunderlag";
+}
+
+function closestCurveEvent(curveReference, height) {
+  const events = curveReference?.curve?.points?.thinningEvents || [];
+  const numericHeight = Number(height);
+  if (!events.length) return null;
+  if (!Number.isFinite(numericHeight)) return events[0];
+  return [...events].sort((a, b) => Math.abs(a.topHeight - numericHeight) - Math.abs(b.topHeight - numericHeight))[0];
+}
+
+function closestCurveAgeText(curveReference, height) {
+  const event = closestCurveEvent(curveReference, height);
+  return event ? ageText(event.ageTotal) : "saknas";
+}
+
+function closestAfterBasalText(curveReference, height) {
+  const event = closestCurveEvent(curveReference, height);
+  if (!event) return "saknas";
+  return (event.label || "Mallpunkt") + ": " + valueWithUnit(event.basalAreaAfter, "m²/ha");
+}
+
+function closestStemsText(curveReference, height, inputStems) {
+  const event = closestCurveEvent(curveReference, height);
+  const inputText = Number.isFinite(inputStems) ? "Indata " + formatNumber(inputStems) : "";
+  if (!event) return inputText || "saknas";
+  const stems = [event.stemsBefore, event.stemsAfter]
+    .filter((value) => value !== null && value !== undefined && value !== "")
+    .map((value) => formatNumber(value))
+    .join(" -> ");
+  return [inputText, stems ? "Mall " + stems : ""].filter(Boolean).join(" · ") || "saknas";
 }
 
 function legalChecksTemplate(checks) {
