@@ -1,4 +1,4 @@
-const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-field-app-flow.1";
+const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-field-tools.2";
 
 const CORE_ASSETS = [
   "./",
@@ -20,6 +20,14 @@ const CORE_ASSETS = [
   "./js/views/dgv.js",
   "./js/views/height.js",
   "./js/views/skotselkollen.js",
+  "./js/views/field-tools.js",
+  "./js/calculators/fieldCalculator.js",
+  "./js/calculators/fieldReferenceData.js",
+  "./js/calculators/fieldSiteIndex.js",
+  "./js/calculators/circlePlotCalculator.js",
+  "./assets/field/si-tall.png",
+  "./assets/field/si-gran.png",
+  "./assets/field/young-volume.png",
   "./js/views/curve-review.js",
   "./js/views/rojning.js",
   "./js/views/forest-plan-pricing.js",

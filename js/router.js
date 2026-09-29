@@ -1,7 +1,7 @@
 import { renderDashboardView } from "./views/dashboard.js";
 import { renderDgvView } from "./views/dgv.js";
 import { renderHeightView } from "./views/height.js";
-import { renderSkotselkollenView } from "./views/skotselkollen.js";
+import { renderFieldToolsView, renderFieldSIView, renderYoungVolumeView, renderCirclePlotView, renderFieldNotesView } from "./views/field-tools.js";
 import { renderCurveReviewView } from "./views/curve-review.js";
 import { renderRojningView } from "./views/rojning.js";
 import { renderForestPlanPricingView } from "./views/forest-plan-pricing.js";
@@ -15,7 +15,11 @@ const routes = {
   "/": { id: "dashboard", title: "Start", render: renderDashboardView },
   "/dgv": { id: "dgv", title: "DGV", render: renderDgvView },
   "/height": { id: "height", title: "Medelhöjd", render: renderHeightView },
-  "/skotselkollen": { id: "skotselkollen", title: "Skötselkollen", render: renderSkotselkollenView },
+  "/skotselkollen": { id: "skotselkollen", title: "Fältverktyg", render: renderFieldToolsView },
+  "/si": { id: "si", title: "Snabb SI", render: renderFieldSIView },
+  "/young-volume": { id: "young-volume", title: "Ungskogsvolym", render: renderYoungVolumeView },
+  "/circle-plot": { id: "circle-plot", title: "Stamantal", render: renderCirclePlotView },
+  "/field-notes": { id: "field-notes", title: "Anteckningar", render: renderFieldNotesView },
   "/curve-review": { id: "curve-review", title: "Kurvgranskning", render: renderCurveReviewView },
   "/rojning": { id: "rojning", title: "Röjning", render: renderRojningView },
   "/forest-plan-pricing": { id: "forest-plan-pricing", title: "Planpris", render: renderForestPlanPricingView },

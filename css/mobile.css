@@ -1037,6 +1037,21 @@
 }
 
 
+@media (max-width: 720px) {
+  .field-tools__layout { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+  .field-tools .page-header { display: none; }
+  .field-tools__tree { margin-bottom: var(--space-2); padding: var(--space-2) 0; }
+  .field-tools__tree .field { gap: var(--space-1); }
+  .field-tools__tree .field-tools__remove { top: -1.7rem; width: 2.75rem; height: 2.75rem; }
+  .field-tools__tabs { font-size: 0.85rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .field-tools__grid { gap: var(--space-2); }
+  .field-tools__grid .field span { font-size: 0.85rem; }
+  .field-tools__note { padding: var(--space-3); }
+  .field-tools__toolbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .field-tools__toolbar .button:first-child { grid-column: 1 / -1; }
+  .field-tools .input, .field-tools .select, .field-tools .textarea { font-size: 1rem; }
+}
+
 /* skotsel-fieldchecks-readable */
 @media (max-width: 560px) {
   .skotsel-list {

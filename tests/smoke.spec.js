@@ -109,7 +109,7 @@ test("mobil UX är kompakt för röjning, planpris, offert och bottom-nav", asyn
 
 test("Norra massimport har T20 pilot och T18 fälttest som enda aktiva", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   const summary = await page.evaluate(async () => {
     const knowledge = await import("/js/calculators/skotselKnowledgeBase.js");
     const siteIndex = await import("/js/calculators/siteIndexCurves.js");
@@ -283,7 +283,7 @@ test("Kurvgranskning sparar lokalt utkast och skapar aktiveringskandidat utan ak
 
 test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await fillSkotselkollenPilot(page);
   await expect(page.locator("body")).toContainText("Pilotunderlag");
   await expect(page.locator("body")).toContainText("Samlad bedömning");
@@ -364,7 +364,7 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
   await page.screenshot({ path: `${SCREENSHOT_DIR}/skotselkollen-desktop.png`, fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await fillSkotselkollenPilot(page);
   await expect(page.locator("body")).toContainText("Pilotunderlag");
   await expect(page.locator("body")).toContainText("Samlad bedömning");
@@ -420,7 +420,7 @@ test("Skötselkollen visar T20-pilot på desktop och mobil", async ({ page }) =>
 
 test("Skötselkollen använder T18 som manuell fälttestkurva för tall", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await fillSkotselkollenT18(page);
   await expect(page.locator("body")).toContainText("T18");
   await expect(page.locator("body")).toContainText("fälttest");
@@ -464,7 +464,7 @@ test("Skötselkollen använder T18 som manuell fälttestkurva för tall", async 
 
 test("Skötselkollen visar fältprotokoll med kopiera och skriv ut", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await fillSkotselkollenPilot(page);
   await page.locator("[data-show-field-report]").first().click();
 
@@ -482,7 +482,7 @@ test("Skötselkollen visar fältprotokoll med kopiera och skriv ut", async ({ pa
 
 test("Skötselkollen fältläge sparar lokal fältbedömning och anteckning", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await expect(page.locator("body")).toContainText("Fältläge");
   await fillSkotselkollenPilot(page);
 
@@ -509,7 +509,7 @@ test("Skötselkollen fältläge sparar lokal fältbedömning och anteckning", as
 
 test("Skötselkollen visar forskningsrisker utan att skapa ny kurva", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await fillSkotselkollenPilot(page);
   await openSkotselAdvanced(page);
   await page.evaluate(() => {
@@ -544,7 +544,7 @@ test("Skötselkollen visar forskningsrisker utan att skapa ny kurva", async ({ p
 
 test("Skötselkollen visar röjningsforskning för ungskog utan pris- eller kurvaktivering", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await page.locator('select[name="mainSpecies"]').selectOption("tall");
   await page.locator('select[name="region"]').selectOption("norrland_inland");
   await fillNumber(page, 'input[name="heightMeters"]', "3");
@@ -582,7 +582,7 @@ test("Skötselkollen visar röjningsforskning för ungskog utan pris- eller kurv
 
 test("Skötselkollen markförutsättning styr juridisk status utan att dölja skoglig status", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await fillSkotselkollenPilot(page);
   await openSkotselAdvanced(page);
 
@@ -601,7 +601,7 @@ test("Skötselkollen markförutsättning styr juridisk status utan att dölja sk
 
 test("Skötselkollen håller björk som eget spår", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await fillSkotselkollenPilot(page);
   await page.locator('select[name="mainSpecies"]').selectOption("bjork");
   await expect(page.locator("body")).toContainText(/LÃ¶vspÃ¥r|Lövspår/i);
@@ -617,7 +617,7 @@ test("Skötselkollen håller björk som eget spår", async ({ page }) => {
 
 test("Skötselkollen visar saknad kurva för tall T22 utan att skapa falsk kurva", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await fillSkotselkollenPilot(page);
   await fillNumber(page, 'input[name="siteIndex"]', "22");
   await page.getByRole("button", { name: "Visa i gallringskurva" }).click();
@@ -633,7 +633,7 @@ test("Skötselkollen visar saknad kurva för tall T22 utan att skapa falsk kurva
 
 test("Skötselkollen visar gran G20 som candidate utan aktiv kurva", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoRoute(page, "/skotselkollen");
+  await gotoSkotselArchive(page);
   await page.locator('select[name="mainSpecies"]').selectOption("gran");
   await page.locator('select[name="region"]').selectOption("norrland_inland");
   await fillNumber(page, 'input[name="heightMeters"]', "14.5");
@@ -705,6 +705,15 @@ async function gotoRoute(page, hash) {
   await page.goto(`/?test=1#${hash}`);
   await page.waitForSelector("#view");
   await page.waitForFunction(() => document.querySelector("#view")?.children.length > 0);
+}
+
+// The retired management view is mounted only by regression tests, never by the router.
+async function gotoSkotselArchive(page) {
+  await gotoRoute(page, "/skotselkollen");
+  await page.evaluate(async () => {
+    const { renderSkotselkollenView } = await import("/js/views/skotselkollen.js");
+    document.querySelector("#view").replaceChildren(renderSkotselkollenView());
+  });
 }
 
 async function fillSkotselkollenPilot(page) {

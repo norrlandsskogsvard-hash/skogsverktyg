@@ -1,5 +1,23 @@
 # Changelog
 
+## v2.0.0-alpha.1-field-tools.2 - 2026-09-29
+
+- SI-verktyget använder nu SLU:s källstödda höjdutvecklingsfunktioner för tall och gran.
+- BH-ålder är fortsatt indata; beräknad totalålder visas separat med normalt ålderstillägg 7–13 år eller eget tillägg.
+- Ny stamantalsflik med cirkelprovyta, standardytor, egen radie och sammanställning av flera provytor.
+- DGV och Höjd är oförändrade.
+- PWA-cache höjd till `skogskalkyl-2.0.0-alpha.1-field-tools.2`.
+
+## v2.0.0-alpha.1-field-tools.1 - 2026-09-29
+
+- Skötselkollens ordinarie flöde ersatt med snabb SI, ungskogsvolym och fältanteckningar. Skötseldelen är undanlagd; tidigare data och källarbete bevaras.
+- SI från höjd och BH-ålder för 1–4 provträd: tall och gran enligt SLU:s funktioner. Totalålder beräknas separat och resultat utanför källans tillämpningsområde stoppas.
+- Ungskogsvolym från grundyta eller stamantal enligt bifogad bild, med valfri areal och hjälp för cirkelprovyta. Resultat märkta som ungefärliga diagramavläsningar.
+- Anteckningar per fastighet/avdelning med autosparning, sparade mätresultat, ångra borttagning, textexport och JSON-säkerhetskopia med återläsning.
+- DGV- och Höjd-vyer, knappsatser, lagring och kalkyler oförändrade. T18/T20, priser och gamla beslutsregler oförändrade.
+- Nya regressions- och mobiltester för fältverktyg, anteckningar, offline och befintliga DGV-/Höjd-funktioner.
+- PWA-cache höjd till `skogskalkyl-2.0.0-alpha.1-field-tools.1`, inklusive alla tre bildkällor.
+
 ## v2.0.0-alpha.1-field-app-flow.1 - 2026-07-20
 
 ### Changed - Tydligare faltapp i Skotselkollen

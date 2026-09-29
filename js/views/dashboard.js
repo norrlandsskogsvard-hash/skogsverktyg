@@ -4,8 +4,9 @@ import { createPageHeader, escapeHtml } from "../ui.js";
 const modules = [
   { title: "DGV", href: "#/dgv", status: MODULE_STATUS.dgv, text: "Beräkna diametergrundytevägd medeldiameter med snabb fältinmatning." },
   { title: "Medelhöjd", href: "#/height", status: MODULE_STATUS.height, text: "Mata in provträdshöjder och få medelhöjd och statistik direkt." },
-  { title: "Skötselkollen", href: "#/skotselkollen", status: MODULE_STATUS.skotselkollen, text: "Röjning, gallring eller slutavverkning baserat på beståndsvärden, källmatris och lagkontroll." },
-  { title: "Kurvgranskning", href: "#/curve-review", status: MODULE_STATUS.curveReview, text: "Kurvgranskning - för källarbete, inte fältbeslut. Spara manuella utkast lokalt och kopiera CSV-rad." },
+  { title: "Snabb SI", href: "#/si", status: "Diagramstöd", text: "Ståndortsindex från höjd och brösthöjdsålder på 1–4 provträd." },
+  { title: "Volym i ungskog", href: "#/young-volume", status: "Diagramstöd", text: "Ungefärlig volym från grundyta eller stamantal och höjd." },
+  { title: "Fältanteckningar", href: "#/field-notes", status: "Lokalt arkiv", text: "Anteckningar och mätresultat per fastighet och avdelning." },
   { title: "Röjning", href: "#/rojning", status: MODULE_STATUS.rojning, text: "Beräkna svårighet, tidsåtgång, pris per hektar och offertunderlag." },
   { title: "Planpris", href: "#/forest-plan-pricing", status: MODULE_STATUS.forestPlanPricing, text: "Prissätt skogsbruksplan med fältarbete, kontor, resa och påslag." },
   { title: "Offert", href: "#/quote", status: MODULE_STATUS.quote, text: "Skapa offert, importera kalkyler och skriv ut som PDF." },
@@ -27,7 +28,7 @@ export function renderDashboardView() {
         "<ul class='status-list'>" +
           "<li class='status-item'><span>Appskal</span><strong>Klart</strong></li>" +
           "<li class='status-item'><span>Offline</span><strong>Aktivt</strong></li>" +
-          "<li class='status-item'><span>Fältverktyg</span><strong>DGV, Höjd, Röjning, Planpris</strong></li>" +
+          "<li class='status-item'><span>Fältverktyg</span><strong>DGV, Höjd, SI, Volym, Anteckningar</strong></li>" +
           "<li class='status-item'><span>Affärsstöd</span><strong>Offert, Kunder</strong></li>" +
         "</ul>" +
       "</div></div>" +
