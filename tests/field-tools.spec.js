@@ -198,7 +198,7 @@ test("PWA cachar verktyg och bildkällor och fungerar offline", async ({ browser
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
     const cached = await page.evaluate(async () => {
-      const cache = await caches.open("skogskalkyl-2.0.0-alpha.1-field-tools.2");
+      const cache = await caches.open("skogskalkyl-2.0.0-alpha.1-field-work.2");
       return (await cache.keys()).map(r => new URL(r.url).pathname);
     });
     for (const path of ["/assets/field/si-tall.png", "/assets/field/si-gran.png", "/assets/field/young-volume.png", "/js/views/field-tools.js", "/js/calculators/fieldSiteIndex.js", "/js/calculators/circlePlotCalculator.js", "/js/views/dgv.js", "/js/views/height.js"]) expect(cached).toContain(path);

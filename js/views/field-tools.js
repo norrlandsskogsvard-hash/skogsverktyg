@@ -4,11 +4,13 @@ import { calculateYoungVolume, calculatePlotStems } from "../calculators/fieldCa
 import { FIELD_REFERENCE_VERSION } from "../calculators/fieldReferenceData.js";
 import { calculateFieldSI, SI_SOURCE } from "../calculators/fieldSiteIndex.js";
 import { calculateCirclePlot, summarizeCirclePlots, PLOT_PRESETS, CIRCLE_PLOT_SOURCE } from "../calculators/circlePlotCalculator.js";
+import { attachMeasurementTransfer } from "./measurement-transfer.js";
+import { presentMeasurementNote } from "../calculators/measurementNote.js";
 
 const NOTES_KEY = "fieldNotesV1";
 const links = [["si", "SI"], ["young-volume", "Ungskogsvolym"], ["circle-plot", "Stamantal"], ["field-notes", "Anteckningar"]];
 const number = (name, label, value = "") => `<label class="field"><span>${label}</span><input class="input" name="${name}" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}"></label>`;
-const select = (name, label, options, value) => `<label class="field"><span>${label}</span><select class="select" name="${name}">${options.map(([id, text]) => `<option value="${id}" ${id === value ? "selected" : ""}>${text}</option>`).join("")}</select></label>`;
+const select = (name, label, options, value) => `<label class="field"><span>${label}</span><select class="select" name="${name}">${options.map(([id, text]) => `<option value="${escapeHtml(id)}" ${id === value ? "selected" : ""}>${escapeHtml(text)}</option>`).join("")}</select></label>`;
 const values = form => Object.fromEntries(new FormData(form));
 const notes = () => getStoredValue(NOTES_KEY, []);
 const stamp = () => new Date().toISOString();
@@ -31,17 +33,18 @@ function sourceDetails(image, description) {
 }
 
 function noteAction() {
-  return `<div class="field-tools__note-action">${select("targetNote", "Spara resultat i avdelning", [["", "Välj avdelning"], ...notes().map(n => [n.id, [n.property, n.department].filter(Boolean).join(" / ") || "Namnlös avdelning"] )], "")}<button type="button" class="button button--secondary" data-save-result>Spara resultat</button><a href="#/field-notes">Ny avdelning</a></div>`;
+  return `<div class="field-tools__note-action">${select("targetNote", "Spara resultat i avdelning", [["", "Välj avdelning"], ...notes().map(n => [n.id, [n.property, n.department].filter(Boolean).join(" / ") || "Namnlös avdelning"] )], getStoredValue("activeFieldNoteV1", ""))}<button type="button" class="button button--secondary" data-save-result>Spara resultat</button><a href="#/field-notes">Ny avdelning</a></div>`;
 }
 
 function wireNoteAction(page, report) {
+  page.querySelector('[name="targetNote"]').addEventListener("change", event => setStoredValue("activeFieldNoteV1", event.target.value));
   page.querySelector("[data-save-result]").addEventListener("click", () => {
     const id = page.querySelector('[name="targetNote"]').value;
     const all = notes();
     const note = all.find(n => n.id === id);
     if (!note) return showToast("Välj en avdelning, eller skapa en ny under Anteckningar.");
     const updated = { ...note, text: `${note.text}${note.text ? "\n\n" : ""}${new Date().toLocaleString("sv-SE")}\n${report}`, updatedAt: stamp() };
-    if (setStoredValue(NOTES_KEY, all.map(n => n.id === id ? updated : n))) showToast("Resultatet har lagts till i avdelningens anteckning.");
+    if (setStoredValue(NOTES_KEY, all.map(n => n.id === id ? updated : n))) { setStoredValue("activeFieldNoteV1", id); showToast("Resultatet har lagts till i avdelningens anteckning."); }
     else showToast("Kunde inte spara resultatet. Lagringen kan vara full.");
   });
 }
@@ -173,6 +176,11 @@ export function renderCirclePlotView() {
   page.querySelector("[data-undo-plot]").addEventListener("click", () => { plots.pop(); setStoredValue("circlePlotObservationsV1", plots); render(); update(); });
   page.querySelector("[data-clear-plots]").addEventListener("click", () => { plots = []; setStoredValue("circlePlotObservationsV1", plots); render(); update(); });
   update(); render();
+  attachMeasurementTransfer(page, () => {
+    const output = summarizeCirclePlots(plots);
+    if (output.error) return "";
+    return { text: `Stamantal: ${formatNumber(output.stemsPerHa, 1)} stammar/ha · ${output.plotCount} provytor.\n${output.plots.map((plot, index) => `Provyta ${index + 1}: ${plot.count} stammar; area ${formatNumber(plot.area, 1)} m²; radie ${formatNumber(plot.radius, 1)} m.`).join("\n")}`, kind: "circle-plot", plots: output.plots, result: output.stemsPerHa, unit: "st/ha" };
+  });
   return page;
 }
 
@@ -237,18 +245,30 @@ function download(name, text, type) {
 
 export function renderFieldNotesView() {
   const page = pageShell("Fältanteckningar", "field-notes");
+  page.classList.add("field-notebook");
   let entries = notes();
   let removed = null;
   page.insertAdjacentHTML("beforeend", `<div class="field-tools__toolbar"><button class="button" data-add-note>Ny avdelning</button><button class="button button--secondary" data-export-text>Exportera text</button><button class="button button--secondary" data-backup>Säkerhetskopia</button></div><p class="field-tools__muted">Sparas på denna enhet. Exportera en säkerhetskopia innan du rensar webbläsardata eller byter enhet.</p><p data-save-status role="status"></p><button class="button button--secondary" data-undo-note hidden>Ångra borttagning</button><section class="field-tools__notes" data-notes aria-label="Avdelningar"></section><details class="field-tools__source"><summary>Återställ säkerhetskopia</summary><label class="field"><span>Anteckningsfil (.json)</span><input type="file" accept=".json,application/json" data-import-notes></label><p>Befintliga anteckningar behålls. Importerade avdelningar läggs till som kopior.</p></details>`);
   function persist() {
+    // Read the current editor state so export remains available after a storage failure.
     const ok = setStoredValue(NOTES_KEY, entries);
     page.querySelector("[data-save-status]").textContent = ok ? "Sparat på denna enhet" : "Kunde inte spara. Exportera text eller säkerhetskopia innan du lämnar sidan.";
   }
   function render() {
     page.querySelector("[data-notes]").innerHTML = entries.length ? entries.map(n => `<article class="field-tools__note" data-note="${escapeHtml(n.id)}"><div class="field-tools__grid"><label class="field"><span>Fastighet</span><input class="input" data-note-field="property" value="${escapeHtml(n.property)}" autocomplete="off"></label><label class="field"><span>Avdelning</span><input class="input" data-note-field="department" value="${escapeHtml(n.department)}" autocomplete="off"></label></div><label class="field"><span>Anteckning</span><textarea class="textarea" data-note-field="text" aria-label="Anteckning" rows="5">${escapeHtml(n.text)}</textarea></label><div class="field-tools__note-footer"><time>${escapeHtml(new Date(n.updatedAt).toLocaleString("sv-SE"))}</time><button class="field-tools__remove" data-remove-note="${escapeHtml(n.id)}" title="Ta bort avdelning" aria-label="Ta bort avdelning ${escapeHtml(n.department)}">×</button></div></article>`).join("") : "<p>Inga avdelningar ännu.</p>";
+    page.querySelectorAll("[data-note]").forEach(row => {
+      const note = entries.find(item => item.id === row.dataset.note);
+      const title = document.createElement("h3");
+      title.className = "field-notebook__heading";
+      title.textContent = `Avdelning ${note.department || "utan nummer"}`;
+      row.prepend(title);
+      row.querySelector("textarea").value = presentMeasurementNote(note.text);
+      row.querySelector("textarea").rows = 9;
+    });
   }
   page.querySelector("[data-add-note]").addEventListener("click", () => {
     entries.unshift({ id: crypto.randomUUID(), property: entries[0]?.property || "", department: "", text: "", updatedAt: stamp() });
+    setStoredValue("activeFieldNoteV1", entries[0].id);
     render(); persist(); page.querySelector('[data-note-field="department"]').focus();
   });
   page.querySelector("[data-notes]").addEventListener("input", event => {
@@ -257,6 +277,7 @@ export function renderFieldNotesView() {
     const row = event.target.closest("[data-note]");
     const note = entries.find(n => n.id === row.dataset.note);
     note[key] = event.target.value; note.updatedAt = stamp();
+    if (key === "department") row.querySelector(".field-notebook__heading").textContent = `Avdelning ${note.department || "utan nummer"}`;
     row.querySelector("time").textContent = new Date(note.updatedAt).toLocaleString("sv-SE");
     persist();
   });
@@ -272,10 +293,35 @@ export function renderFieldNotesView() {
     removed = null; persist(); render(); page.querySelector("[data-undo-note]").hidden = true;
   });
   page.querySelector("[data-export-text]").addEventListener("click", () => {
-    download("skogskalkyl-faltanteckningar.txt", entries.map(n => `${n.property || "Fastighet saknas"} / Avdelning ${n.department || "saknas"}\n${new Date(n.updatedAt).toLocaleString("sv-SE")}\n${n.text}`).join("\n\n--------------------\n\n"), "text/plain;charset=utf-8");
+    download("skogskalkyl-faltanteckningar.txt", entries.map(n => `${n.property || "Fastighet saknas"} / Avdelning ${n.department || "saknas"}\n${new Date(n.updatedAt).toLocaleString("sv-SE")}\n${presentMeasurementNote(n.text)}`).join("\n\n--------------------\n\n"), "text/plain;charset=utf-8");
   });
   page.querySelector("[data-backup]").addEventListener("click", () => {
     download("skogskalkyl-faltanteckningar.json", JSON.stringify({ version: 1, exportedAt: stamp(), entries }, null, 2), "application/json");
+  });
+  const csvButton = document.createElement("button");
+  const search = document.createElement("input");
+  search.className = "input"; search.type = "search";
+  search.placeholder = "Sök fastighet, avdelning eller anteckning";
+  search.setAttribute("aria-label", "Sök avdelningar");
+  page.querySelector("[data-notes]").before(search);
+  function filterNotes() {
+    const query = search.value.trim().toLocaleLowerCase("sv-SE");
+    page.querySelectorAll("[data-note]").forEach(row => {
+      const note = entries.find(item => item.id === row.dataset.note);
+      row.hidden = ![note.property, note.department, note.text].join(" ").toLocaleLowerCase("sv-SE").includes(query);
+    });
+  }
+  search.addEventListener("input", filterNotes);
+  page.querySelector("[data-notes]").addEventListener("input", filterNotes);
+  const observer = new MutationObserver(filterNotes);
+  observer.observe(page.querySelector("[data-notes]"), { childList: true });
+  csvButton.type = "button"; csvButton.className = "button button--secondary";
+  csvButton.textContent = "Exportera CSV";
+  page.querySelector(".field-tools__toolbar").append(csvButton);
+  csvButton.addEventListener("click", () => {
+    const cell = value => `"${String(value).replace(/^([=+@-])/, "'$1").replaceAll('"', '""')}"`;
+    const rows = [["Fastighet", "Avdelning", "Uppdaterad", "Mätningar och kommentarer"], ...entries.map(note => [note.property, note.department, note.updatedAt, presentMeasurementNote(note.text)])];
+    download("skogskalkyl-faltanteckningar.csv", "\uFEFF" + rows.map(row => row.map(cell).join(";")).join("\r\n"), "text/csv;charset=utf-8");
   });
   page.querySelector("[data-import-notes]").addEventListener("change", async event => {
     const file = event.target.files[0];
@@ -284,7 +330,7 @@ export function renderFieldNotesView() {
       if (file.size > 2_000_000) throw new Error("Filen är för stor (max 2 MB).");
       const payload = JSON.parse(await file.text());
       if (payload.version !== 1 || !Array.isArray(payload.entries) || payload.entries.length > 1000 || payload.entries.some(n => !n || ["property", "department", "text"].some(k => typeof n[k] !== "string"))) throw new Error("Filen är inte en giltig anteckningskopia.");
-      const imported = payload.entries.map(n => ({ id: crypto.randomUUID(), property: n.property, department: n.department, text: n.text, updatedAt: stamp() }));
+      const imported = payload.entries.map(n => ({ id: crypto.randomUUID(), property: n.property, department: n.department, text: n.text, updatedAt: stamp(), measurements: Array.isArray(n.measurements) ? n.measurements : [] }));
       entries = [...imported, ...entries]; persist(); render();
     } catch (error) { showToast(error.message); }
     event.target.value = "";

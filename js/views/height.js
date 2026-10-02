@@ -1,6 +1,7 @@
 import { calculateMeanHeight, parsePositiveHeight } from "../calculators/heightCalculator.js";
 import { getStoredValue, setStoredValue } from "../storage.js";
 import { createPageHeader, escapeHtml, formatNumber } from "../ui.js";
+import { attachMeasurementTransfer, attachHandPreference } from "./measurement-transfer.js";
 
 const STORAGE_KEY = "heightDraftValues";
 const KEYPAD_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "backspace"];
@@ -27,7 +28,7 @@ export function renderHeightView() {
   const keypad = page.querySelector("[data-height-keypad]");
 
   function saveDraft() {
-    setStoredValue(STORAGE_KEY, heights);
+    if (!setStoredValue(STORAGE_KEY, heights)) setFeedback("Kunde inte spara utkastet på enheten. Behåll sidan öppen.", "error");
   }
 
   function setFeedback(message, type = "info") {
@@ -200,6 +201,12 @@ export function renderHeightView() {
   undoButton.addEventListener("click", undoLast);
   clearButton.addEventListener("click", clearAll);
 
+  attachHandPreference(page);
+  attachMeasurementTransfer(page, () => {
+    const result = calculateMeanHeight(heights);
+    if (!result.hasValues) return "";
+    return { text: `Medelhöjd: ${formatNumber(result.meanHeight, 1)} m · ${result.count} provträd.\nHöjder (m): ${result.values.map(value => formatNumber(value, 1)).join("; ")}.`, kind: "height", values: result.values, result: result.meanHeight, unit: "m" };
+  });
   render();
   return page;
 }

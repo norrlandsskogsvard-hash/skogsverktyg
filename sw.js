@@ -1,4 +1,4 @@
-const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-field-tools.2";
+const CACHE_NAME = "skogskalkyl-2.0.0-alpha.1-field-work.2";
 
 const CORE_ASSETS = [
   "./",
@@ -21,6 +21,8 @@ const CORE_ASSETS = [
   "./js/views/height.js",
   "./js/views/skotselkollen.js",
   "./js/views/field-tools.js",
+  "./js/views/measurement-transfer.js",
+  "./js/calculators/measurementNote.js",
   "./js/calculators/fieldCalculator.js",
   "./js/calculators/fieldReferenceData.js",
   "./js/calculators/fieldSiteIndex.js",

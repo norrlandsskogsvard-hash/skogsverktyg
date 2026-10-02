@@ -1,5 +1,23 @@
 # Changelog
 
+## v2.0.0-alpha.1-field-work.2 - 2026-10-02
+
+- Mätningar i avdelningsanteckningar visas med en decimal. Metodrader har tagits bort från anteckningar och läsexport.
+- Äldre genererade DGV-/höjdanteckningar får samma visningsformat; fri kommentartext bevaras.
+- Nya mätningar sparar oavrundade råvärden och resultat separat i säkerhetskopian.
+- Anteckningsvyn har tydligare avdelningsrubriker, större skrivyta och fyrspaltig verktygsnavigation på dator.
+- PWA-cache: `skogskalkyl-2.0.0-alpha.1-field-work.2`.
+
+## v2.0.0-alpha.1-field-work.1 - 2026-10-02
+
+- DGV och Medelhöjd har logisk trespaltig knappsats, större tryckytor och val för vänster/höger hand.
+- Mätningar kan sparas i en avdelning tillsammans med råvärden, metod, tidpunkt och kommentar. Avdelningen kan skapas direkt vid mätningen.
+- Vald avdelning följer med mellan fältverktyg. Stamantal från cirkelprovytor kan också sparas.
+- Fältanteckningar kan exporteras som CSV utöver text och JSON-säkerhetskopia.
+- Sök avdelningar via fastighet, avdelningsnummer eller anteckning. Kommentarutkast sparas mellan sidbyten.
+- Strikt talvalidering för DGV/Höjd förhindrar att felaktiga strängar accepteras som delvis giltiga värden. Formler och mätprecision bevaras.
+- PWA-cache: `skogskalkyl-2.0.0-alpha.1-field-work.1`.
+
 ## v2.0.0-alpha.1-field-tools.2 - 2026-09-29
 
 - SI-verktyget använder nu SLU:s källstödda höjdutvecklingsfunktioner för tall och gran.

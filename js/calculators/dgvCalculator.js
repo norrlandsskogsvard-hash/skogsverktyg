@@ -8,11 +8,13 @@ export function parsePositiveDiameter(value) {
     return null;
   }
 
-  const number = Number.parseFloat(normalized);
+  if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null;
+  const number = Number(normalized);
   return Number.isFinite(number) && number > 0 ? number : null;
 }
 
 export function normalizeDiameters(values = []) {
+  if (!Array.isArray(values)) return [];
   return values
     .map((value) => {
       if (value && typeof value === "object" && "diameter" in value) {

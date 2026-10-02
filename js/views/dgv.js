@@ -1,6 +1,7 @@
 import { calculateDgv, parsePositiveDiameter } from "../calculators/dgvCalculator.js";
 import { getStoredValue, setStoredValue } from "../storage.js";
 import { createPageHeader, escapeHtml, formatNumber } from "../ui.js";
+import { attachMeasurementTransfer, attachHandPreference } from "./measurement-transfer.js";
 
 const STORAGE_KEY = "dgvDraftDiameters";
 const KEYPAD_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "backspace"];
@@ -27,7 +28,7 @@ export function renderDgvView() {
   const keypad = page.querySelector("[data-diameter-keypad]");
 
   function saveDraft() {
-    setStoredValue(STORAGE_KEY, diameters);
+    if (!setStoredValue(STORAGE_KEY, diameters)) setFeedback("Kunde inte spara utkastet på enheten. Behåll sidan öppen.", "error");
   }
 
   function setFeedback(message, type = "info") {
@@ -200,6 +201,12 @@ export function renderDgvView() {
   undoButton.addEventListener("click", undoLast);
   clearButton.addEventListener("click", clearAll);
 
+  attachHandPreference(page);
+  attachMeasurementTransfer(page, () => {
+    const result = calculateDgv(diameters);
+    if (!result.hasValues) return "";
+    return { text: `DGV: ${formatNumber(result.dgv, 1)} cm · ${result.count} provträd.\nDiametrar (cm): ${result.values.map(value => formatNumber(value, 1)).join("; ")}.`, kind: "dgv", values: result.values, result: result.dgv, unit: "cm" };
+  });
   render();
   return page;
 }

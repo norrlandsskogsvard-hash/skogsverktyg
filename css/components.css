@@ -560,7 +560,7 @@
 .field-keypad__grid {
   display: grid;
   min-width: 0;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
 }
 
@@ -569,6 +569,14 @@
   font-size: 1.35rem;
   padding: 0 var(--space-2);
 }
+
+.field-hand-selector { display: flex; justify-content: flex-end; gap: 0.25rem; }
+.field-hand-selector button { min-height: 2.5rem; padding: 0.4rem 0.75rem; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: var(--radius-sm); cursor: pointer; }
+.field-hand-selector [aria-pressed="true"] { background: var(--color-primary-soft); border-color: var(--color-primary); font-weight: 800; }
+.measurement-transfer { display: grid; min-width: 0; gap: var(--space-3); padding: var(--space-3); border-top: 1px solid var(--color-border); grid-column: 1 / -1; }
+.measurement-transfer h3, .measurement-transfer p { margin: 0; }
+.measurement-transfer details { display: grid; gap: var(--space-2); }
+.measurement-transfer summary { min-height: 2.75rem; align-content: center; cursor: pointer; }
 
 .field-value-list {
   display: grid;
@@ -2251,7 +2259,7 @@
 .field-tools [hidden] { display: none !important; }
 .field-tools__tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   border-bottom: 1px solid var(--color-border);
 }
 .field-tools__tabs a {
@@ -2295,6 +2303,11 @@
 .field-tools__notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(26rem, 100%), 1fr)); gap: var(--space-4); }
 .field-tools__note { min-width: 0; display: grid; gap: var(--space-3); padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .field-tools__note-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); color: var(--color-muted); font-size: 0.85rem; }
+.field-notebook [data-notes] { grid-template-columns: minmax(0, 1fr); }
+.field-notebook__heading { margin: 0; font-size: 1.1rem; padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-border); }
+.field-notebook textarea { min-height: 14rem; resize: vertical; line-height: 1.65; background: var(--color-surface); }
+.field-notebook .field-tools__note { box-shadow: none; border-radius: var(--radius-sm); }
+.field-notebook .field-tools__toolbar { align-items: center; padding-block: var(--space-2); border-bottom: 1px solid var(--color-border); }
 .field-tools__home { display: grid; gap: var(--space-3); }
 .field-tools__launch { position: relative; display: grid; gap: var(--space-2); padding: var(--space-5) 3rem var(--space-5) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); text-decoration: none; }
 .field-tools__launch strong { font-size: 1.15rem; }
