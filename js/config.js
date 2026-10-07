@@ -8,6 +8,7 @@ export const NAV_ITEMS = [
   { id: "young-volume", label: "Volym", hash: "#/young-volume", icon: "V", primary: true },
   { id: "circle-plot", label: "Stamantal", hash: "#/circle-plot", icon: "N", primary: true },
   { id: "field-notes", label: "Anteckningar", hash: "#/field-notes", icon: "A", primary: true },
+  { id: "nature-assessment", label: "Naturvärden", hash: "#/nature-assessment", icon: "NV", primary: true },
   { id: "rojning", label: "Röjning", hash: "#/rojning", icon: "R", primary: true },
   { id: "quote", label: "Offert", hash: "#/quote", icon: "O" },
   { id: "customers", label: "Kunder", hash: "#/customers", icon: "K" },

@@ -7,6 +7,7 @@ const modules = [
   { title: "Snabb SI", href: "#/si", status: "Diagramstöd", text: "Ståndortsindex från höjd och brösthöjdsålder på 1–4 provträd." },
   { title: "Volym i ungskog", href: "#/young-volume", status: "Diagramstöd", text: "Ungefärlig volym från grundyta eller stamantal och höjd." },
   { title: "Fältanteckningar", href: "#/field-notes", status: "Lokalt arkiv", text: "Anteckningar och mätresultat per fastighet och avdelning." },
+  { title: "Naturvärden", href: "#/nature-assessment", status: "Fältunderlag", text: "Stegvis naturvärdesbedömning med observationer och avdelningsrapport." },
   { title: "Röjning", href: "#/rojning", status: MODULE_STATUS.rojning, text: "Beräkna svårighet, tidsåtgång, pris per hektar och offertunderlag." },
   { title: "Planpris", href: "#/forest-plan-pricing", status: MODULE_STATUS.forestPlanPricing, text: "Prissätt skogsbruksplan med fältarbete, kontor, resa och påslag." },
   { title: "Offert", href: "#/quote", status: MODULE_STATUS.quote, text: "Skapa offert, importera kalkyler och skriv ut som PDF." },

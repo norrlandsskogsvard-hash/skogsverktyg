@@ -1,5 +1,26 @@
 # Changelog
 
+## v2.0.0-alpha.1-si-falt.1 - 2026-10-07
+
+- SI-anpassat ålderstillägg från visuellt kontrollerade tabeller i Skogsstyrelsens BD-häfte, jämfört med Norra 2007. SI och tillägget löses tillsammans utan avrundning i beräkningen.
+- Känd totalålder kan anges separat för 1–4 provträd. BH-ålder förblir primär indata; eget tillägg och grov schablon finns kvar.
+- Tydligare tabellmatchning, åldersredovisning och begränsningar. Regionalt tillägg är ett kombinerat modellstöd, inte en ny verifierad höjdutvecklingskurva. Ingen extrapolation av ålderstabellen.
+- SI sparar indata, oavrundat resultat och källversioner i avdelningens säkerhetskopia.
+- Naturvärdesblanketten kan användas för AC/BD enligt användarens rättelse av områdesrubriken. Rättelsens ursprung redovisas; frågematrisen är oförändrad.
+- DGV, medelhöjd, prisberäkningar, T20-pilot och SLU:s SI-koefficienter är oförändrade.
+- PWA-cache: `skogskalkyl-2.0.0-alpha.1-si-falt.1`.
+
+## v2.0.0-alpha.1-naturvarde.1 - 2026-10-07
+
+- Ny naturvärdesflik med en fråga i taget, sex delområden och stora svarsknappar. Underlag sparas per arbetsavdelning.
+- PDF-blankettens 80 frågor och 300 poängringar har lästs in utan nya naturvärdesklassgränser. Obesvarat, osäkert och motsägande svar hålls isär.
+- Regional skillnad mellan den boreala PDF-blanketten och den nordligt boreala manualen visas. Utanför PDF-versionens område registreras observationer utan regional poäng.
+- Naturvärdesunderlag kan exporteras och sparas till avdelningsanteckning med strukturerade råsvar i säkerhetskopian.
+- Avdelningsanteckningar har genvägar till naturvärden och SI i rätt arbetsavdelning.
+- SI har kontroll av provträdens lämplighet, metodvägledning och valfritt preliminärt modellförslag utanför ordinarie åldersområde. Extrapolation märks med låg säkerhet även i anteckningar.
+- DGV, medelhöjd, prisberäkningar och ordinarie SI-formler är oförändrade.
+- PWA-cache: `skogskalkyl-2.0.0-alpha.1-naturvarde.1`.
+
 ## v2.0.0-alpha.1-field-work.2 - 2026-10-02
 
 - Mätningar i avdelningsanteckningar visas med en decimal. Metodrader har tagits bort från anteckningar och läsexport.

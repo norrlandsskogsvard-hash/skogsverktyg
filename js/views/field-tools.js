@@ -2,13 +2,13 @@ import { createPageHeader, escapeHtml, formatNumber, showToast } from "../ui.js"
 import { getStoredValue, setStoredValue } from "../storage.js";
 import { calculateYoungVolume, calculatePlotStems } from "../calculators/fieldCalculator.js";
 import { FIELD_REFERENCE_VERSION } from "../calculators/fieldReferenceData.js";
-import { calculateFieldSI, SI_SOURCE } from "../calculators/fieldSiteIndex.js";
+import { calculateFieldSI, SI_SOURCE, AGE_ADDITION_SOURCE, SI_AGE_ADDITIONS } from "../calculators/fieldSiteIndex.js";
 import { calculateCirclePlot, summarizeCirclePlots, PLOT_PRESETS, CIRCLE_PLOT_SOURCE } from "../calculators/circlePlotCalculator.js";
 import { attachMeasurementTransfer } from "./measurement-transfer.js";
 import { presentMeasurementNote } from "../calculators/measurementNote.js";
 
 const NOTES_KEY = "fieldNotesV1";
-const links = [["si", "SI"], ["young-volume", "Ungskogsvolym"], ["circle-plot", "Stamantal"], ["field-notes", "Anteckningar"]];
+const links = [["si", "SI"], ["young-volume", "Ungskogsvolym"], ["circle-plot", "Stamantal"], ["nature-assessment", "Naturvärden"], ["field-notes", "Anteckningar"]];
 const number = (name, label, value = "") => `<label class="field"><span>${label}</span><input class="input" name="${name}" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}"></label>`;
 const select = (name, label, options, value) => `<label class="field"><span>${label}</span><select class="select" name="${name}">${options.map(([id, text]) => `<option value="${escapeHtml(id)}" ${id === value ? "selected" : ""}>${escapeHtml(text)}</option>`).join("")}</select></label>`;
 const values = form => Object.fromEntries(new FormData(form));
@@ -43,7 +43,9 @@ function wireNoteAction(page, report) {
     const all = notes();
     const note = all.find(n => n.id === id);
     if (!note) return showToast("Välj en avdelning, eller skapa en ny under Anteckningar.");
-    const updated = { ...note, text: `${note.text}${note.text ? "\n\n" : ""}${new Date().toLocaleString("sv-SE")}\n${report}`, updatedAt: stamp() };
+    const text = typeof report === "string" ? report : report.text;
+    const updated = { ...note, text: `${note.text}${note.text ? "\n\n" : ""}${new Date().toLocaleString("sv-SE")}\n${text}`, updatedAt: stamp() };
+    if (typeof report !== "string") updated.measurements = [...(Array.isArray(note.measurements) ? note.measurements : []), { ...report, savedAt: stamp() }];
     if (setStoredValue(NOTES_KEY, all.map(n => n.id === id ? updated : n))) { setStoredValue("activeFieldNoteV1", id); showToast("Resultatet har lagts till i avdelningens anteckning."); }
     else showToast("Kunde inte spara resultatet. Lagringen kan vara full.");
   });
@@ -56,6 +58,7 @@ export function renderFieldToolsView() {
     <a class="field-tools__launch" href="#/young-volume"><strong>Volym i ungskog</strong><span>Grundyta eller stamantal</span><span aria-hidden="true">→</span></a>
     <a class="field-tools__launch" href="#/circle-plot"><strong>Stamantal</strong><span>Cirkelprovyta · en eller flera provytor</span><span aria-hidden="true">→</span></a>
     <a class="field-tools__launch" href="#/field-notes"><strong>Fältanteckningar</strong><span>Fastighet och avdelning</span><span aria-hidden="true">→</span></a>
+    <a class="field-tools__launch" href="#/nature-assessment"><strong>Naturvärden</strong><span>Observationer och hänsyn per avdelning</span><span aria-hidden="true">→</span></a>
   </section>`);
   return page;
 }
@@ -65,32 +68,51 @@ export function renderFieldSIView() {
   const previous = getStoredValue("fieldSIDraftV1", null);
   // Never reinterpret a saved total age as a breast-height age on upgrade.
   const migrated = previous?.ageType === "breast" ? { species: previous.species, trees: previous.trees } : {};
-  const draft = { species: "tall", ageAdditionMode: "range", yearsToBH: "", trees: [{ height: "", age: "" }],
+  const draft = { species: "tall", ageAdditionMode: "regional", region: "north", yearsToBH: "", trees: [{ height: "", age: "", totalAge: "" }],
     ...migrated, ...getStoredValue("fieldSIDraftV2", {}) };
   page.insertAdjacentHTML("beforeend", `<div class="field-tools__layout"><form class="form field-tools__form" data-si-form>
-    <div class="field-tools__grid">${select("species", "Trädslag", [["tall", "Tall"], ["gran", "Gran"]], draft.species)}${select("ageAdditionMode", "År till brösthöjd", [["range", "Schablon 7–13 år"], ["own", "Eget tillägg"]], draft.ageAdditionMode)}</div>
+    <div class="field-tools__grid">${select("species", "Trädslag", [["tall", "Tall"], ["gran", "Gran"]], draft.species)}${select("region", "Område", [["north", "Norra Sverige"], ["other", "Övriga Sverige"]], draft.region)}</div>
+    ${select("ageAdditionMode", "År till brösthöjd", [["regional", "SI-anpassat tabelltillägg"], ["measured", "Känd totalålder per träd"], ["own", "Eget tillägg"], ["range", "Grov schablon 7–13 år"]], draft.ageAdditionMode)}
+    <p class="field-tools__muted" data-age-basis></p>
     <div data-age-addition>${number("yearsToBH", "Eget tillägg (år till BH)", draft.yearsToBH)}<p class="field-tools__muted">Tillägget gäller alla provträd i denna beräkning.</p></div>
     <p class="field-tools__muted">Ange BH-ålder. Totalålder = BH-ålder + år till brösthöjd.</p>
     <div data-trees></div><button class="button button--secondary" type="button" data-add-tree>Lägg till provträd</button>
+    <details class="field-tools__source"><summary>Provträdens kvalitet och modellförslag</summary>${select("suitability", "Provträdens lämplighet", [["suitable", "Likåldriga, oskadade övrehöjdsträd"], ["uncertain", "Osäkert – behöver kontrolleras"], ["unsuitable", "Skadade / undertryckta / olikåldriga"]], draft.suitability || "suitable")}
+    <label class="nature-field__auto"><input type="checkbox" name="allowExtrapolation" ${draft.allowExtrapolation ? "checked" : ""}> Visa preliminärt modellförslag när ordinarie SI saknas</label></details>
     <button class="button" type="submit">Beräkna SI och totalålder</button><p class="field-tools__muted" data-save-status role="status"></p>
     </form><section class="field-tools__result" data-si-result aria-live="polite"><h3>SI och totalålder</h3><p>Ange höjd och BH-ålder för provträden.</p></section></div>
-    <details class="field-tools__source"><summary>Provträd och ålderstillägg</summary><p>Välj representativa övrehöjdsträd i likåldrig, oskadad skog. SLU beskriver mätning av de två grövsta träden på en cirkelprovyta med 10 m radie. Ett träd ger en provträdsskattning; flera sammanfattas som medel av individuella SI.</p><p>Skogskunskap anger normalt 7–13 år till brösthöjd för tall och gran. Det är en schablon, inte en uppmätt ålder eller statistisk felmarginal. Undertryckta träd kan behöva ett större tillägg. Ange ett eget tillägg om tiden är känd.</p></details>
-    <details class="field-tools__source" data-si-source><summary>Källor och beräkning</summary><p>SLU:s funktioner för tall och gran, hela Sverige. SI avser höjd vid 100 års totalålder (H100). För gran minskas båda funktionsåldrarna med 3 år enligt fotnoten.</p><p>SI beräknas inom källans tillämpningsområde: totalålder 10–80 år och etablerad skog över 5 m. Utanför området visas bara totalålder.</p><ul><li><a href="${SI_SOURCE.url}" target="_blank" rel="noopener">SLU: Fakta Skog 14/2013, faktaruta 3</a></li><li><a href="${SI_SOURCE.toolUrl}" target="_blank" rel="noopener">Skogskunskap: Ståndortsindex</a></li><li><a href="${SI_SOURCE.ageUrl}" target="_blank" rel="noopener">Skogskunskap: underlag för ålderstillägget</a></li></ul></details>`);
+    <details class="field-tools__source"><summary>Provträd och ålderstillägg</summary><p>Välj representativa övrehöjdsträd i likåldrig, oskadad skog. SLU beskriver mätning av de två grövsta träden på en cirkelprovyta med 10 m radie. Ett träd ger en provträdsskattning; flera sammanfattas som medel av individuella SI. Skilj provytor eller bestånd som inte hör ihop.</p><p>Känd totalålder per träd undviker schablontillägget. SI-anpassat tabelltillägg använder BD-häftets år till BH och löser SI och totalålder tillsammans. Mellan tabellklasser interpolerar appen linjärt. Detta är ett kombinerat modellstöd, inte en ny verifierad boniteringsfunktion. Talltabellen omfattar T14–T28; gran G16–G32 i norra Sverige.</p><div class="si-age-tables">${Object.entries(SI_AGE_ADDITIONS).map(([species, rows]) => `<table><caption>${species === "tall" ? "Tall, hela Sverige" : "Gran, norra Sverige"}</caption><thead><tr><th>SI, H100</th><th>År till BH</th></tr></thead><tbody>${rows.map(([si, age]) => `<tr><th>${species === "tall" ? "T" : "G"}${si}</th><td>${age}</td></tr>`).join("")}</tbody></table>`).join("")}</div><p>Grov schablon 7–13 år behålls som alternativ. Inget tillägg är en statistisk felmarginal. Undertryckta träd kan ha mycket längre ungdomsfas och ska inte bedömas som ostörd skog.</p></details>
+    <details class="field-tools__source" data-si-source><summary>Källor och beräkning</summary><p>SLU:s funktioner för tall och gran, hela Sverige. SI avser höjd vid 100 års totalålder (H100). För gran minskas båda funktionsåldrarna med 3 år enligt fotnoten.</p><p>Ordinarie SI beräknas inom källans tillämpningsområde: totalålder 10–80 år och etablerad skog över 5 m. Ett valfritt modellförslag kan visas utanför åldersområdet, men är extrapolation med låg säkerhet. Det är appens försiktiga vägledning, inte en utökad rekommendation från källan.</p><p>Skogsskötselserien beskriver metodval och krav på representativa övrehöjdsträd. Äldre BH-ålderskurvor och nyare totalåldersfunktioner får inte blandas. Unga, skadade eller undertryckta bestånd kräver annat underlag.</p><ul><li><a href="${SI_SOURCE.url}" target="_blank" rel="noopener">SLU: Fakta Skog 14/2013, faktaruta 3</a></li><li><a href="${SI_SOURCE.toolUrl}" target="_blank" rel="noopener">Skogskunskap: Ståndortsindex</a></li><li><a href="${SI_SOURCE.ageUrl}" target="_blank" rel="noopener">Skogskunskap: underlag för ålderstillägget</a></li><li><a href="https://www.skogsstyrelsen.se/globalassets/mer-om-skog/skogsskotselserien/skogsskotsel-serien-1-skogsskotselns-grunder-och-samband.pdf" target="_blank" rel="noopener">Skogsskötselserien 1: bonitering, sidorna 37–43</a></li></ul></details>`);
+  const ageSourceLink = document.createElement("p");
+  ageSourceLink.innerHTML = `<a href="${AGE_ADDITION_SOURCE.url}" target="_blank" rel="noopener">${AGE_ADDITION_SOURCE.title}</a> · tabell kontrollerad ${AGE_ADDITION_SOURCE.checked}. Äldre BH-kurvor digitaliseras inte eller ersätts av SLU-funktionen; här används endast deras ålderstabell som separat antagande.`;
+  page.querySelector("[data-si-source]").append(ageSourceLink);
   const form = page.querySelector("form");
   const result = page.querySelector("[data-si-result]");
   let trees = Array.isArray(draft.trees) ? draft.trees.slice(0, 4) : [];
   if (!trees.length) trees = [{ height: "", age: "" }];
   function treeInputs() {
-    return [...form.querySelectorAll("[data-tree]")].map(row => ({ height: row.querySelector('[data-height]').value, age: row.querySelector('[data-age]').value }));
+    return [...form.querySelectorAll("[data-tree]")].map(row => ({ height: row.querySelector('[data-height]').value, age: row.querySelector('[data-age]').value, totalAge: row.querySelector('[data-total-input]').value }));
   }
-  function persist() { saveDraft(page, "fieldSIDraftV2", { ...values(form), ageType: "breast", trees: treeInputs() }); }
+  function persist() { saveDraft(page, "fieldSIDraftV2", { ...values(form), allowExtrapolation: form.elements.allowExtrapolation.checked, ageType: "breast", trees: treeInputs() }); }
   function invalidate() {
     page.querySelector("[data-age-addition]").hidden = form.elements.ageAdditionMode.value !== "own";
+    page.querySelectorAll("[data-known-total]").forEach(row => { row.hidden = form.elements.ageAdditionMode.value !== "measured"; });
+    page.querySelector("[data-age-basis]").textContent = {
+      regional: "SI och ålderstillägg matchas tillsammans. Regional schablon, inte uppmätt totalålder.",
+      measured: "Ange känd totalålder för varje träd utöver BH-åldern. Inget schablontillägg används.",
+      own: "Använd ett eget, känt tillägg när tiden till BH kan styrkas.",
+      range: "Grov åldersuppskattning. Ett spann visas, inte ett exakt SI."
+    }[form.elements.ageAdditionMode.value];
     result.innerHTML = "<h3>SI och totalålder</h3><p>Indata ändrad. Beräkna för aktuella värden.</p>";
   }
   function rows() {
     page.querySelector("[data-trees]").innerHTML = trees.map((tree, i) => `<fieldset class="field-tools__tree" data-tree><legend>Träd ${i + 1}</legend><div class="field-tools__grid"><label class="field"><span>Höjd (m)</span><input class="input" data-height aria-label="Höjd träd ${i + 1}" inputmode="decimal" value="${escapeHtml(tree.height)}"></label><label class="field"><span>BH-ålder (år)</span><input class="input" data-age aria-label="BH-ålder träd ${i + 1}" inputmode="numeric" value="${escapeHtml(tree.age)}"></label></div>${trees.length > 1 ? `<button class="field-tools__remove" type="button" data-remove-tree="${i}" aria-label="Ta bort träd ${i + 1}" title="Ta bort träd ${i + 1}">×</button>` : ""}</fieldset>`).join("");
     page.querySelector("[data-add-tree]").disabled = trees.length >= 4;
+    page.querySelectorAll("[data-tree]").forEach((row, i) => {
+      const label = document.createElement("label"); label.className = "field"; label.dataset.knownTotal = "";
+      label.innerHTML = `<span>Känd totalålder (år)</span><input class="input" data-total-input aria-label="Totalålder träd ${i + 1}" inputmode="numeric" value="${escapeHtml(trees[i].totalAge || "")}">`;
+      row.querySelector(".field-tools__grid").append(label);
+    });
   }
   rows(); invalidate();
   form.addEventListener("input", () => { invalidate(); persist(); });
@@ -108,17 +130,46 @@ export function renderFieldSIView() {
   });
   form.addEventListener("submit", event => {
     event.preventDefault(); persist();
-    const input = { ...values(form), ageType: "breast", trees: treeInputs() };
+    const input = { ...values(form), allowExtrapolation: form.elements.allowExtrapolation.checked, ageType: "breast", trees: treeInputs() };
     const output = calculateFieldSI(input);
     if (output.error) { result.innerHTML = `<p class="field-tools__error" role="alert">${escapeHtml(output.error)}</p>`; return; }
-    const range = (a, b, digits = 0) => Math.abs(a - b) < 1e-9 ? formatNumber(a, digits) : `${formatNumber(a, digits)}–${formatNumber(b, digits)}`;
+    const range = (a, b, digits = 1) => Math.abs(a - b) < 1e-9 ? formatNumber(a, digits) : `${formatNumber(a, digits)}–${formatNumber(b, digits)}`;
     const si = (a, b) => a === null ? "Ej beräknat" : output.code + range(a, b, 1);
     const label = si(output.siLow, output.siHigh);
-    const total = range(output.totalAgeLow, output.totalAgeHigh, output.trees.length > 1 ? 1 : 0);
-    const ageBasis = output.ageAdditionMode === "own" ? `eget tillägg ${output.addition[0]} år` : "schablontillägg 7–13 år";
-    const report = `SI ${output.hasSI ? "cirka " : ""}${label}, H100. Totalålder ${total} år (${ageBasis}).\n${output.trees.map((t, i) => `Träd ${i + 1}: ${formatNumber(t.height)} m, BH-ålder ${t.age} år, totalålder ${range(t.totalAgeLow, t.totalAgeHigh)} år, SI ${si(t.siLow, t.siHigh)}.`).join("\n")}\nUnderlag: ${SI_SOURCE.title}, ${SI_SOURCE.version}. Ålderstillägg: Skogskunskap / egen uppgift. Spannet är inte en statistisk felmarginal.${output.limitation ? `\n${output.limitation}` : ""}`;
+    const total = range(output.totalAgeLow, output.totalAgeHigh, output.ageAdditionMode === "regional" || output.trees.length > 1 ? 1 : 0);
+    const ageBasis = output.ageAdditionMode === "own" ? `eget tillägg ${output.addition[0]} år` : output.ageAdditionMode === "regional" ? "SI-anpassat tabelltillägg (BD)" : output.ageAdditionMode === "measured" ? "känd totalålder per träd" : "schablontillägg 7–13 år";
     result.innerHTML = `<span class="pill">SLU-funktion · ${output.ageAdditionMode === "own" ? "eget ålderstillägg" : "uppskattad totalålder"}</span><h3>Ståndortsindex, H100</h3><strong class="field-tools__value">${output.hasSI ? "≈ " : ""}${label}</strong><div class="field-tools__age-result"><span>Beräknad totalålder${output.trees.length > 1 ? ", medel" : ""}</span><strong data-total-age>${total} år</strong><small>${escapeHtml(ageBasis)}</small></div>${output.limitation ? `<p class="field-tools__error">${output.limitation}</p>` : ""}<p>${output.trees.length} provträd · medel av individuella SI</p><ul class="field-tools__readings">${output.trees.map((t, i) => `<li class="field-tools__tree-result"><span>Träd ${i + 1} · BH ${t.age} år<br>Totalålder ${range(t.totalAgeLow, t.totalAgeHigh)} år</span><strong>${si(t.siLow, t.siHigh)}</strong></li>`).join("")}</ul><p class="field-tools__muted">${output.ageAdditionMode === "range" ? "Schablonen kan underskatta åldern hos undertryckta träd. " : ""}SI-spannet följer åldersantagandet och är inte en statistisk felmarginal.</p>${noteAction()}`;
-    wireNoteAction(page, report);
+    if (output.guidance) {
+      const guidance = document.createElement("p"); guidance.className = "field-tools__muted"; guidance.textContent = output.guidance;
+      result.querySelector(".field-tools__note-action").before(guidance);
+    }
+    result.querySelector(".pill").textContent = output.ageAdditionMode === "regional" ? "SLU + SI-anpassad åldersschablon" : output.ageAdditionMode === "measured" ? "SLU · känd totalålder" : output.ageAdditionMode === "own" ? "SLU · eget ålderstillägg" : "SLU · grov åldersschablon";
+    if (output.ageAdditionMode === "regional") {
+      result.querySelector("h3").textContent = "Preliminärt SI-förslag, H100";
+      result.querySelector(".field-tools__age-result > span").textContent = output.trees.length > 1 ? "Uppskattad totalålder, medel" : "Uppskattad totalålder";
+    }
+    let report = `SI ${output.hasSI ? "cirka " : ""}${label}, H100. Totalålder ${total} år (${ageBasis}).\n${output.trees.map((t, i) => `Träd ${i + 1}: ${formatNumber(t.height)} m, BH-ålder ${t.age} år, totalålder ${range(t.totalAgeLow, t.totalAgeHigh, 1)} år, SI ${si(t.siLow, t.siHigh)}.`).join("\n")}\nUnderlag: ${SI_SOURCE.title}, ${SI_SOURCE.version}. Åldersunderlag: ${ageBasis}. Spannet är inte en statistisk felmarginal.${output.limitation ? "\n" + output.limitation : ""}${output.guidance ? "\n" + output.guidance : ""}`;
+    if (output.suggestion) {
+      const proposal = output.code + range(output.suggestion.siLow, output.suggestion.siHigh, 1);
+      const panel = document.createElement("section"); panel.className = "si-model-proposal";
+      panel.innerHTML = `<h3>Preliminärt modellförslag</h3><strong>${escapeHtml(proposal)}</strong><p>Låg säkerhet · ${output.suggestion.extrapolated ? "utanför källans åldersområde (extrapolation)" : "provträdens lämplighet är osäker"}. Inte ordinarie SI. Kontrollera mot ståndort och annat boniteringsunderlag.</p>`;
+      result.querySelector(".field-tools__note-action").before(panel);
+      report += `\nPreliminärt modellförslag: ${proposal}, H100. Låg säkerhet. ${output.suggestion.extrapolated ? "Extrapolation utanför källans åldersområde." : "Provträdens lämplighet är osäker."} Ej ordinarie SI. Kontrollera mot ståndort och annat boniteringsunderlag.`;
+    }
+    if (output.ageAdditionMode !== "range") {
+      const detail = document.createElement("section"); detail.className = "si-age-match";
+      const estimate = output.hasSI ? (output.siLow + output.siHigh) / 2 : output.suggestion ? (output.suggestion.siLow + output.suggestion.siHigh) / 2 : null;
+      const classes = SI_AGE_ADDITIONS[output.species];
+      const matched = estimate !== null && estimate >= classes[0][0] && estimate <= classes.at(-1)[0] ? classes.reduce((best, row) => Math.abs(row[0] - estimate) < Math.abs(best[0] - estimate) ? row : best)[0] : null;
+      const additions = output.trees.map((tree, i) => `Träd ${i + 1}: BH ${tree.age} + ${formatNumber(tree.additionLow, 1)} = ${formatNumber(tree.totalAgeLow, 1)} år`);
+      const assumption = output.ageAdditionMode === "regional" ? "Preliminär SI-skattning med regionalt schablontillägg. SLU-funktion + BD-tabell är appens kombinerade modellstöd; inte samma beräkning som det äldre BH-diagrammet. En decimal beskriver visningen, inte biologisk säkerhet." : "Åldern bygger på dina uppgifter. Höjdutvecklingen är fortfarande en modell, inte ett facit för beståndet.";
+      detail.innerHTML = `${matched === null ? "" : `<h3>Närmaste tabellklass <span data-si-match>${output.code}${matched}</span></h3><p class="field-tools__muted">Närmaste SI-klass i ålderstabellen, inte en separat bonitering.</p>`}<ul class="field-tools__readings">${additions.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul><p>${escapeHtml(assumption)}</p>${output.treeSISpread && output.trees.length > 1 ? `<p>Provträdens modell-SI: ${output.code}${range(...output.treeSISpread, 1)}. Spridning mellan träd, inte ett konfidensintervall.</p>` : ""}`;
+      result.querySelector(".field-tools__note-action").before(detail);
+      report += `\n${additions.join("\n")}\n${assumption}${matched === null ? "" : `\nNärmaste tabellklass: ${output.code}${matched}.`}`;
+      if (output.ageAdditionMode === "regional") report += `\nÅlderskälla: ${AGE_ADDITION_SOURCE.title}, ${AGE_ADDITION_SOURCE.version}; ${AGE_ADDITION_SOURCE.url}`;
+    }
+    if (output.ageAdditionMode === "regional") report = "Preliminärt SI-förslag med schablonålder\n" + report;
+    wireNoteAction(page, { text: report, kind: "site-index", input, assessment: output, sourceVersion: SI_SOURCE.version, ageSourceVersion: output.ageSource });
   });
   return page;
 }
@@ -264,6 +315,11 @@ export function renderFieldNotesView() {
       row.prepend(title);
       row.querySelector("textarea").value = presentMeasurementNote(note.text);
       row.querySelector("textarea").rows = 9;
+      const tools = document.createElement("div"); tools.className = "field-tools__toolbar";
+      tools.innerHTML = '<a class="button button--secondary" href="#/nature-assessment">Naturvärden i avdelningen</a><a class="button button--secondary" href="#/si">SI i avdelningen</a>';
+      tools.addEventListener("click", () => setStoredValue("activeFieldNoteV1", note.id));
+      row.append(tools);
+      row.addEventListener("focusin", () => setStoredValue("activeFieldNoteV1", note.id));
     });
   }
   page.querySelector("[data-add-note]").addEventListener("click", () => {

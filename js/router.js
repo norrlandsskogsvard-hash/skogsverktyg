@@ -1,6 +1,7 @@
 import { renderDashboardView } from "./views/dashboard.js";
 import { renderDgvView } from "./views/dgv.js";
 import { renderHeightView } from "./views/height.js";
+import { renderNatureAssessmentView } from "./views/nature-assessment.js";
 import { renderFieldToolsView, renderFieldSIView, renderYoungVolumeView, renderCirclePlotView, renderFieldNotesView } from "./views/field-tools.js";
 import { renderCurveReviewView } from "./views/curve-review.js";
 import { renderRojningView } from "./views/rojning.js";
@@ -20,6 +21,7 @@ const routes = {
   "/young-volume": { id: "young-volume", title: "Ungskogsvolym", render: renderYoungVolumeView },
   "/circle-plot": { id: "circle-plot", title: "Stamantal", render: renderCirclePlotView },
   "/field-notes": { id: "field-notes", title: "Anteckningar", render: renderFieldNotesView },
+  "/nature-assessment": { id: "nature-assessment", title: "Naturvärden", render: renderNatureAssessmentView },
   "/curve-review": { id: "curve-review", title: "Kurvgranskning", render: renderCurveReviewView },
   "/rojning": { id: "rojning", title: "Röjning", render: renderRojningView },
   "/forest-plan-pricing": { id: "forest-plan-pricing", title: "Planpris", render: renderForestPlanPricingView },

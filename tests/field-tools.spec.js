@@ -58,6 +58,7 @@ for (const width of [390, 1440]) {
     await expect(page.getByRole("link", { name: /Ståndortsindex/ })).toBeVisible();
     await expect(page.getByRole("button", { name: "Visa i gallringskurva" })).toHaveCount(0);
     await page.getByRole("link", { name: /Ståndortsindex/ }).click();
+    await page.locator('[name="ageAdditionMode"]').selectOption("range");
     await page.getByLabel("Höjd träd 1", { exact: true }).fill("16,0");
     await page.getByLabel("BH-ålder träd 1", { exact: true }).fill("60");
     await page.getByRole("button", { name: "Beräkna SI och totalålder", exact: true }).click();
@@ -129,6 +130,7 @@ test("avdelningsanteckningar: autospara, resultat, export, import och ångra", a
   await page.reload();
   await expect(page.getByLabel("Anteckning", { exact: true })).toHaveValue(/Kontrollera vindfällen/);
   await page.getByRole("link", { name: "SI", exact: true }).first().click();
+  await page.locator('[name="ageAdditionMode"]').selectOption("range");
   await page.getByLabel("Höjd träd 1", { exact: true }).fill("16");
   await page.getByLabel("BH-ålder träd 1", { exact: true }).fill("60");
   await page.getByRole("button", { name: "Beräkna SI och totalålder", exact: true }).click();
@@ -198,12 +200,13 @@ test("PWA cachar verktyg och bildkällor och fungerar offline", async ({ browser
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
     const cached = await page.evaluate(async () => {
-      const cache = await caches.open("skogskalkyl-2.0.0-alpha.1-field-work.2");
+      const cache = await caches.open("skogskalkyl-2.0.0-alpha.1-si-falt.1");
       return (await cache.keys()).map(r => new URL(r.url).pathname);
     });
     for (const path of ["/assets/field/si-tall.png", "/assets/field/si-gran.png", "/assets/field/young-volume.png", "/js/views/field-tools.js", "/js/calculators/fieldSiteIndex.js", "/js/calculators/circlePlotCalculator.js", "/js/views/dgv.js", "/js/views/height.js"]) expect(cached).toContain(path);
     await context.setOffline(true);
     await page.reload();
+    await page.locator('[name="ageAdditionMode"]').selectOption("range");
     await page.getByLabel("Höjd träd 1", { exact: true }).fill("16");
       await page.getByLabel("BH-ålder träd 1", { exact: true }).fill("60");
     await page.getByRole("button", { name: "Beräkna SI och totalålder", exact: true }).click();
